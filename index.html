@@ -3743,71 +3743,190 @@ document.querySelectorAll(".drumSeg button").forEach(b => b.onclick = () => {
 });
 document.querySelectorAll(".drumSeg button").forEach(x => x.setAttribute("aria-pressed", (x.dataset.drums === "1") === drumsOn));
 
-/* ════════ La musique des menus : une boucle synthwave originale, en sol mineur ════════
-   Huit mesures à 96 temps par minute : basse qui pulse en croches, nappe, arpège en doubles croches
-   avec écho, boîte à rythmes, et une mélodie de lead sur la deuxième moitié. Elle se tait dès qu'on chante. */
+/* ════════ La musique des menus : « Néon Rouge », un morceau darksynth original ════════
+   La mineur harmonique, 118 battements par minute. Intro de 8 mesures qui monte, thème principal de 16 mesures
+   (la mineur, fa, ré mineur, mi majeur), pont de 8 mesures sur si bémol pour la tension, puis retour au thème.
+   Basse et nappes « pompent » sur chaque grosse caisse, comme dans les productions synthwave des années 2010. */
 
-const MENU_BPM = 96;
-const MENU_PROG = [
-  { bass: 43, pad: [55, 58, 62], arp: [67, 70, 74, 79] },   // sol mineur
-  { bass: 39, pad: [55, 58, 63], arp: [67, 70, 75, 79] },   // mi bémol
-  { bass: 46, pad: [53, 58, 62], arp: [65, 70, 74, 77] },   // si bémol
-  { bass: 41, pad: [53, 57, 60], arp: [65, 69, 72, 77] },   // fa
+const MENU_BPM = 118;
+const CH = {
+  Am: { bass: 45, pad: [57, 60, 64], arp: [69, 72, 76, 81] },
+  F: { bass: 41, pad: [57, 60, 65], arp: [65, 69, 72, 77] },
+  Dm: { bass: 38, pad: [57, 62, 65], arp: [62, 65, 69, 74] },
+  E: { bass: 40, pad: [56, 59, 64], arp: [64, 68, 71, 76] },
+  Bb: { bass: 46, pad: [58, 62, 65], arp: [70, 74, 77, 82] },
+};
+const SONG = [
+  ...Array(8).fill("Am"),
+  ..."Am F Dm E Am F Dm E Am F Dm E Am F Dm E".split(" "),
+  ..."Bb Am Bb Am Bb Am Dm E".split(" "),
 ];
-const ARP_ORDER = [0, 1, 2, 3, 2, 1, 2, 3, 0, 1, 2, 3, 2, 3, 1, 2];
-const MENU_LEAD = [
-  [[0, 74, 4], [4, 72, 2], [6, 70, 2], [8, 69, 4], [12, 70, 4]],
-  [[0, 67, 8], [8, 70, 4], [12, 72, 4]],
-  [[0, 74, 6], [6, 77, 2], [8, 74, 4], [12, 72, 4]],
-  [[0, 72, 8], [8, 69, 4], [12, 65, 4]],
-];
-const music = { on: store.get("drm.music") !== "0", playing: false, bus: null, echo: null, drums: null, next: 0, step: 0, timer: null };
+const LOOP_FROM = 8;
+const ARP_ORDER = [0, 1, 2, 3, 2, 1, 0, 2, 3, 1, 2, 3, 0, 3, 2, 1];
+const LEAD = {
+  16: [[0, 76, 6], [6, 74, 2], [8, 72, 4], [12, 71, 4]],
+  17: [[0, 72, 8], [8, 69, 4], [12, 72, 4]],
+  18: [[0, 74, 6], [6, 77, 2], [8, 76, 4], [12, 74, 4]],
+  19: [[0, 71, 8], [8, 68, 4], [12, 71, 4]],
+  20: [[0, 81, 4], [4, 79, 2], [6, 76, 2], [8, 79, 4], [12, 76, 4]],
+  21: [[0, 77, 6], [6, 76, 2], [8, 72, 8]],
+  22: [[0, 74, 4], [4, 72, 4], [8, 77, 4], [12, 76, 4]],
+  23: [[0, 76, 8], [8, 80, 8]],
+  24: [[0, 82, 14]], 25: [[0, 81, 14]], 26: [[0, 77, 8], [8, 82, 8]], 27: [[0, 76, 14]],
+  28: [[0, 74, 8], [8, 77, 8]], 29: [[0, 72, 14]], 30: [[0, 74, 14]], 31: [[0, 80, 8], [8, 83, 8]],
+};
+const music = { on: store.get("drm.music") !== "0", playing: false, next: 0, step: 0, timer: null, n: {} };
 
-function musicBass(midi, t, dur, out) {
-  const o = ctx.createOscillator(), sub = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
-  o.type = "sawtooth"; o.frequency.value = freq(midi); sub.type = "sine"; sub.frequency.value = freq(midi - 12);
-  lp.type = "lowpass"; lp.Q.value = 4; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(220, t + dur);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(lp); sub.connect(lp); lp.connect(g).connect(out);
-  o.start(t); sub.start(t); o.stop(t + dur + 0.05); sub.stop(t + dur + 0.05);
+function driveCurve(k) {
+  const c = new Float32Array(1024);
+  for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; c[i] = Math.tanh(k * x) / Math.tanh(k); }
+  return c;
 }
-function musicPluck(midi, t, out) {
-  const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+function mNoise(t, dur, type, f, q, gain, out, sweepTo) {
+  const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noise(); s.loop = true; fl.type = type; fl.frequency.setValueAtTime(f, t); fl.Q.value = q;
+  if (sweepTo) fl.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
+  return { s, fl, g, go() { s.connect(fl).connect(g).connect(out); s.start(t); s.stop(t + dur + 0.05); } };
+}
+function mKick(t) {
+  const n = music.n, o = ctx.createOscillator(), g = ctx.createGain(), ws = ctx.createWaveShaper();
+  ws.curve = n.kickCurve;
+  o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.09);
+  g.gain.setValueAtTime(0.75, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+  o.connect(ws).connect(g).connect(n.drums); o.start(t); o.stop(t + 0.5);
+  const c = mNoise(t, 0.012, "highpass", 3000, 0.7, 0, n.drums); c.g.gain.setValueAtTime(0.35, t); c.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.012); c.go();
+  // la pompe : tout le reste s'écrase sous la grosse caisse puis remonte
+  const pg = n.pump.gain; pg.setValueAtTime(0.22, t); pg.linearRampToValueAtTime(1, t + 60 / MENU_BPM * 0.55);
+}
+function mClap(t) {
+  const n = music.n;
+  [0, 0.011, 0.023].forEach((d, i) => {
+    const b = mNoise(t + d, i === 2 ? 0.28 : 0.02, "bandpass", 1300, 0.9, 0, n.clap);
+    b.g.gain.setValueAtTime(i === 2 ? 0.55 : 0.4, t + d); b.g.gain.exponentialRampToValueAtTime(0.0001, t + d + (i === 2 ? 0.28 : 0.02)); b.go();
+  });
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(160, t + 0.07);
+  og.gain.setValueAtTime(0.25, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+  o.connect(og).connect(n.clap); o.start(t); o.stop(t + 0.12);
+}
+function mHat(t, open, accent) {
+  const h2 = mNoise(t, open ? 0.25 : 0.045, "highpass", 8200, 0.7, 0, music.n.drums);
+  h2.g.gain.setValueAtTime(accent ? 0.13 : 0.07, t); h2.g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.25 : 0.045)); h2.go();
+}
+function mCrash(t) {
+  const c = mNoise(t, 2.2, "highpass", 5200, 0.5, 0, music.n.clap);
+  c.g.gain.setValueAtTime(0.22, t); c.g.gain.exponentialRampToValueAtTime(0.0001, t + 2.2); c.go();
+}
+function mRiser(t, dur) {
+  const r = mNoise(t, dur, "bandpass", 300, 2.5, 0, music.n.clap, 7000);
+  r.g.gain.setValueAtTime(0.0001, t); r.g.gain.exponentialRampToValueAtTime(0.3, t + dur); r.go();
+}
+function mBass(midi, t, dur, accent) {
+  const n = music.n, f = freq(midi);
+  const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), sub = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+  o1.type = o2.type = "sawtooth"; o1.frequency.value = o2.frequency.value = f; o1.detune.value = -9; o2.detune.value = 9;
+  sub.type = "sine"; sub.frequency.value = f / 2;
+  lp.type = "lowpass"; lp.Q.value = 7; lp.frequency.setValueAtTime(accent ? 2400 : 1500, t); lp.frequency.exponentialRampToValueAtTime(180, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.15, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o1.connect(lp); o2.connect(lp); sub.connect(g); lp.connect(n.bassDrive).connect(g); g.connect(n.pump);
+  for (const o of [o1, o2, sub]) { o.start(t); o.stop(t + dur + 0.05); }
+}
+function mPad(midis, t, dur, amp) {
+  const n = music.n, lp = ctx.createBiquadFilter(), g = ctx.createGain();
+  lp.type = "lowpass"; lp.frequency.setValueAtTime(900, t); lp.frequency.linearRampToValueAtTime(2200, t + dur * 0.6); lp.Q.value = 1;
+  lp.connect(g).connect(n.pump);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(amp, t + 0.35); g.gain.setValueAtTime(amp, t + dur - 0.1); g.gain.linearRampToValueAtTime(0, t + dur + 0.25);
+  const oscs = [];
+  for (const m of midis) for (const dt of [-12, 0, 12]) { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = freq(m); o.detune.value = dt; o.connect(lp); oscs.push(o); }
+  for (const o of oscs) { o.start(t); o.stop(t + dur + 0.4); }
+}
+function mArp(midi, t, open) {
+  const n = music.n, o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
   o.type = "square"; o.frequency.value = freq(midi);
-  lp.type = "lowpass"; lp.frequency.setValueAtTime(4200, t); lp.frequency.exponentialRampToValueAtTime(600, t + 0.18);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
-  o.connect(lp).connect(g).connect(out); o.start(t); o.stop(t + 0.25);
+  lp.type = "lowpass"; lp.Q.value = 5; lp.frequency.setValueAtTime(700 + open * 5200, t); lp.frequency.exponentialRampToValueAtTime(500, t + 0.16);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.075, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+  o.connect(lp).connect(g).connect(n.arp); o.start(t); o.stop(t + 0.2);
 }
+function mLead(midi, t, dur) {
+  const n = music.n, f = freq(midi), end = t + dur;
+  const lp = ctx.createBiquadFilter(), g = ctx.createGain(), vib = ctx.createOscillator(), vd = ctx.createGain();
+  lp.type = "lowpass"; lp.Q.value = 3; lp.frequency.setValueAtTime(2200, t); lp.frequency.exponentialRampToValueAtTime(5200, t + 0.08); lp.frequency.exponentialRampToValueAtTime(3000, t + 0.5);
+  vib.frequency.value = 5.8; vd.gain.setValueAtTime(0, t); vd.gain.linearRampToValueAtTime(14, t + Math.min(0.6, dur * 0.7)); vib.connect(vd);
+  const from = n.lastLead ? freq(n.lastLead) : f;
+  const oscs = [-11, 0, 11].map(dt => {
+    const o = ctx.createOscillator(); o.type = "sawtooth"; o.detune.value = dt;
+    o.frequency.setValueAtTime(from, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+    vd.connect(o.detune); o.connect(lp); return o;
+  });
+  lp.connect(n.leadDrive).connect(g).connect(n.lead);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.02); g.gain.setValueAtTime(0.16, end - 0.04); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.12);
+  for (const o of [...oscs, vib]) { o.start(t); o.stop(end + 0.2); }
+  n.lastLead = midi;
+}
+
 function musicStep(step, t) {
-  const sd = 60 / MENU_BPM / 4, bar = Math.floor(step / 16) % 8, s = step % 16, ch = MENU_PROG[bar % 4], d = music.drums;
-  if (s === 0 || s === 8 || (s === 10 && bar % 2)) kick(t, d);
-  if (s === 4 || s === 12) snare(t, d);
-  if (s % 2 === 0) hat(t, d, s === 14);
-  if (s % 2 === 0) musicBass(ch.bass + (s === 6 || s === 14 ? 12 : 0), t, sd * 1.7, music.bus);
-  if (s === 0) ch.pad.forEach(m => padNote(m, t, sd * 15.5, music.bus, 0.8));
-  if (bar >= 1) musicPluck(ch.arp[ARP_ORDER[s]], t, music.echo);
-  if (bar >= 4) for (const [st, m, len] of MENU_LEAD[bar - 4]) if (st === s) synthLead(m, t, sd * len * 0.95, music.bus, 0.75);
+  const sd = 60 / MENU_BPM / 4, s = step % 16;
+  const raw = Math.floor(step / 16), bar = raw < SONG.length ? raw : LOOP_FROM + ((raw - LOOP_FROM) % (SONG.length - LOOP_FROM));
+  const ch = CH[SONG[bar]], intro = bar < 8, brk = bar >= 24;
+  // batterie
+  if (!intro || bar >= 4) {
+    if (brk) { if (s === 0 || s === 10) mKick(t); if (s === 8) mClap(t); }
+    else { if (s % 4 === 0) mKick(t); if (!intro && (s === 4 || s === 12)) mClap(t); }
+  }
+  if ((!intro || bar >= 6) && !brk) mHat(t, s % 4 === 2, s % 4 === 2);
+  if (brk && s % 4 === 2) mHat(t, true, false);
+  if ((bar === 8 || bar === 24) && s === 0) mCrash(t);
+  if ((bar === 6 || bar === 22 || bar === 30) && s === 0) mRiser(t, sd * 32);
+  // basse galopante
+  if (!intro || bar >= 4) {
+    if (brk) { if (s % 4 === 0) mBass(ch.bass, t, sd * 3.6, true); }
+    else mBass(ch.bass + (s % 2 ? 12 : 0), t, sd * 0.9, s % 4 === 0);
+  }
+  // nappe
+  if (s === 0) mPad(ch.pad, t, sd * 16, brk ? 0.05 : intro ? 0.03 : 0.035);
+  // arpège, le filtre s'ouvre pendant l'intro
+  if (!brk || s % 2 === 0) mArp(ch.arp[ARP_ORDER[s]] + (brk ? 12 : 0), t, intro ? bar / 8 : brk ? 0.5 : 0.85);
+  // lead
+  for (const [st, m, len] of LEAD[bar] || []) if (st === s) mLead(m, t, sd * len * 0.96);
 }
 function startMusic() {
   if (music.playing || !ctx) return;
   music.playing = true;
-  music.bus = ctx.createGain(); music.bus.gain.setValueAtTime(0, ctx.currentTime); music.bus.gain.linearRampToValueAtTime(0.6, ctx.currentTime + 1.2); music.bus.connect(OUT);
-  music.drums = ctx.createGain(); music.drums.gain.value = 0.55; music.drums.connect(music.bus);
-  const dl = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
-  dl.delayTime.value = 60 / MENU_BPM * 0.75; fb.gain.value = 0.38; wet.gain.value = 0.5;
-  music.echo = ctx.createGain(); music.echo.connect(music.bus); music.echo.connect(dl); dl.connect(fb).connect(dl); dl.connect(wet).connect(music.bus);
-  music.next = ctx.currentTime + 0.12; music.step = 0;
+  const n = music.n = {}, now = ctx.currentTime;
+  n.bus = ctx.createGain(); n.bus.gain.setValueAtTime(0, now); n.bus.gain.linearRampToValueAtTime(0.3, now + 1.5);
+  const glue = ctx.createDynamicsCompressor(); glue.threshold.value = -14; glue.ratio.value = 4; glue.attack.value = 0.005; glue.release.value = 0.12;
+  const limit = ctx.createDynamicsCompressor(); limit.threshold.value = -4; limit.ratio.value = 20; limit.knee.value = 0; limit.attack.value = 0.001; limit.release.value = 0.08;
+  n.bus.connect(glue).connect(limit).connect(OUT);
+  n.drums = ctx.createGain(); n.drums.gain.value = 0.62; n.drums.connect(n.bus);
+  n.pump = ctx.createGain(); n.pump.gain.value = 1; n.pump.connect(n.bus);
+  const verb = ctx.createConvolver(); verb.buffer = impulse(2.4); const verbWet = ctx.createGain(); verbWet.gain.value = 0.55; verb.connect(verbWet).connect(n.bus);
+  n.clap = ctx.createGain(); n.clap.gain.value = 0.7; n.clap.connect(n.drums); n.clap.connect(verb);
+  n.kickCurve = driveCurve(3);
+  n.bassDrive = ctx.createWaveShaper(); n.bassDrive.curve = driveCurve(2.6);
+  n.leadDrive = ctx.createWaveShaper(); n.leadDrive.curve = driveCurve(1.8);
+  const mkEcho = (time, fbk, wetAmt, pan) => {
+    const inp = ctx.createGain(), dl = ctx.createDelay(1.5), fb = ctx.createGain(), wet = ctx.createGain(), hp = ctx.createBiquadFilter();
+    dl.delayTime.value = time; fb.gain.value = fbk; wet.gain.value = wetAmt; hp.type = "highpass"; hp.frequency.value = 400;
+    inp.connect(dl); dl.connect(hp).connect(fb).connect(dl); dl.connect(wet);
+    if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; wet.connect(p).connect(n.pump); } else wet.connect(n.pump);
+    return inp;
+  };
+  const beat = 60 / MENU_BPM;
+  n.arp = ctx.createGain(); n.arp.connect(n.pump); n.arp.connect(mkEcho(beat * 0.75, 0.42, 0.45, -0.5)); n.arp.connect(mkEcho(beat * 0.5, 0.3, 0.3, 0.5));
+  n.lead = ctx.createGain(); n.lead.connect(n.bus); n.lead.connect(mkEcho(beat * 0.75, 0.38, 0.4, 0.3)); n.lead.connect(verb);
+  music.next = now + 0.12; music.step = 0;
   music.timer = setInterval(() => {
     if (!music.playing) return;
     while (music.next < ctx.currentTime + 0.3) { musicStep(music.step, music.next); music.next += 60 / MENU_BPM / 4; music.step++; }
-  }, 50);
+  }, 40);
 }
 function stopMusic() {
   if (!music.playing) return;
   music.playing = false; clearInterval(music.timer);
-  const bus = music.bus; bus.gain.cancelScheduledValues(ctx.currentTime); bus.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
-  setTimeout(() => bus.disconnect(), 900);
+  const bus = music.n.bus; bus.gain.cancelScheduledValues(ctx.currentTime); bus.gain.setValueAtTime(bus.gain.value, ctx.currentTime); bus.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
+  setTimeout(() => bus.disconnect(), 1200);
 }
+
 function inMenus() {
   if (document.hidden) return false;
   const title = !$("titleScreen").classList.contains("gone");
