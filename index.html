@@ -849,6 +849,13 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 .vn.boss .vn-chap b { text-shadow: 4px 4px 0 #FF3B3B, -3px -2px 0 rgba(255, 228, 94, .8); }
 @keyframes vnChap { 0% { opacity: 0; transform: scale(1.6); } 15% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
 @media (max-width: 640px) { .vn-l svg, .vn-r svg { width: 44vw; } .vn-box { padding: 22px 16px 16px; } .vn-l.dim, .vn-r.dim { opacity: .25; } }
+
+/* ══ Le niveau de jeu ══ */
+.stage.game .arena, .stage.game #where, .stage.game #zoomIn, .stage.game #zoomOut, .stage.game #hintDrag { display: none !important; }
+.st-part { margin-top: 28px; padding: 16px 18px; background: rgba(255, 255, 255, .03); box-shadow: inset 0 0 0 1px dashed rgba(195, 155, 211, .4); border: 1px dashed rgba(195, 155, 211, .45); display: grid; gap: 6px; justify-items: start; }
+.st-part .k { font-family: var(--f-mono); color: var(--muted); font-size: 17px; letter-spacing: .2em; text-transform: uppercase; }
+.st-part b { font-family: var(--f-display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: #fff; }
+.st-part p { margin: 0; color: var(--muted); font-size: 14px; max-width: 560px; }
 </style>
 
 <div class="app">
@@ -1691,6 +1698,9 @@ function draw(now, dt) {
   if (!W || !H || !state.score) return;
   const ns = notes(), P = ppb(), NX = nowX(), bpb = state.score.beatsPerBar, bot = H - BOTTOM();
   g.clearRect(0, 0, W, H);
+  const gm = gameOn();
+  if (stage.classList.contains("game") !== gm) stage.classList.toggle("game", gm);
+  if (gm) { drawGame(now, dt); return; }
   drawBackground(now, dt);
 
   // pistes
@@ -1808,24 +1818,7 @@ function draw(now, dt) {
 
   drawRider(now, dt, NX, bot);
 
-  // ondes et étincelles
-  fx.items = fx.items.filter(it => (it.t += dt) < it.life);
-  for (const it of fx.items) {
-    const p = it.t / it.life;
-    if (it.k === "t") {
-      const sz = it.size > 20 ? it.size : 22, pop = p < 0.12 ? 1.6 - p * 5 : 1;
-      g.save(); g.globalAlpha = Math.min(1, (1 - p) * 1.8);
-      g.translate(it.x, it.y - p * 30); g.rotate(it.rot || 0); g.scale(pop, pop); g.transform(1, 0, -0.18, 1, 0, 0);
-      g.font = `${sz}px 'Anton', Impact, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
-      const s = String(it.s).toUpperCase();
-      g.fillStyle = "rgba(0,240,255,.85)"; g.fillText(s, -2, -1);
-      g.fillStyle = "rgba(255,46,136,.9)"; g.fillText(s, 3, 2);
-      g.fillStyle = COL[it.col] || it.col; g.fillText(s, 0, 0);
-      g.restore(); g.globalAlpha = 1;
-    }
-    else if (it.k === "r") { g.strokeStyle = rgba(COL[it.col] || it.col, (1 - p) * 0.8); g.lineWidth = 2; g.beginPath(); g.arc(it.x, it.y, 8 + p * 54, 0, 6.283); g.stroke(); }
-    else { it.x += it.vx * dt; it.y += it.vy * dt; it.vy += 0.00025 * dt; g.fillStyle = rgba(COL[it.col] || it.col, 1 - p); g.beginPath(); g.arc(it.x, it.y, it.r, 0, 6.283); g.fill(); }
-  }
+  drawFx(dt);
 
   if (typeof ex !== "undefined" && ex && ex.combo >= 5) {
     const k = Math.min(4, 1 + Math.floor(ex.combo / 5)), a = 0.06 * k * (0.75 + 0.25 * Math.sin(now / 160));
@@ -1848,6 +1841,27 @@ function draw(now, dt) {
   }
 
   if (!state.hidePiece) drawLyrics(curIdx, bot);
+}
+
+/* Ondes, étincelles et textes qui sautent : communs à la partition et au niveau de jeu */
+function drawFx(dt) {
+  fx.items = fx.items.filter(it => (it.t += dt) < it.life);
+  for (const it of fx.items) {
+    const p = it.t / it.life;
+    if (it.k === "t") {
+      const sz = it.size > 20 ? it.size : 22, pop = p < 0.12 ? 1.6 - p * 5 : 1;
+      g.save(); g.globalAlpha = Math.min(1, (1 - p) * 1.8);
+      g.translate(it.x, it.y - p * 30); g.rotate(it.rot || 0); g.scale(pop, pop); g.transform(1, 0, -0.18, 1, 0, 0);
+      g.font = `${sz}px 'Anton', Impact, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+      const s = String(it.s).toUpperCase();
+      g.fillStyle = "rgba(0,240,255,.85)"; g.fillText(s, -2, -1);
+      g.fillStyle = "rgba(255,46,136,.9)"; g.fillText(s, 3, 2);
+      g.fillStyle = COL[it.col] || it.col; g.fillText(s, 0, 0);
+      g.restore(); g.globalAlpha = 1;
+    }
+    else if (it.k === "r") { g.strokeStyle = rgba(COL[it.col] || it.col, (1 - p) * 0.8); g.lineWidth = 2; g.beginPath(); g.arc(it.x, it.y, 8 + p * 54, 0, 6.283); g.stroke(); }
+    else { it.x += it.vx * dt; it.y += it.vy * dt; it.vy += 0.00025 * dt; g.fillStyle = rgba(COL[it.col] || it.col, 1 - p); g.beginPath(); g.arc(it.x, it.y, it.r, 0, 6.283); g.fill(); }
+  }
 }
 
 function drawLyrics(curIdx, bot) {
@@ -2787,6 +2801,7 @@ function exOnBeat(b) {
     const r = analyzeNote(n, state.trace, ex.bpm, TOL_EX, ex.prevT);
     ex.prevT = tgtOf(n);
     state.results[ex.evalAt] = r;
+    gameJudge(ex.evalAt, r);
     judge(r, Math.max(LEFT + 30, Math.min(W - 30, xOf(n.start + n.beats / 2))), yOf(tgtOf(n)));
     ex.evalAt++;
   }
@@ -3636,8 +3651,9 @@ function updateHp() {
   $("meHp").style.width = Math.max(0, ex.myHp / ex.myMax * 100) + "%";
   $("foeHp").style.width = Math.max(0, ex.foeHp / ex.foeMax * 100) + "%";
 }
-function hitAnim(id) { const el = $(id); if (!el) return; el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
+function hitAnim(id) { gameHit(id); const el = $(id); if (!el) return; el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
 function shot(toFoe) {
+  gameShot(toFoe);
   const ar = $("arena"), s = document.createElement("span");
   s.className = "shot " + (toFoe ? "to-foe" : "to-me"); s.textContent = pick(["♪", "♫", "♬"]);
   ar.appendChild(s); setTimeout(() => s.remove(), 520);
@@ -4980,6 +4996,271 @@ function cineFrame(now) {
 }
 window.addEventListener("resize", () => { if (cine.on) cineSize(); });
 
+/* ════════ Le jeu pendant qu'on chante : un niveau qui défile, des croquettes sur la mélodie, des sbires, des boss ════════ */
+const gs = { exRef: null, pel: new Map(), mins: new Map(), shots: [], parts: [], lastBeat: null, eaten: 0, total: 0, band: null, revealed: 0, round: -1, lastJ: 0, lastK: 0, orbPos: [], bossHit: 0, meHit: 0, chomp: 0 };
+const GAME_THEMES = [
+  { sky: ["#07000F", "#2A0848", "#8A1A6E"], sun: ["#FFE45E", "#FF2E88"], far: "#1B0636", mid: "#2A0B4E", grid: "255,46,136", rail: "#FFE45E" },
+  { sky: ["#00040F", "#062048", "#0E5A7A"], sun: ["#C8FBFF", "#00F0FF"], far: "#071835", mid: "#0B2654", grid: "0,240,255", rail: "#FFE45E" },
+  { sky: ["#0A0000", "#3A0610", "#8A1020"], sun: ["#FFB35E", "#FF3B3B"], far: "#260409", mid: "#3D0B14", grid: "255,59,59", rail: "#FFE45E" },
+];
+const SKY_FAR = (() => { const r = rngOf(31), a = []; let x = 0; while (x < 2400) { const w = 40 + r() * 90; a.push({ x, w, h: 0.14 + r() * 0.3, win: r() }); x += w + r() * 14; } return a; })();
+const SKY_MID = (() => { const r = rngOf(77), a = []; let x = 0; while (x < 2400) { const w = 70 + r() * 120; a.push({ x, w, h: 0.1 + r() * 0.22, win: r() }); x += w + 40 + r() * 120; } return a; })();
+const gameOn = () => typeof ex !== "undefined" && !!ex && state.mode === "train";
+const gameTheme = () => GAME_THEMES[ex?.story?.act ?? (ex?.type === "battle" ? 2 : ex?.type === "phrase" || ex?.type === "full" || ex?.type === "drill" ? 1 : 0)];
+const RAIL_KINDS = new Set(["phrase", "full", "drill"]);
+
+function gameReset() {
+  gs.exRef = ex; gs.pel.clear(); gs.mins.clear(); gs.shots = []; gs.parts = []; gs.lastBeat = null; gs.eaten = 0; gs.total = 0;
+  gs.revealed = 0; gs.round = -1; gs.lastJ = 0; gs.lastK = 0; gs.orbPos = []; gs.bossHit = 0; gs.meHit = 0; gs.band = null;
+}
+function gBurst(x, y, col, n = 14, sp = 0.18) { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = 0.04 + Math.random() * sp; gs.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 0.04, t: 0, life: 500 + Math.random() * 500, col, r: 1.5 + Math.random() * 2.5 }); } }
+function chomp() { if (!ctx) return; gs.chomp = (gs.chomp + 1) % 4; blip([1320, 1568, 1760, 2093][gs.chomp], ctx.currentTime, 0.035, 0.018, "triangle"); }
+function boom(big) {
+  if (!ctx) return; const t = ctx.currentTime;
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), gn = ctx.createGain();
+  s.buffer = noise(); f.type = "lowpass"; f.frequency.setValueAtTime(big ? 2400 : 1600, t); f.frequency.exponentialRampToValueAtTime(120, t + 0.35);
+  gn.gain.setValueAtTime(big ? 0.22 : 0.12, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+  s.connect(f).connect(gn).connect(OUT); s.start(t); s.stop(t + 0.42);
+  blip(big ? 70 : 110, t, 0.2, 0.08, "sawtooth");
+}
+const isMinion = i => i % 3 === 1;
+
+/* Une note jugée : le sbire posé dessus explose, ou s'enfuit en ricanant */
+function gameJudge(i, r) {
+  if (!gameOn() || !RAIL_KINDS.has(ex.type) || !isMinion(i) || gs.mins.get(i)) return;
+  const n = notes()[i]; if (!n || n.midi == null) return;
+  const x = xOf(n.start + n.beats) - 4, y = yOf(tgtOf(n)) - 16;
+  if (r.status === "ok") { gs.mins.set(i, { s: 1, t: 0 }); gBurst(x, y, "#FFE45E", 26, 0.3); gBurst(x, y, "#FF2E88", 14, 0.22); boom(false); ex.score += 50; fx.text(x, y - 30, "+50 BOUM", "yellow", 22); }
+  else { gs.mins.set(i, { s: 2, t: 0 }); fx.text(x, y - 26, pick(["HA HA", "HI HI", "NUL", "RATÉ"]), "high", 18); }
+}
+function gameShot(toFoe) { gs.shots.push({ toFoe, t: 0, life: 420, y0: rider.y ?? H / 2 }); if (ctx) blip(toFoe ? 880 : 220, ctx.currentTime, 0.12, 0.05, toFoe ? "square" : "sawtooth"); }
+function gameHit(id) { if (id === "foeMon") { if (!/écoute/.test(ex?.phase || "")) gs.bossHit = 1; } else gs.meHit = 1; }
+
+/* ── Le décor : ciel, soleil, deux rangées d'immeubles en parallaxe, route en grille ── */
+function drawScenery(now, T, scroll, bot, pulse) {
+  const sky = g.createLinearGradient(0, 0, 0, bot);
+  sky.addColorStop(0, T.sky[0]); sky.addColorStop(0.6, T.sky[1]); sky.addColorStop(1, T.sky[2]);
+  g.fillStyle = sky; g.fillRect(0, 0, W, bot);
+  const sr = Math.min(W, H) * 0.32, sx = W * 0.66, sy = bot - sr * 0.15;
+  const sg = g.createLinearGradient(0, sy - sr, 0, sy); sg.addColorStop(0, T.sun[0]); sg.addColorStop(1, T.sun[1]);
+  g.save(); g.globalAlpha = 0.55; g.shadowColor = T.sun[1]; g.shadowBlur = 40 + pulse * 30; g.fillStyle = sg; g.beginPath(); g.arc(sx, sy, sr, Math.PI, 0); g.fill(); g.restore();
+  g.fillStyle = T.sky[1]; for (let i = 0; i < 6; i++) { const yy = sy - sr * 0.55 + i * sr * 0.1; g.fillRect(sx - sr, yy, sr * 2, 1.5 + i * 1.2); }
+  const layer = (arr, k, col, hk, winCol) => {
+    const off = (scroll * k) % 2400;
+    for (const b of arr) for (const rep of [0, 2400]) {
+      const x = b.x - off + rep; if (x > W || x + b.w < 0) continue;
+      const h = b.h * bot * hk; g.fillStyle = col; g.fillRect(x, bot - h, b.w, h);
+      if (winCol) { g.fillStyle = winCol; for (let k2 = 0; k2 < 6; k2++) if ((b.win * 13 + k2) % 3 < 1) g.fillRect(x + 6 + (k2 % 3) * 12, bot - h + 10 + Math.floor(k2 / 3) * 14, 5, 5); }
+    }
+  };
+  layer(SKY_FAR, 0.15, T.far, 1, `rgba(${T.grid},.25)`);
+  layer(SKY_MID, 0.4, T.mid, 0.8, `rgba(${T.grid},.4)`);
+  g.fillStyle = `rgba(${T.grid},.85)`; g.shadowColor = `rgb(${T.grid})`; g.shadowBlur = 12; g.fillRect(0, bot, W, 2); g.shadowBlur = 0;
+  const rg = g.createLinearGradient(0, bot, 0, H); rg.addColorStop(0, "#0A0016"); rg.addColorStop(1, "#03000A");
+  g.fillStyle = rg; g.fillRect(0, bot + 2, W, H - bot);
+  g.strokeStyle = `rgba(${T.grid},.35)`; g.lineWidth = 1;
+  const vx = W / 2, sp = 70, o = scroll % sp;
+  for (let i = -24; i < 40; i++) { const bx = i * sp - o * 2; g.beginPath(); g.moveTo(vx + (bx - vx) * 0.25, bot + 2); g.lineTo(bx, H); g.stroke(); }
+  for (let k = 0; k < 5; k++) { const f = (k + ((scroll / sp) % 1)) / 5, yy = bot + 2 + f * f * (H - bot); g.globalAlpha = f; g.beginPath(); g.moveTo(0, yy); g.lineTo(W, yy); g.stroke(); }
+  g.globalAlpha = 1;
+  // voile pour lire les notes
+  g.fillStyle = "rgba(5,0,12,.22)"; g.fillRect(0, 0, W, bot);
+}
+
+/* Un sbire des Monstres Muets : une boule d'ombre aux yeux rouges */
+function drawMinion(x, y, now, st) {
+  let a = 1, dy = Math.sin(now / 180 + x) * 3, s = 1;
+  if (st && st.s === 2) { st.t += 16; a = Math.max(0, 1 - st.t / 900); dy -= st.t * 0.12; s = 1 + st.t / 1500; }
+  if (a <= 0) return;
+  g.save(); g.globalAlpha = a; g.translate(x, y + dy); g.scale(s, s);
+  g.fillStyle = "#0B0010"; g.strokeStyle = "#FF3B3B"; g.lineWidth = 2; g.shadowColor = "#FF0033"; g.shadowBlur = 10;
+  g.beginPath(); g.moveTo(-13, 10); g.quadraticCurveTo(-15, -14, 0, -15); g.quadraticCurveTo(15, -14, 13, 10); g.lineTo(8, 6); g.lineTo(4, 11); g.lineTo(0, 6); g.lineTo(-4, 11); g.lineTo(-8, 6); g.closePath(); g.fill(); g.stroke();
+  g.shadowBlur = 0; g.fillStyle = "#FF3B3B"; g.beginPath(); g.ellipse(-5, -3, 2.6, Math.sin(now / 300 + x) > 0.95 ? 0.4 : 2.6, 0, 0, 6.283); g.ellipse(5, -3, 2.6, Math.sin(now / 300 + x) > 0.95 ? 0.4 : 2.6, 0, 0, 6.283); g.fill();
+  g.restore();
+}
+
+/* ── Le niveau ── */
+function drawGame(now, dt) {
+  if (gs.exRef !== ex) gameReset();
+  const T = gameTheme(), bot = H - BOTTOM(), NX = nowX(), p = state.playing;
+  const beat = p ? currentBeat() : now / 1000 * 2;
+  const pulse = Math.pow(1 - (((p ? view.beat : now / 500) % 1) + 1) % 1, 3);
+  const scroll = p ? view.beat * ppb() : now * 0.05;
+  drawScenery(now, T, scroll, bot, pulse);
+  // repères de hauteur, discrets
+  for (let m = lanes.lo; m <= lanes.hi; m++) {
+    const pc = pcOf(m); if (BLACK.has(pc)) continue;
+    g.fillStyle = pc === 0 ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.035)"; g.fillRect(LEFT, yOf(m), W - LEFT, 1);
+  }
+  if (state.exBand != null) {
+    const y = yOf(state.exBand), bh = lanes.h * 1.2, band = g.createLinearGradient(0, y - bh, 0, y + bh);
+    band.addColorStop(0, `rgba(${T.grid},0)`); band.addColorStop(0.5, `rgba(${T.grid},.28)`); band.addColorStop(1, `rgba(${T.grid},0)`);
+    g.fillStyle = band; g.fillRect(LEFT, y - bh, W - LEFT, bh * 2);
+  }
+  if (RAIL_KINDS.has(ex.type) && ex.ph) drawRails(now, dt, T, NX, p);
+  else if (ex.type === "hold") drawHoldGame(now, dt, NX);
+  else if (ex.type === "echo") drawOrbs(now, NX, ex.fig || [], ex.j || 0, "#00F0FF", ex.k);
+  else if (ex.type === "attack") drawTarget(now, NX);
+  else if (ex.type === "battle") drawBattle(now, dt, NX, bot);
+  // la traînée de la voix : un ruban de néon
+  if (state.trace.length > 1 && ex.type !== "battle") {
+    g.lineCap = "round"; g.lineJoin = "round"; let prev = null;
+    for (const pt of state.trace) {
+      const x = xOf(pt.beat); if (pt.midi == null || x < LEFT - 20 || x > NX + 2) { prev = null; continue; }
+      const t = tgtOf(notes()[noteIndexAt(pt.beat)]), mm = t == null ? pt.midi : t + fold((pt.midi - t) * 100) / 100, y = yOf(mm);
+      if (prev && Math.abs(prev.y - y) < lanes.h * 3) {
+        const ok = t != null && Math.abs((mm - t) * 100) <= TOL_EX, a = Math.max(0.1, 1 - (NX - x) / (NX - LEFT));
+        g.strokeStyle = ok ? `rgba(0,245,212,${a})` : `rgba(255,59,59,${a * 0.8})`; g.lineWidth = ok ? 7 : 4;
+        g.beginPath(); g.moveTo(prev.x, prev.y); g.lineTo(x, y); g.stroke();
+      }
+      prev = { x, y };
+    }
+  }
+  drawRider(now, dt, NX, bot);
+  // les tirs du combat
+  if (ex.type === "battle") drawShots(dt, NX);
+  // particules du jeu
+  gs.parts = gs.parts.filter(q => (q.t += dt) < q.life);
+  for (const q of gs.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 0.0003 * dt; g.fillStyle = q.col; g.globalAlpha = 1 - q.t / q.life; g.fillRect(q.x - q.r / 2, q.y - q.r / 2, q.r, q.r); }
+  g.globalAlpha = 1;
+  drawFx(dt);
+  // noms des notes à gauche
+  const lg = g.createLinearGradient(0, 0, LEFT + 20, 0); lg.addColorStop(0, "rgba(5,0,12,.85)"); lg.addColorStop(1, "rgba(5,0,12,0)");
+  g.fillStyle = lg; g.fillRect(0, TOP - 24, LEFT + 20, bot - TOP + 24);
+  g.textAlign = "right"; g.textBaseline = "middle"; g.font = "500 10px 'Chakra Petch', sans-serif";
+  for (let m = lanes.lo; m <= lanes.hi; m++) { const pc = pcOf(m); if (BLACK.has(pc) || (lanes.h < 12 && ![0, 4, 7].includes(pc))) continue; g.fillStyle = state.exBand === m ? "#FFE45E" : "rgba(195,155,211,.6)"; g.fillText(fullName(m), LEFT - 6, yOf(m)); }
+  if (RAIL_KINDS.has(ex.type)) { drawGameHud(T); drawLyrics(noteIndexAt(view.beat), bot); }
+}
+
+/* Les rails de la mélodie : une croquette par demi-temps, un sbire toutes les trois notes */
+function drawRails(now, dt, T, NX, p) {
+  const ns = notes(), P = ppb(), b = view.beat, sing = p && p.mode === "ex";
+  // manger : chaque croquette qui passe la ligne du présent est mangée si la voix est juste
+  if (sing && gs.lastBeat != null && b > gs.lastBeat) {
+    for (let i = ex.ph.from; i <= ex.ph.to; i++) {
+      const n = ns[i]; if (n.midi == null || n.start > b || n.start + n.beats < gs.lastBeat) continue;
+      const cnt = Math.max(1, Math.floor(n.beats * 2));
+      for (let j = 0; j < cnt; j++) {
+        const pb = n.start + (j + 0.5) * (n.beats / cnt), key = i * 64 + j;
+        if (pb <= gs.lastBeat || pb > b || gs.pel.has(key)) continue;
+        const ok = state.live && state.live.cls === "ok";
+        gs.pel.set(key, ok ? 1 : 2);
+        if (ok) { gs.eaten++; ex.score += 10; chomp(); gBurst(NX, yOf(tgtOf(n)), T.rail, 5, 0.12); }
+      }
+    }
+  }
+  gs.lastBeat = sing ? b : null;
+  if (!gs.total) for (let i = ex.ph.from; i <= ex.ph.to; i++) if (ns[i].midi != null) gs.total += Math.max(1, Math.floor(ns[i].beats * 2));
+  for (let i = ex.ph.from; i <= ex.ph.to; i++) {
+    const n = ns[i]; if (n.midi == null) continue;
+    const x0 = xOf(n.start), x1 = xOf(n.start + n.beats); if (x0 > W + 20) break; if (x1 < LEFT - 20) continue;
+    const m = tgtOf(n), y = yOf(m), res = state.results?.[i];
+    const col = res ? (res.status === "ok" ? "#00F5D4" : "#FF3B3B") : "#FF2E88";
+    const active = b >= n.start && b < n.start + n.beats;
+    g.save(); g.strokeStyle = col; g.globalAlpha = x1 < NX ? 0.35 : 0.85; g.lineWidth = active ? 4 : 2.5; g.shadowColor = col; g.shadowBlur = active ? 18 : 8;
+    g.beginPath(); g.moveTo(Math.max(LEFT, x0), y); g.lineTo(x1 - 3, y); g.stroke();
+    g.beginPath(); g.arc(x0, y, active ? 7 : 5, 0, 6.283); g.fillStyle = col; g.fill();
+    g.restore();
+    const cnt = Math.max(1, Math.floor(n.beats * 2));
+    for (let j = 0; j < cnt; j++) {
+      const key = i * 64 + j, st = gs.pel.get(key); if (st === 1) continue;
+      const px = xOf(n.start + (j + 0.5) * (n.beats / cnt)); if (px < LEFT || px > W) continue;
+      if (st === 2) { g.fillStyle = "rgba(110,90,128,.5)"; g.beginPath(); g.arc(px, y, 2.5, 0, 6.283); g.fill(); continue; }
+      const r = 4.5 + Math.sin(now / 200 + j) * 0.8;
+      g.save(); g.fillStyle = T.rail; g.shadowColor = T.rail; g.shadowBlur = 10; g.beginPath(); g.arc(px, y, r, 0, 6.283); g.fill(); g.restore();
+    }
+    if (isMinion(i)) { const st = gs.mins.get(i); if (!st || st.s === 2) drawMinion(x1 - 4, y - 16, now, st); }
+  }
+}
+function drawGameHud(T) {
+  const x = W * 0.5 - Math.min(220, W * 0.3), w = Math.min(440, W * 0.6), y = TOP - 26;
+  const a = ex.ph.a ?? notes()[ex.ph.from].start, z = ex.ph.until ?? (notes()[ex.ph.to].start + notes()[ex.ph.to].beats);
+  const k = Math.max(0, Math.min(1, (view.beat - a) / Math.max(0.01, z - a)));
+  g.fillStyle = "rgba(255,255,255,.1)"; g.fillRect(x, y, w, 5);
+  g.fillStyle = `rgb(${T.grid})`; g.fillRect(x, y, w * k, 5);
+  g.font = "16px 'Anton', Impact, sans-serif"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "#FFE45E";
+  g.fillText("⚑", x + w + 6, y + 3);
+  g.font = "14px 'VT323', monospace"; g.fillStyle = "#FFF2FA"; g.textAlign = "right";
+  g.fillText(`CROQUETTES ${gs.eaten}/${gs.total}`, W - 14, y + 3);
+}
+
+/* La note tenue : une croquette géante que le monstre grignote tant que la note tient */
+function drawHoldGame(now, dt, NX) {
+  if (ex.tgt == null) return;
+  const y = yOf(ex.tgt), k = Math.min(1, (ex.on || 0) / ex.goal), R = Math.max(14, lanes.h * 2.6) * (1 - k * 0.75), x = NX + 70 + R;
+  g.save(); g.fillStyle = "#FFB347"; g.strokeStyle = "#FFE45E"; g.lineWidth = 3; g.shadowColor = "#FFE45E"; g.shadowBlur = 24;
+  g.beginPath(); g.arc(x, y, R, 0.5, 6.283 - 0.5 * (state.live?.cls === "ok" ? Math.abs(Math.sin(now / 90)) : 0)); g.lineTo(x, y); g.closePath(); g.fill(); g.stroke(); g.restore();
+  g.fillStyle = "#8A4A10"; for (let i = 0; i < 5; i++) { const a = i * 1.3 + 0.4; g.beginPath(); g.arc(x + Math.cos(a) * R * 0.5, y + Math.sin(a) * R * 0.5, R * 0.1, 0, 6.283); g.fill(); }
+  if (state.live?.cls === "ok" && Math.random() < dt / 60) gs.parts.push({ x: x - R * 0.6, y, vx: -0.25 - Math.random() * 0.1, vy: (Math.random() - 0.5) * 0.1, t: 0, life: 350, col: "#FFB347", r: 3 });
+  g.font = "18px 'Anton', Impact, sans-serif"; g.textAlign = "center"; g.fillStyle = "#FFE45E"; g.fillText(`${Math.round(k * 100)} %`, x, y - R - 14);
+}
+/* L'écho et le combat : les notes à rendre flottent devant le monstre */
+function drawOrbs(now, NX, fig, j, col, round) {
+  if (gs.round !== round) { gs.round = round; gs.lastJ = 0; }
+  if (j > gs.lastJ) { for (let q = gs.lastJ; q < j; q++) { const pz = gs.orbPos[q]; if (pz) { gBurst(pz.x, pz.y, col, 18, 0.25); boom(false); } } gs.lastJ = j; }
+  gs.orbPos = [];
+  fig.forEach((m, q) => {
+    const x = NX + 90 + q * Math.min(80, W * 0.08), y = yOf(m);
+    gs.orbPos[q] = { x, y };
+    if (q < j) return;
+    const cur = q === j, r = cur ? 12 + Math.sin(now / 120) * 2 : 8;
+    g.save(); g.fillStyle = col; g.shadowColor = col; g.shadowBlur = cur ? 26 : 10; g.globalAlpha = cur ? 1 : 0.6;
+    g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill(); g.fillStyle = "#12001F"; g.font = `${cur ? 16 : 12}px 'Chakra Petch', sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("♪", x, y + 1); g.restore();
+  });
+}
+/* Les attaques nettes : une cible à toucher pile */
+function drawTarget(now, NX) {
+  if (ex.k != null && ex.k > gs.lastK) { const pz = gs.orbPos[0]; if (pz) { gBurst(pz.x, pz.y, "#FFE45E", 24, 0.3); boom(false); } gs.lastK = ex.k; }
+  if (ex.tgt == null) return;
+  const x = NX + 110, y = yOf(ex.tgt), r = Math.max(14, lanes.h * 1.4);
+  gs.orbPos = [{ x, y }];
+  g.save(); g.lineWidth = 3; g.shadowColor = "#FF2E88"; g.shadowBlur = 16;
+  [1, 0.66, 0.33].forEach((k, i) => { g.strokeStyle = i % 2 ? "#FFF2FA" : "#FF2E88"; g.beginPath(); g.arc(x, y, r * k, 0, 6.283); g.stroke(); });
+  g.fillStyle = "#FFE45E"; g.beginPath(); g.arc(x, y, 3, 0, 6.283); g.fill(); g.restore();
+}
+
+/* ── Le combat de boss : le boss à droite, ses notes qui arrivent, tes tirs qui repartent ── */
+function drawBattle(now, dt, NX, bot) {
+  const foe = ex.foe, S = Math.min(H * 0.62, 320) * [1, 1.5, 1.25, 1.1][foe.stage || 1], bx = W - Math.min(W * 0.2, 200), by = bot + 6;
+  gs.bossHit = Math.max(0, gs.bossHit - dt * 0.003); gs.meHit = Math.max(0, gs.meHit - dt * 0.003);
+  const lunge = ex.phase && !ex.atk && /écoute/.test(ex.phase) ? Math.sin(now / 90) * 4 : 0;
+  g.save();
+  if (gs.bossHit > 0 && canFilter) g.filter = `brightness(${1 + gs.bossHit * 2.5})`;
+  drawMon(g, foe, bx + (gs.bossHit ? Math.sin(now / 15) * 8 * gs.bossHit : 0) + lunge, by, S, { mood: gs.bossHit > 0.3 ? "hurt" : "angry", flip: true, glow: "#FF3B3B", glowR: 30, lift: Math.abs(Math.sin(now / 400)) * 8 });
+  g.restore();
+  if (ex.round !== gs.round) { gs.round = ex.round; gs.revealed = 0; gs.lastJ = 0; gs.band = null; }
+  if (/écoute/.test(ex.phase || "") && state.exBand != null && state.exBand !== gs.band) { gs.band = state.exBand; gs.revealed++; gBurst(bx - S * 0.3, by - S * 0.45, ex.atk ? "#00F0FF" : "#FF3B3B", 8, 0.15); }
+  const fig = (ex.fig || []).slice(0, /écoute/.test(ex.phase || "") ? gs.revealed : (ex.fig || []).length);
+  drawOrbs(now, NX, fig, ex.j || 0, ex.atk ? "#00F0FF" : "#FF3B3B", ex.round);
+  // barres de vie
+  const bar = (x, w, k, col, name, right) => {
+    g.save(); g.translate(x, H - BOTTOM() + 12); g.transform(1, 0, -0.2, 1, 0, 0);
+    g.fillStyle = "rgba(12,0,28,.85)"; g.fillRect(0, 0, w, 26); g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 10;
+    const fw = (w - 6) * Math.max(0, k); g.fillRect(right ? 3 + (w - 6 - fw) : 3, 3, fw, 20); g.shadowBlur = 0;
+    g.font = "18px 'Anton', Impact, sans-serif"; g.textBaseline = "top"; g.fillStyle = "#fff"; g.textAlign = right ? "right" : "left";
+    g.fillText(name.toUpperCase(), right ? w : 0, 30); g.restore();
+  };
+  const bw = Math.min(W * 0.36, 360);
+  bar(14, bw, ex.myHp / ex.myMax, "#00F5D4", `${ex.me.name} · niv. ${ex.me.lvl}`, false);
+  bar(W - bw - 20, bw, ex.foeHp / ex.foeMax, "#FF3B3B", `${ex.R.name} · niv. ${ex.R.lvl}`, true);
+  if (gs.meHit > 0) { g.fillStyle = `rgba(255,0,51,${gs.meHit * 0.25})`; g.fillRect(0, 0, W, H); }
+  const ph = ex.phase || "";
+  if (ph) { g.save(); g.font = `${Math.min(34, W / 18)}px 'Anton', Impact, sans-serif`; g.textAlign = "center"; g.fillStyle = /Répète|parer/.test(ph) ? "#FF3B3B" : /Chante|frapper/.test(ph) ? "#00F5D4" : "#FFF2FA"; g.shadowColor = g.fillStyle; g.shadowBlur = 16; g.fillText(ph.toUpperCase(), W / 2, H * 0.2); g.restore(); }
+}
+function drawShots(dt, NX) {
+  const bx = W - Math.min(W * 0.2, 200), by = (H - BOTTOM()) * 0.55;
+  gs.shots = gs.shots.filter(s => {
+    s.t += dt; const k = Math.min(1, s.t / s.life);
+    const x0 = s.toFoe ? NX - 20 : bx - 60, y0 = s.toFoe ? s.y0 : by, x1 = s.toFoe ? bx - 40 : NX - 20, y1 = s.toFoe ? by : (rider.y ?? H / 2);
+    const x = x0 + (x1 - x0) * k, y = y0 + (y1 - y0) * k - Math.sin(k * Math.PI) * 40, col = s.toFoe ? "#00F5D4" : "#FF3B3B";
+    g.save(); g.strokeStyle = col; g.lineWidth = 6; g.shadowColor = col; g.shadowBlur = 20; g.globalAlpha = 0.6;
+    g.beginPath(); g.moveTo(x0 + (x1 - x0) * Math.max(0, k - 0.25), y0 + (y1 - y0) * Math.max(0, k - 0.25)); g.lineTo(x, y); g.stroke();
+    g.globalAlpha = 1; g.fillStyle = "#fff"; g.beginPath(); g.arc(x, y, 7, 0, 6.283); g.fill(); g.restore();
+    if (k >= 1) { gBurst(x1, y1, col, 30, 0.35); boom(true); return false; }
+    return true;
+  });
+}
+
 /* ════════ Le mode histoire : trois actes, un mentor, six Monstres Muets, et chaque exercice amené par le récit ════════ */
 
 /* ── Doc Vinyle, ancien ingé son du Néon Club ── */
@@ -5008,7 +5289,15 @@ function docSvg(mood = "talk", size = 260) {
 }
 
 /* ── La progression de l'histoire : des identifiants stables, quelle que soit la voix chantée ── */
-const story = Object.assign({ done: [], fails: {}, finished: false }, readJSON("drm.story"));
+const story = Object.assign({ songs: {}, order: [] }, readJSON("drm.story"));
+if (story.done) { story.songs["Carol of the Bells"] = { done: story.done, fails: story.fails || {}, finished: !!story.finished }; delete story.done; delete story.fails; delete story.finished; if (!story.order.includes("Carol of the Bells")) story.order.unshift("Carol of the Bells"); }
+function SP() {
+  const t = state.score.title;
+  if (!story.songs[t]) story.songs[t] = { done: [], fails: {}, finished: false };
+  if (!story.order.includes(t)) story.order.push(t);
+  return story.songs[t];
+}
+const partNo = () => { SP(); return story.order.indexOf(state.score.title) + 1; };
 const saveStory = () => store.set("drm.story", JSON.stringify(story));
 let storyRun = null;
 
@@ -5059,7 +5348,8 @@ function storyChapters() {
     fail: [["doc", "Ton perroquet a besoin de lunettes. Ferme les yeux, écoute, recommence.", "worried"]] });
   const first = chPhrase(0);
   first.title = "Ding Dong"; first.act = 0;
-  first.pre = [["doc", "Bienvenue au Studio 86. Ici, on récupère le morceau que les Muets ont volé : Carol of the Bells."],
+  if (!/carol/i.test(state.score.title)) first.title = chPhrase(0).title;
+  first.pre = [["doc", `Bienvenue au Studio 86. Ici, on récupère le morceau que les Muets ont volé : ${state.score.title}.`],
     ["doc", "Il est découpé en salles. Chaque salle libérée rend un bout de la chanson à la ville."],
     ["doc", "On commence doucement, tempo ralenti. Tu écoutes une fois, puis c'est à toi. Il faut 70 % de notes justes."],
     ["me", "Ding ! Dong !", "joy"]];
@@ -5131,12 +5421,13 @@ function storyChapters() {
       ["doc", "Aujourd'hui, Synthville chante juste. Et c'est grâce à toi."],
       ["me", "Et à moi !", "joy"], ["doc", "Et à {m}, oui. Surtout à {m}, d'après {m}.", "smile"],
       ["doc", "Le quartier est à toi. Continue de nourrir ta bande, ouvre des cassettes, repasse le filage pour le plaisir."],
-      ["doc", "Et à la chorale ? Ils ne vont pas en revenir."]],
+      ["doc", "Et à la chorale ? Ils ne vont pas en revenir."],
+      ["narr", `Partie ${partNo()} terminée : ${state.score.title} est à toi. La suite s'écrira avec le prochain chant de ta chorale.`]],
     win: [] });
   return L;
 }
 const chapterIndex = (L, id) => L.findIndex(c => c.id === id);
-function nextChapter(L = storyChapters()) { return L.find(c => !story.done.includes(c.id)) || null; }
+function nextChapter(L = storyChapters()) { return L.find(c => !SP().done.includes(c.id)) || null; }
 
 /* ════════ Le roman visuel : portraits, bulle, texte tapé à la machine ════════ */
 const vn = { on: false, q: [], cur: null, shown: 0, timer: 0, done: null, wait: false };
@@ -5227,26 +5518,29 @@ function openStory(focusId) {
   storyBackdrop("home");
   const L = storyChapters(), nx = nextChapter(L), cur = nx ? chapterIndex(L, nx.id) : L.length;
   const icon = c => c.boss ? "⚔" : c.kind === "phrase" || c.kind === "full" || c.kind === "melody" ? "♪" : c.kind === "none" || c.kind === "starter" ? "★" : "◎";
-  let html = `<div class="st-top"><div><span class="k">Mode histoire</span><h2>${story.finished ? "Synthville chante juste" : esc(ACTS[nx ? nx.act : 2])}</h2>
-      <span class="st-prog"><i style="width:${Math.round(story.done.filter(id => L.some(c => c.id === id)).length / L.length * 100)}%"></i></span>
-      <small>${story.done.filter(id => L.some(c => c.id === id)).length} chapitres sur ${L.length}</small></div>
+  let html = `<div class="st-top"><div><span class="k">Partie ${partNo()} · ${esc(state.score.title)}</span><h2>${SP().finished ? "Synthville chante juste" : esc(ACTS[nx ? nx.act : 2])}</h2>
+      <span class="st-prog"><i style="width:${Math.round(SP().done.filter(id => L.some(c => c.id === id)).length / L.length * 100)}%"></i></span>
+      <small>${SP().done.filter(id => L.some(c => c.id === id)).length} chapitres sur ${L.length}</small></div>
     <div class="st-btns"><button type="button" class="w-btn" data-st="world">Quartier libre</button><button type="button" class="w-btn" data-st="account">${cloud.user ? '<i class="dot on"></i>' : ""}${esc(prof.player?.name || "Compte")}</button><button type="button" class="w-btn" data-st="title">Menu</button></div></div>`;
   if (nx) {
     const isBoss = nx.boss, who = isBoss ? rivalMon(nx.r) : null;
     html += `<button type="button" class="st-next${isBoss ? " boss" : ""}" data-play="${nx.id}">
       <span class="st-art">${isBoss ? monsterSvg(who, 120, { mood: "angry", cls: "idle" }) : activeMon() ? monsterSvg(activeMon(), 120, { mood: "joy", cls: "idle" }) : docSvg("smile", 110)}</span>
-      <span class="st-txt"><small>${story.done.length ? "Continuer · " : ""}Chapitre ${cur + 1}</small><b>${esc(nx.title)}</b><em>${isBoss ? "Combat de boss" : { starter: "Le début de l'histoire", hold: "La note tenue", echo: "L'écho", attack: "Attaques nettes", phrase: "Une salle du morceau", melody: "La musicalité", drill: "L'atelier", full: "Tout le morceau", none: "La fin" }[nx.kind]}</em></span>
+      <span class="st-txt"><small>${SP().done.length ? "Continuer · " : ""}Chapitre ${cur + 1}</small><b>${esc(nx.title)}</b><em>${isBoss ? "Combat de boss" : { starter: "Le début de l'histoire", hold: "La note tenue", echo: "L'écho", attack: "Attaques nettes", phrase: "Une salle du morceau", melody: "La musicalité", drill: "L'atelier", full: "Tout le morceau", none: "La fin" }[nx.kind]}</em></span>
       <span class="st-go">▶</span></button>`;
   }
   let act = -1;
   html += `<div class="st-path">`;
   L.forEach((c, i) => {
     if (c.act !== act) { act = c.act; html += `<h3 class="st-act">${esc(ACTS[act])}</h3>`; }
-    const done = story.done.includes(c.id), now = nx && c.id === nx.id, locked = !done && !now;
+    const done = SP().done.includes(c.id), now = nx && c.id === nx.id, locked = !done && !now;
     html += `<button type="button" class="st-node${done ? " done" : ""}${now ? " now" : ""}${locked ? " locked" : ""}${c.boss ? " boss" : ""}" ${locked ? "disabled" : `data-play="${c.id}"`} style="--x:${[0, 1, 2, 1][i % 4]}">
       <i>${done ? "✓" : locked ? "🔒" : icon(c)}</i><span><small>Chapitre ${i + 1}</small><b>${esc(c.title)}</b></span></button>`;
   });
   html += `</div>`;
+  html += `<div class="st-part"><span class="k">Partie ${partNo() + 1}</span><b>Ton prochain chant de chorale</b>
+    <p>Charge la partition d'un autre chant de ta chorale, une photo suffit. Doc Vinyle en fera la partie suivante, avec ses salles, ses boss et sa finale.</p>
+    <button type="button" class="pill primary" data-st="sheet">Charger une partition</button></div>`;
   $("storyMap").innerHTML = html; $("storyMap").hidden = false; $("storyMap").scrollTop = 0;
   const focus = $("storyMap").querySelector(".st-node.now");
   if (focus) setTimeout(() => focus.scrollIntoView({ block: "center", behavior: "smooth" }), 400);
@@ -5257,12 +5551,12 @@ $("storyMap").addEventListener("click", e => {
   if (b) {
     const w = b.dataset.st;
     if (w === "world") { closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }
-    else if (w === "account") openAccount(); else if (w === "title") openTitle();
+    else if (w === "account") openAccount(); else if (w === "title") openTitle(); else if (w === "sheet") openSheet();
     return;
   }
   const p = e.target.closest("[data-play]"); if (!p) return;
   const L = storyChapters(), c = L.find(x => x.id === p.dataset.play); if (!c) return;
-  playChapter(c, story.done.includes(c.id));
+  playChapter(c, SP().done.includes(c.id));
 });
 
 /* ════════ Un chapitre : dialogue, épreuve, dénouement ════════ */
@@ -5291,7 +5585,7 @@ async function launchChapter(c, replay) {
   if (c.kind === "starter" || c.kind === "none") { storyResult({ id: c.id, replay }, true); return; }
   const m = await ensureMic();
   if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Le micro est bloqué. Autorise-le dans le navigateur, ou ouvre le jeu sur deftunk.github.io/pupitre.", "worried"]], () => openStory()); return; }
-  storyRun = { id: c.id, replay, title: c.title };
+  storyRun = { id: c.id, replay, title: c.title, act: c.act };
   closeWorld(); $("world").classList.remove("in-story");
   const p = W_.places.find(q => q.id === c.place); if (p) placeBar(p);
   state.lairView = c.place === "home" ? "train" : c.place;
@@ -5306,10 +5600,10 @@ async function launchChapter(c, replay) {
 function storyResult(run, passed) {
   const L = storyChapters(), c = L.find(x => x.id === run.id); storyRun = null;
   if (!c) { openStory(); return; }
-  const i = chapterIndex(L, c.id), first = passed && !story.done.includes(c.id);
-  if (passed) { if (first) { story.done.push(c.id); delete story.fails[c.id]; prof.tokens = (prof.tokens || 0) + 3; saveProf(); } }
-  else { story.fails[c.id] = (story.fails[c.id] || 0) + 1; }
-  if (c.id === "epilogue" && passed) story.finished = true;
+  const i = chapterIndex(L, c.id), first = passed && !SP().done.includes(c.id);
+  if (passed) { if (first) { SP().done.push(c.id); delete SP().fails[c.id]; prof.tokens = (prof.tokens || 0) + 3; saveProf(); } }
+  else { SP().fails[c.id] = (SP().fails[c.id] || 0) + 1; }
+  if (c.id === "epilogue" && passed) SP().finished = true;
   saveStory();
   closeStoryMap(); storyBackdrop(c.place);
   const lines = (passed ? c.win : c.fail || []).slice();
@@ -5321,7 +5615,7 @@ function storyResult(run, passed) {
     else lines.push({ choice: [["Explorer le quartier", () => { vn.done = null; vnEnd(); closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }, "primary"], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
   } else {
     const opts = [["Réessayer", () => { vnEnd(); launchChapter(c, run.replay); }, "primary", "↻ "], ["Revoir le chapitre", () => { vnEnd(); playChapter(c, run.replay); }], ["La carte", () => { vn.done = null; vnEnd(); openStory(); }]];
-    if ((story.fails[c.id] || 0) >= 3 && !story.done.includes(c.id)) opts.push(["Passer ce chapitre", () => { vnEnd(); story.done.push(c.id); saveStory(); openStory(); }]);
+    if ((SP().fails[c.id] || 0) >= 3 && !SP().done.includes(c.id)) opts.push(["Passer ce chapitre", () => { vnEnd(); SP().done.push(c.id); saveStory(); openStory(); }]);
     lines.push({ choice: opts });
   }
   vnPlay(lines, () => openStory(), { boss: c.boss && !passed });
@@ -5345,7 +5639,7 @@ $("titleScreen").addEventListener("click", e => {
   $("titleScreen").classList.add("gone");
   flash("#FF2E88", 0.35); shake(10);
   const m = b.dataset.start;
-  const begin = () => { const nx = nextChapter(); if (!story.done.length && nx) playChapter(nx); else openStory(); };
+  const begin = () => { const nx = nextChapter(); if (!SP().done.length && nx) playChapter(nx); else openStory(); };
   if (m === "intro" || !store.get("drm.intro")) playIntro(begin);
   else begin();
 });
