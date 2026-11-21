@@ -6,10 +6,11 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0A0012">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Do Ré Monstres">
 <style>html,body{margin:0}</style>
 </head>
 <body>
-<title>Pupitre</title>
+<title>Do Ré Monstres</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Monoton&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,600&family=VT323&display=swap">
@@ -577,6 +578,55 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
   .shot.to-foe { left: 80px; } .shot.to-me { right: 80px; }
   @keyframes toFoe { to { left: calc(100% - 80px); } }
 }
+
+/* Do Ré Monstres : nom, juke-box, compte, raretés */
+.t-logo { font-size: clamp(40px, min(9vw, 11vh), 108px); line-height: .95; }
+.title { overflow-y: auto; }
+.t-rays { position: fixed; }
+.t-inner { margin: auto; }
+.t-menu { gap: 4px; margin-top: 10px; }
+.t-menu button { font-size: clamp(28px, min(5.5vw, 6.5vh), 52px); }
+.t-player { display: flex; align-items: center; gap: 10px; margin-top: 6px; transform: skewX(-8deg); }
+.t-player span { font-family: var(--f-mono); font-size: 18px; letter-spacing: .2em; color: var(--cyan); text-transform: uppercase; }
+.t-player input { font-family: var(--f-display); font-size: 24px; text-transform: uppercase; letter-spacing: .05em; color: #fff; background: rgba(255, 46, 136, .12); border: 2px solid var(--gold); padding: 4px 12px; width: min(260px, 60vw); box-shadow: 4px 4px 0 var(--cyan); }
+.t-player input:focus { outline: none; border-color: var(--cyan); }
+.monster.shiny { animation: shiny 4s linear infinite; }
+.monster.shiny.idle { animation: bob 1.8s ease-in-out infinite, shiny 4s linear infinite; }
+@keyframes shiny { from { filter: hue-rotate(0deg) saturate(1.6) drop-shadow(0 0 10px #fff); } to { filter: hue-rotate(360deg) saturate(1.6) drop-shadow(0 0 10px #fff); } }
+.monster.legend { filter: drop-shadow(0 0 10px #FFE45E) drop-shadow(0 0 3px var(--glow)); }
+.jukebox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.jb-machine { position: relative; display: grid; justify-items: center; gap: 10px; padding: 22px 16px 18px; border: 3px solid var(--gold); background: linear-gradient(180deg, rgba(255, 46, 136, .2), rgba(138, 43, 226, .12)); box-shadow: 6px 6px 0 var(--cyan), inset 0 0 40px rgba(255, 46, 136, .25); }
+.jb-lights { display: flex; gap: 6px; }
+.jb-lights i { width: 10px; height: 10px; background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: blink 1.4s steps(2) infinite; animation-delay: var(--d); }
+.jb-lights i:nth-child(3n) { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.jb-lights i:nth-child(3n+1) { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+@keyframes blink { 50% { opacity: .2; } }
+.jb-tokens { font-family: var(--f-mono); font-size: 22px; color: var(--muted); }
+.jb-tokens b { font-size: 54px; color: var(--yellow); text-shadow: 0 0 14px rgba(255, 228, 94, .6); margin-right: 6px; }
+.jb-pity { font-family: var(--f-mono); font-size: 16px; color: var(--cyan); }
+.main-btn:disabled { opacity: .45; animation: none; cursor: default; }
+.jb-odds { display: grid; gap: 6px; align-content: start; }
+.odd { display: grid; grid-template-columns: 16px 1fr auto auto; gap: 10px; align-items: center; padding: 6px 10px; border-bottom: 1px dashed rgba(255, 46, 136, .25); }
+.odd b { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: .05em; }
+.odd em { font-style: normal; font-family: var(--f-mono); font-size: 19px; color: var(--yellow); }
+.odd small { font-family: var(--f-mono); font-size: 15px; color: var(--muted); }
+.dotr { width: 12px; height: 12px; transform: rotate(45deg); }
+.shinydot { background: linear-gradient(90deg, #FF2E88, #FFE45E, #00F0FF, #C04BFF); animation: shiny 3s linear infinite; }
+.exend .gain .tok { color: var(--yellow); font-family: var(--f-mono); font-size: 18px; }
+.acc { display: grid; gap: 18px; }
+.acc-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; padding: 14px; border: 2px solid var(--gold); box-shadow: 5px 5px 0 var(--cyan); background: rgba(255, 46, 136, .08); }
+.acc-id { display: grid; gap: 4px; min-width: 0; }
+.acc-id input { font-family: var(--f-display); font-size: 30px; text-transform: uppercase; color: #fff; background: transparent; border: 0; border-bottom: 2px dashed rgba(0, 240, 255, .5); padding: 0; width: 100%; }
+.acc-id input:focus { outline: none; border-bottom-color: var(--yellow); }
+.acc-lv { font-family: var(--f-mono); font-size: 19px; color: var(--yellow); }
+.acc-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.acc-stats div { display: grid; padding: 8px 10px; border: 1px solid rgba(255, 46, 136, .3); background: rgba(255, 255, 255, .03); }
+.acc-stats b { font-family: var(--f-mono); font-size: 32px; font-weight: 400; color: var(--yellow); line-height: 1; }
+.acc-stats span { font-family: var(--f-mono); font-size: 15px; color: var(--muted); }
+.acc h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: 22px; color: #fff; text-shadow: 2px 2px 0 var(--gold); margin: 0; }
+.acc .sub { margin: 4px 0 10px; color: var(--muted); font-size: 13px; }
+.acc textarea { min-height: 90px; margin: 8px 0; }
+@media (max-width: 760px) { .jukebox { grid-template-columns: 1fr; } .acc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
 
 <div class="app">
@@ -584,7 +634,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <div class="titles">
       <div class="brand">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a5 5 0 0 0-5 5v4l-2 4h14l-2-4V8a5 5 0 0 0-5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
-        Pupitre
+        Do Ré Monstres
       </div>
       <h1 id="title">Carol of the Bells</h1>
       <div class="meta" id="meta"></div>
@@ -592,6 +642,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <div class="top-right">
       <div class="seg" id="voices" role="group" aria-label="Ma voix"></div>
       <button class="ghost" id="openTitle" type="button">Menu</button>
+      <button class="ghost" id="openAccount" type="button">Compte</button>
     <button class="ghost" id="openSheet" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
         Partition
@@ -649,11 +700,14 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
       <label class="field"><span>Tempo</span>
         <div class="stepper"><button type="button" data-tempo="-10" aria-label="Plus lent">−</button><output class="tempoOut">140 / min</output><button type="button" data-tempo="10" aria-label="Plus rapide">+</button></div>
       </label>
+      <div class="field"><span>Boîte à rythmes</span>
+        <div class="seg small drumSeg"><button type="button" data-drums="1" aria-pressed="true">On</button><button type="button" data-drums="0" aria-pressed="false">Off</button></div>
+      </div>
       <label class="field"><span>Hauteur</span>
         <div class="stepper"><button type="button" data-tr="-1" aria-label="Un demi-ton plus bas">−</button><output class="trOut">écrite</output><button type="button" data-tr="1" aria-label="Un demi-ton plus haut">+</button></div>
       </label>
       <div class="field"><span>Son</span>
-        <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
+        <div class="seg small soundSeg"><button type="button" data-sound="synth" aria-pressed="true">Synthé</button><button type="button" data-sound="fm" aria-pressed="false">FM</button><button type="button" data-sound="pad" aria-pressed="false">Nappe</button><button type="button" data-sound="piano" aria-pressed="false">Piano</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
         <div class="mix"><input type="range" class="othersRange" min="0" max="100" step="5" value="0" aria-label="Volume des autres voix"><output class="othersOut">muettes</output></div>
@@ -685,7 +739,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
         <div class="seg small" id="guideSeg"><button type="button" data-guide="0" aria-pressed="false">Muette</button><button type="button" data-guide="0.35" aria-pressed="true">Douce</button><button type="button" data-guide="1" aria-pressed="false">Forte</button></div>
       </div>
       <div class="field"><span>Son</span>
-        <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
+        <div class="seg small soundSeg"><button type="button" data-sound="synth" aria-pressed="true">Synthé</button><button type="button" data-sound="fm" aria-pressed="false">FM</button><button type="button" data-sound="pad" aria-pressed="false">Nappe</button><button type="button" data-sound="piano" aria-pressed="false">Piano</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
         <div class="mix"><input type="range" class="othersRange" min="0" max="100" step="5" value="0" aria-label="Volume des autres voix"><output class="othersOut">muettes</output></div>
@@ -739,8 +793,9 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 <div class="title" id="titleScreen" role="dialog" aria-label="Écran titre">
   <div class="t-rays"></div>
   <div class="t-inner">
-    <span class="t-pre">// UN JEU DE CHORALE SANS PITIÉ</span>
-    <h2 class="t-logo">Pupitre</h2>
+    <span class="t-pre">// CHANTE JUSTE · ÉLÈVE TES MONSTRES · 1986</span>
+    <h2 class="t-logo">Do Ré<br>Monstres</h2>
+    <label class="t-player"><span>Pseudo</span><input id="titleName" maxlength="18" placeholder="Ton pseudo" autocomplete="nickname"></label>
     <span class="t-sub" id="titleSub">Carol of the Bells</span>
     <nav class="t-menu">
       <button type="button" data-start="train" style="--d:0s">Carrière<small>exercices, étoiles, trophées</small></button>
@@ -750,6 +805,13 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     </nav>
     <span class="t-foot">CASQUE RECOMMANDÉ · LES FAUSSES NOTES SERONT PUNIES</span>
   </div>
+</div>
+<div class="sheet-back" id="accountBack" hidden>
+  <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="accTitle">
+    <div class="row spread"><h2 id="accTitle">Mon compte</h2>
+      <button class="round" id="closeAccount" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="acc" id="accountBody"></div>
+  </aside>
 </div>
 <div class="hatch" id="hatch" hidden></div>
 <div id="flash" aria-hidden="true"></div>
@@ -967,7 +1029,7 @@ const barOf = beat => Math.floor(beat / state.score.beatsPerBar + 1e-6) + 1;
 /* ════════ Son (avec réverbération de salle) ════════ */
 
 let ctx = null, OUT = null;
-let instrument = store.get("pupitre.sound") || "piano";
+let instrument = store.get("pupitre.sound2") || "synth";
 let piano = null, pianoLoading = null;
 
 function ac() {
@@ -1071,13 +1133,15 @@ function choirNote(midi, t, dur, out, vel) {
 
 /* Les autres voix prennent le timbre opposé au sien, pour qu'elle distingue sa ligne du reste du chœur */
 function otherTone(midi, t, dur, out, vel) {
-  if (instrument === "piano") choirNote(midi, t, dur, out, vel * 1.9);
-  else if (piano) pianoNote(midi, t, dur, out, vel * 0.8);
-  else choirNote(midi, t, dur, out, vel * 1.4);
+  if (instrument === "pad") fmNote(midi, t, dur, out, vel * 0.75);
+  else padNote(midi, t, dur, out, vel * 1.5);
 }
 function tone(midi, t, dur, out, vel = 1) {
-  if (instrument === "piano" && piano) pianoNote(midi, t, dur, out, vel);
-  else choirNote(midi, t, dur, out, vel);
+  if (instrument === "synth") synthLead(midi, t, dur, out, vel);
+  else if (instrument === "fm") fmNote(midi, t, dur, out, vel);
+  else if (instrument === "pad") padNote(midi, t, dur, out, vel * 1.3);
+  else if (instrument === "piano" && piano) pianoNote(midi, t, dur, out, vel);
+  else synthLead(midi, t, dur, out, vel);
 }
 function bell(t, strong, out) {
   const base = strong ? 1318.5 : 1046.5;
@@ -1139,8 +1203,10 @@ async function startPlayback({ from, guide = 1, countIn = false, mode = "listen"
     if (k === state.voice) return;
     for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6 && n.start < end - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.9, other: k });
   });
+  const dBus = c.createGain(); dBus.gain.value = 0.6; dBus.connect(bus);
+  if (drumsOn && (mode === "listen" || mode === "preview" || (mode === "sing" && state.headphones))) queue.push(...drumPattern(startBeat, end, bpb));
   queue.sort((a, b) => a.beat - b.beat);
-  state.playing = { t0, startBeat, endBeat: end, bpm: B, bus, gBus, oBus, pans, queue, hasOthers: withOthers, qi: 0, mode, from, countIn, lastIdx: -1 };
+  state.playing = { t0, startBeat, endBeat: end, bpm: B, bus, gBus, oBus, dBus, pans, queue, hasOthers: withOthers, qi: 0, mode, from, countIn, lastIdx: -1 };
   pump(state.playing);
   updateButtons();
 }
@@ -1151,7 +1217,8 @@ function pump(p) {
     if (t > horizon) break;
     if (t > ctx.currentTime - 0.05) {
       const at = Math.max(t, ctx.currentTime + 0.005), d = e.beats * spb;
-      if (e.other === false) tone(e.midi, at, d, p.gBus, e.vel);
+      if (e.drum) { if (e.drum.includes("k")) kick(at, p.dBus); if (e.drum.includes("s")) snare(at, p.dBus); if (e.drum.includes("h")) hat(at, p.dBus, e.drum.includes("o")); }
+      else if (e.other === false) tone(e.midi, at, d, p.gBus, e.vel);
       else otherTone(e.midi, at, d, p.pans[e.other], e.vel);
     }
     p.qi++;
@@ -1247,8 +1314,8 @@ function smoothed(p) {
 function showMicToast() {
   if (state.mode === "train") { $("micToast").hidden = true; return; }
   $("micToastText").textContent = state.mode === "step"
-    ? "Ce mode marche aussi à l'oreille : écoutez la note, chantez-la, puis passez à la suivante. Pour être guidée en direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur."
-    : "Enregistrez-vous avec le dictaphone du téléphone, puis utilisez « Analyser un enregistrement » : chaque note sera vérifiée. Pour le direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur.";
+    ? "Ce mode marche aussi à l'oreille : écoutez la note, chantez-la, puis passez à la suivante. Pour être guidée en direct, ouvrez le fichier Do Ré Monstres dans Chrome sur un ordinateur."
+    : "Enregistrez-vous avec le dictaphone du téléphone, puis utilisez « Analyser un enregistrement » : chaque note sera vérifiée. Pour le direct, ouvrez le fichier Do Ré Monstres dans Chrome sur un ordinateur.";
   $("micToast").hidden = false;
 }
 
@@ -1689,7 +1756,7 @@ setOthers(parseInt(store.get("pupitre.others") || "0", 10) || 0, false);
 
 
 document.querySelectorAll(".soundSeg button").forEach(b => b.onclick = () => {
-  instrument = b.dataset.sound; store.set("pupitre.sound", instrument);
+  instrument = b.dataset.sound; store.set("pupitre.sound2", instrument);
   syncSound();
   ac();
   if (state.playing?.mode === "listen") { const bt = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(bt), mode: "listen" }); }
@@ -2161,6 +2228,8 @@ const BADGES = [
   { id: "chanter-beau", g: "~", name: "Chanter beau", desc: "Musicalité de 85 sur une phrase juste" },
   { id: "arene", g: "⚔", name: "Première victoire", desc: "Gagner un combat dans l'arène" },
   { id: "reine", g: "♛", name: "Régicide", desc: "Battre la Reine du Fausset" },
+  { id: "legende", g: "✦", name: "Légende", desc: "Obtenir un monstre légendaire" },
+  { id: "brillant", g: "◇", name: "Ça brille", desc: "Obtenir un monstre brillant" },
   { id: "3-jours", g: "3", name: "Régulière", desc: "3 jours d'entraînement d'affilée" },
   { id: "7-jours", g: "7", name: "Une semaine pleine", desc: "7 jours d'affilée" },
 ];
@@ -2263,7 +2332,7 @@ function renderTrain() {
     </div>`;
   };
   $("train").innerHTML = `
-    ${micState === "denied" ? `<div class="reco warn"><div><b>Les exercices ont besoin du micro.</b><span>Sur cette page, il est bloqué. Ouvrez Pupitre en ligne, dans Chrome ou Safari : <a href="https://deftunk.github.io/pupitre/" target="_blank" rel="noopener">deftunk.github.io/pupitre</a></span></div></div>` : ""}
+    ${micState === "denied" ? `<div class="reco warn"><div><b>Les exercices ont besoin du micro.</b><span>Sur cette page, il est bloqué. Ouvre Do Ré Monstres en ligne, dans Chrome ou Safari : <a href="https://deftunk.github.io/pupitre/" target="_blank" rel="noopener">deftunk.github.io/pupitre</a></span></div></div>` : ""}
     <div class="t-head">
       <div class="t-card lvl">
         <span class="lv-badge">${L + 1}</span>
@@ -2282,11 +2351,12 @@ function renderTrain() {
       <button type="button" class="main-btn wide" data-go="${reco.kind}" ${reco.k != null ? `data-k="${reco.k}" data-l="${reco.L}"` : ""}>${ICON.play}Go</button></div>
 
     ${monsterSections()}
+    ${zoo.list.length ? jukeboxSection() : ""}
 
     <section class="t-sec"><h3>Échauffement</h3><p class="sub">Cinq minutes pour décrasser la voix. Sans ça, c'est la casse.</p>
       <div class="ex-grid">
         ${warm("hold", "La note tenue", "Trois notes de votre voix à tenir 5 secondes, bien droites.", prog.warm.hold)}
-        ${warm("echo", "L'écho", "Pupitre joue trois notes, vous les rechantez de mémoire.", prog.warm.echo)}
+        ${warm("echo", "L'écho", "La machine joue trois notes, tu les rechantes de mémoire.", prog.warm.echo)}
       </div></section>
 
     <section class="t-sec"><h3>Les niveaux</h3><p class="sub">70 % de notes justes pour une étoile. En dessous, tu recommences. C'est la règle.</p>
@@ -2332,6 +2402,7 @@ $("train").addEventListener("click", e => {
   else if (go === "hatch") hatchTape(+b.dataset.i);
   else if (go === "active") { zoo.active = b.dataset.id; saveZoo(); renderTrain(); }
   else if (go === "battle") startBattle(+(b.dataset.r ?? b.dataset.k));
+  else if (go === "pull") pullJukebox();
 });
 $("train").addEventListener("change", e => {
   if (e.target.id !== "monName") return;
@@ -2610,6 +2681,8 @@ function complete(pct, info) {
   if (goalHit) addXp(50);
   prof.hist.push({ t: Date.now(), acc: Math.round(pct * 100), kind: ex.type, mus: ex.music ? Math.round(ex.music.score * 100) : undefined });
   prof.hist = prof.hist.slice(-40);
+  info.tokens = tokensFor(pct) + (prof.today.n === 1 ? 2 : 0);
+  prof.tokens = (prof.tokens || 0) + info.tokens;
   saveProf(); saveProg();
   info.mon = monsterReward(pct) + (ex.loot ? `<div class="mon-reward">${ex.loot}</div>` : "");
   showEnd(pct, info, goalHit);
@@ -2677,7 +2750,7 @@ function showEnd(pct, info, goalHit) {
       ${up ? `<span class="levelup">Niveau ${L1 + 1} !</span>` : ""}
       ${ex.type === "battle" ? "" : `<span class="stars big">${starRow(info.stars, 3, info.fresh)}</span>`}
       <h3>${title}</h3><p>${sub}</p>
-      <div class="gain"><b id="xpCount">+0 XP</b>${goalHit ? "<span>Objectif du jour atteint, +50 XP compris</span>" : ""}</div>
+      <div class="gain"><b id="xpCount">+0 XP</b>${info.tokens ? `<span class="tok">+${info.tokens} jeton${info.tokens > 1 ? "s" : ""} pour le juke-box</span>` : ""}${goalHit ? "<span>Objectif du jour atteint, +50 XP compris</span>" : ""}</div>
       <div class="lvl-line"><span>${up ? `Nouveau titre : <b>${cur[1]}</b>` : `Niveau ${L1 + 1} · ${cur[1]}`}</span><span class="xpbar"><i style="width:${Math.round(lvPct * 100)}%"></i></span></div>
       ${ex.newBadges.length ? `<div class="badges mini">${ex.newBadges.map(id => { const b = BADGES.find(x => x.id === id); return `<div class="medal on fresh"><i>${b.g}</i><div><b>${b.name}</b><small>${b.desc}</small></div></div>`; }).join("")}</div>` : ""}
       ${ex.music ? musicBlock(ex.music) : ""}
@@ -3006,7 +3079,7 @@ const TYPES = {
 };
 const STAGES = ["", "Bébé", "Ado", "Ultime"];
 const STAT_LABELS = { pui: "Puissance", prec: "Précision", souf: "Souffle", ryt: "Rythme", style: "Style" };
-const RARITY = { commune: { mult: 1, col: "#C39BD3" }, rare: { mult: 1.25, col: "#00F0FF" }, legendaire: { mult: 1.6, col: "#FFE45E" } };
+const RARITY = { commune: { mult: 1, col: "#C39BD3" }, rare: { mult: 1.2, col: "#00F0FF" }, epique: { mult: 1.4, col: "#C04BFF" }, legendaire: { mult: 1.65, col: "#FFE45E" } };
 const RIVALS = [
   { name: "Wubby", seed: 1101, type: "basse", lvl: 2, notes: 3, tol: 42, bio: "Le plus nul de la ligue. Même lui va te chambrer." },
   { name: "Croc-Synthé", seed: 2207, type: "chrome", lvl: 4, notes: 3, tol: 38, bio: "Mord dans les fausses notes. Littéralement." },
@@ -3046,7 +3119,8 @@ function monsterSvg(m, size = 120, opts = {}) {
   else if (d.body === 2) body = `<path d="M${cx},${cy - s * 1.2} C${cx + s * 0.6},${cy - s * 1.2} ${cx + s * 1.15},${cy + s * 0.3} ${cx + s},${cy + s * 0.85} L${cx - s},${cy + s * 0.85} C${cx - s * 1.15},${cy + s * 0.3} ${cx - s * 0.6},${cy - s * 1.2} ${cx},${cy - s * 1.2} Z"/>`;
   else body = `<rect x="${cx - s * 0.78}" y="${cy - s * 1.25}" width="${s * 1.56}" height="${s * 2.15}" rx="${s * 0.78}"/>`;
   const parts = [];
-  if (st >= 3 || m.rar === "legendaire") parts.push(`<circle cx="${cx}" cy="${cy}" r="${s * 1.75}" fill="none" stroke="${line2}" stroke-width="1.5" stroke-dasharray="4 6" opacity=".7"><animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="9s" repeatCount="indefinite"/></circle>`);
+  if (m.rar === "epique" || m.rar === "legendaire") parts.push([[-1.5, -0.9], [1.45, -1.1], [-1.25, 0.95], [1.5, 0.7]].map(([a, b], i) => `<path d="M${cx + a * s},${cy + b * s - 5} l1.6,3.4 3.4,1.6 -3.4,1.6 -1.6,3.4 -1.6,-3.4 -3.4,-1.6 3.4,-1.6 Z" fill="${m.rar === "legendaire" ? "#FFE45E" : "#E9A8FF"}"><animate attributeName="opacity" values="1;.15;1" dur="${1.2 + i * 0.3}s" repeatCount="indefinite"/></path>`).join(""));
+  if (st >= 3 || m.rar === "legendaire") parts.push(`<circle cx="${cx}" cy="${cy}" r="${s * 1.75}" fill="none" stroke="${m.rar === "legendaire" ? "#FFE45E" : line2}" stroke-width="1.5" stroke-dasharray="4 6" opacity=".7"><animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="9s" repeatCount="indefinite"/></circle>`);
   if (st >= 2 && d.tail) parts.push(`<path d="M${cx + s * 0.8},${cy + s * 0.5} q${s * 0.9},${-s * 0.1} ${s * 0.8},${-s * 0.9} l${s * 0.25},${s * 0.1} l${-s * 0.05},${-s * 0.35}" fill="none" stroke="${line2}" stroke-width="3" stroke-linecap="round"/>`);
   if (st >= 2) {
     if (d.limbs === 0) parts.push(`<ellipse cx="${cx - s * 0.5}" cy="${cy + s * 0.95}" rx="${s * 0.3}" ry="${s * 0.16}" fill="#12001F" stroke="${line}" stroke-width="2.5"/><ellipse cx="${cx + s * 0.5}" cy="${cy + s * 0.95}" rx="${s * 0.3}" ry="${s * 0.16}" fill="#12001F" stroke="${line}" stroke-width="2.5"/>`);
@@ -3076,7 +3150,7 @@ function monsterSvg(m, size = 120, opts = {}) {
     : d.mouth === 1 ? `<path d="M${cx - s * 0.42},${my} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>`
     : `<ellipse cx="${cx}" cy="${my + s * 0.06}" rx="${s * 0.17}" ry="${s * 0.22}" fill="#12001F" stroke="#fff" stroke-width="2"/>`;
   const crown = st === 3 ? `<path d="M${cx - s * 0.35},${top - s * 0.05} l${s * 0.12},${-s * 0.3} l${s * 0.11},${s * 0.18} l${s * 0.12},${-s * 0.3} l${s * 0.12},${s * 0.3} l${s * 0.11},${-s * 0.18} l${s * 0.12},${s * 0.3} Z" fill="#FFE45E"/>` : "";
-  return `<svg class="monster ${opts.cls || ""}" width="${size}" height="${size}" viewBox="0 0 120 120" aria-hidden="true" style="--glow:${line}">
+  return `<svg class="monster ${opts.cls || ""}${m.shiny ? " shiny" : ""}${m.rar === "legendaire" ? " legend" : ""}" width="${size}" height="${size}" viewBox="0 0 120 120" aria-hidden="true" style="--glow:${line}">
     <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${d.hue}, 75%, 30%)"/><stop offset="1" stop-color="hsl(${d.hue2}, 80%, 12%)"/></linearGradient>
     <clipPath id="${uid}c">${body}</clipPath></defs>
     <g transform="rotate(${d.lean} 60 66)">${parts.join("")}
@@ -3136,10 +3210,10 @@ function monsterReward(pct) {
   }
   const gr = gradeOf(pct);
   if ("SABC".includes(gr) && ex.type !== "battle") {
-    const rar = gr === "S" ? "legendaire" : gr === "A" ? "rare" : "commune";
+    const rar = gr === "S" ? "epique" : gr === "A" ? "rare" : "commune";
     const c = { seed: hashStr(`${ex.type}|${ex.k ?? ""}|${Date.now()}|${ex.score}`), type: typeFromRange(), rar, from: ex.title };
     zoo.tapes.push(c);
-    lines.push(`<span class="loot" style="color:${RARITY[rar].col}">Cassette ${rar === "legendaire" ? "légendaire" : rar} obtenue</span>`);
+    lines.push(`<span class="loot" style="color:${RARITY[rar].col}">Cassette ${RAR_LABEL[rar]} obtenue</span>`);
   }
   saveZoo();
   return lines.length ? `<div class="mon-reward">${svg}<div>${lines.map(l => `<span>${l}</span>`).join("")}</div></div>` : "";
@@ -3162,7 +3236,7 @@ function monsterSections() {
       <div class="zoo-main">
         <div class="mon-stage type-${m.type}">${monsterSvg(m, 180, { mood: mood === "sad" ? "sad" : "ok", cls: "idle" })}</div>
         <div class="zoo-info">
-          <span class="k">${TYPES[m.type].name} · ${STAGES[m.stage]}${m.rar !== "commune" ? ` · ${m.rar === "legendaire" ? "légendaire" : "rare"}` : ""}</span>
+          <span class="k">${TYPES[m.type].name} · ${STAGES[m.stage]}${m.rar !== "commune" ? ` · ${RAR_LABEL[m.rar]}` : ""}</span>
           <input class="mon-name" id="monName" value="${esc(m.name)}" maxlength="16" aria-label="Nom du monstre">
           <span class="lv-line">Niveau ${m.lvl} · ${m.wins || 0} victoire${(m.wins || 0) > 1 ? "s" : ""}</span>
           <span class="xpbar"><i style="width:${Math.round(m.xp / need * 100)}%"></i></span>
@@ -3192,14 +3266,14 @@ function hatchShow(m, title) {
   const hz = $("hatch");
   hz.innerHTML = `<div class="h-inner"><div class="h-tape">${cassetteSvg({ type: m.type, rar: m.rar }, 160)}</div>
     <div class="h-mon" hidden>${monsterSvg(m, 200, { cls: "born" })}</div>
-    <h3 hidden>${title}</h3><p hidden><b>${esc(m.name)}</b> · ${TYPES[m.type].name}${m.rar !== "commune" ? ` · ${m.rar === "legendaire" ? "légendaire" : "rare"}` : ""}</p>
+    <h3 hidden>${title}</h3><p hidden><b>${esc(m.name)}</b> · ${TYPES[m.type].name}${m.rar !== "commune" ? ` · ${RAR_LABEL[m.rar]}` : ""}</p>
     <button type="button" class="main-btn wide" hidden>Trop stylé</button></div>`;
   hz.hidden = false;
   ac(); if (ctx) { const t = ctx.currentTime; for (let i = 0; i < 8; i++) blip(300 + i * 60, t + i * 0.13, 0.06, 0.04); }
   setTimeout(() => {
     hz.querySelector(".h-tape").hidden = true;
     hz.querySelectorAll(".h-mon, h3, p, button").forEach(el => el.hidden = false);
-    flash("#FFFFFF", 0.5); shake(14); celebrate(m.rar === "legendaire" ? 160 : 80);
+    flash(RARITY[m.rar]?.col || "#FFFFFF", 0.5); shake(m.rar === "legendaire" ? 22 : 14); celebrate(m.rar === "legendaire" || m.shiny ? 180 : m.rar === "epique" ? 120 : 70);
     if (ctx) fanfare();
   }, 1250);
   hz.querySelector("button").onclick = () => { hz.hidden = true; renderTrain(); };
@@ -3322,7 +3396,7 @@ function endBattle() {
     const first = zoo.league <= ex.ri;
     if (first) {
       zoo.league = ex.ri + 1;
-      zoo.tapes.push({ seed: RIVALS[ex.ri].seed, type: ex.R.type, rar: ex.ri >= 4 ? "legendaire" : ex.ri >= 2 ? "rare" : "commune", from: ex.R.name });
+      zoo.tapes.push({ seed: RIVALS[ex.ri].seed, type: ex.R.type, rar: ex.ri >= 5 ? "legendaire" : ex.ri >= 3 ? "epique" : ex.ri >= 1 ? "rare" : "commune", from: ex.R.name });
       ex.loot = `<span class="loot">Tu récupères la cassette de ${ex.R.name} !</span>`;
       if (ex.ri === RIVALS.length - 1) award("reine");
     }
@@ -3332,14 +3406,237 @@ function endBattle() {
   complete(pct, { stars: 0, fresh: 0, passed: win });
 }
 
+/* ════════ Le juke-box : des jetons gagnés en chantant, des cassettes plus ou moins rares ════════ */
+
+const RAR_LABEL = { commune: "commune", rare: "rare", epique: "épique", legendaire: "légendaire" };
+const PULL_COST = 5;
+const ODDS = [["legendaire", 3], ["epique", 10], ["rare", 27], ["commune", 60]];
+const SHINY_ODDS = 40;
+prof.tokens = prof.tokens ?? 10;
+prof.pity = prof.pity ?? 0;
+prof.pulls = prof.pulls ?? 0;
+
+function rollRarity() {
+  if (prof.pity >= 9) return Math.random() < 0.22 ? "legendaire" : "epique";
+  let r = Math.random() * 100;
+  for (const [k, w] of ODDS) { if (r < w) return k; r -= w; }
+  return "commune";
+}
+function tokensFor(pct) {
+  const g = gradeOf(pct);
+  let n = { S: 5, A: 4, B: 3, C: 2, D: 1, F: 0 }[g];
+  if (ex && ex.type === "battle" && ex.win) n += 3 + ex.ri;
+  return n;
+}
+function pullJukebox() {
+  if (prof.tokens < PULL_COST) return;
+  prof.tokens -= PULL_COST; prof.pulls++;
+  const rar = rollRarity();
+  prof.pity = rar === "epique" || rar === "legendaire" ? 0 : prof.pity + 1;
+  const seed = (Math.random() * 4294967295) >>> 0;
+  const m = birth(seed, pick(Object.keys(TYPES)), rar, "Juke-box");
+  if (Math.random() * SHINY_ODDS < 1) { m.shiny = true; award("brillant"); }
+  if (rar === "legendaire") award("legende");
+  saveZoo(); saveProf();
+  hatchShow(m, m.shiny ? "Brillant !" : rar === "legendaire" ? "Légendaire !" : rar === "epique" ? "Épique !" : rar === "rare" ? "Rare !" : "Nouveau monstre");
+}
+function jukeboxSection() {
+  const counts = Object.fromEntries(Object.keys(RAR_LABEL).map(k => [k, zoo.list.filter(m => m.rar === k).length]));
+  const shinies = zoo.list.filter(m => m.shiny).length;
+  return `<section class="t-sec"><h3>Le juke-box</h3><p class="sub">Chaque exercice rapporte des jetons, de 0 pour un F à 5 pour un S, et les victoires dans l'arène en rapportent encore plus. ${PULL_COST} jetons, une cassette, un monstre.</p>
+    <div class="jukebox">
+      <div class="jb-machine">
+        <div class="jb-lights">${Array.from({ length: 12 }, (_, i) => `<i style="--d:${i * 0.12}s"></i>`).join("")}</div>
+        <span class="jb-tokens"><b>${prof.tokens}</b> jetons</span>
+        <button type="button" class="main-btn wide" data-go="pull" ${prof.tokens >= PULL_COST ? "" : "disabled"}>${ICON.play}Lancer · ${PULL_COST} jetons</button>
+        <span class="jb-pity">${prof.pity >= 9 ? "Prochaine cassette : épique garantie" : `Épique garantie dans ${10 - prof.pity} lancers`}</span>
+      </div>
+      <div class="jb-odds">
+        ${ODDS.slice().reverse().map(([k, w]) => `<div class="odd"><span class="dotr" style="background:${RARITY[k].col}"></span><b>${RAR_LABEL[k]}</b><em>${w} %</em><small>${counts[k]} possédé${counts[k] > 1 ? "s" : ""}</small></div>`).join("")}
+        <div class="odd"><span class="dotr shinydot"></span><b>brillant</b><em>1/${SHINY_ODDS}</em><small>${shinies} possédé${shinies > 1 ? "s" : ""}</small></div>
+      </div>
+    </div></section>`;
+}
+
+/* ════════ Synthés des années 80 : lead, piano FM, nappe, et une boîte à rythmes ════════ */
+
+function synthLead(midi, t, dur, out, vel) {
+  const c = ctx, f = freq(midi), end = t + Math.max(0.12, dur * 0.95);
+  const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 5;
+  lp.frequency.setValueAtTime(f * 1.5, t);
+  lp.frequency.exponentialRampToValueAtTime(Math.min(9000, f * 9), t + 0.035);
+  lp.frequency.exponentialRampToValueAtTime(Math.min(5200, f * 3.4), t + 0.4);
+  const vib = c.createOscillator(), vd = c.createGain();
+  vib.frequency.value = 5.6; vd.gain.setValueAtTime(0, t); vd.gain.linearRampToValueAtTime(9, t + 0.55); vib.connect(vd);
+  const env = c.createGain();
+  const oscs = [["sawtooth", -8, 0.5], ["sawtooth", 8, 0.5], ["square", 0, 0.22], ["sine", -1200, 0.35]].map(([type, dt, a]) => {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = f; o.detune.value = dt; vd.connect(o.detune);
+    g.gain.value = a; o.connect(g).connect(lp); return o;
+  });
+  lp.connect(env).connect(out);
+  const pk = 0.15 * vel;
+  env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(pk, t + 0.01);
+  env.gain.setTargetAtTime(pk * 0.72, t + 0.02, 0.15);
+  env.gain.setValueAtTime(pk * 0.72, end); env.gain.setTargetAtTime(0, end, 0.08);
+  for (const o of [...oscs, vib]) { o.start(t); o.stop(end + 0.7); }
+}
+function fmNote(midi, t, dur, out, vel) {
+  const c = ctx, f = freq(midi), end = t + Math.max(0.2, dur);
+  const car = c.createOscillator(), mod = c.createOscillator(), mi = c.createGain(), env = c.createGain();
+  car.frequency.value = f; mod.frequency.value = f;
+  mi.gain.setValueAtTime(f * 2.4, t); mi.gain.setTargetAtTime(f * 0.35, t, 0.25);
+  mod.connect(mi).connect(car.frequency); car.connect(env).connect(out);
+  const tine = c.createOscillator(), tg = c.createGain();
+  tine.frequency.value = f * 14; tg.gain.setValueAtTime(0.045 * vel, t); tg.gain.exponentialRampToValueAtTime(0.0001, t + 0.14); tine.connect(tg).connect(out);
+  const pk = 0.3 * vel;
+  env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(pk, t + 0.006);
+  env.gain.setTargetAtTime(pk * 0.3, t + 0.01, 0.55);
+  env.gain.setTargetAtTime(0, end, 0.12);
+  for (const o of [car, mod, tine]) { o.start(t); o.stop(end + 0.9); }
+}
+function padNote(midi, t, dur, out, vel) {
+  const c = ctx, f = freq(midi), end = t + Math.max(0.3, dur);
+  const lp = c.createBiquadFilter(), env = c.createGain();
+  lp.type = "lowpass"; lp.frequency.value = Math.min(2600, f * 4); lp.Q.value = 0.7;
+  lp.connect(env).connect(out);
+  const oscs = [-15, -5, 5, 15].map(dt => { const o = c.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.detune.value = dt; o.connect(lp); return o; });
+  const pk = 0.075 * vel;
+  env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(pk, t + Math.min(0.28, dur * 0.4));
+  env.gain.setValueAtTime(pk, end); env.gain.setTargetAtTime(0, end, 0.28);
+  for (const o of oscs) { o.start(t); o.stop(end + 1.6); }
+}
+
+let drumsOn = store.get("pupitre.drums") !== "0";
+let noiseBuf = null;
+const noise = () => {
+  if (!noiseBuf) { noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  return noiseBuf;
+};
+function kick(t, out) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.setValueAtTime(155, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13);
+  g.gain.setValueAtTime(0.55, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+  o.connect(g).connect(out); o.start(t); o.stop(t + 0.42);
+}
+function snare(t, out) {
+  const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noise(); bp.type = "bandpass"; bp.frequency.value = 1900; bp.Q.value = 0.7;
+  g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+  s.connect(bp).connect(g).connect(out); s.start(t); s.stop(t + 0.26);
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.frequency.setValueAtTime(210, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.08);
+  og.gain.setValueAtTime(0.2, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+  o.connect(og).connect(out); o.start(t); o.stop(t + 0.15);
+}
+function hat(t, out, open) {
+  const s = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noise(); hp.type = "highpass"; hp.frequency.value = 7600;
+  g.gain.setValueAtTime(open ? 0.08 : 0.07, t); g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.2 : 0.05));
+  s.connect(hp).connect(g).connect(out); s.start(t); s.stop(t + 0.22);
+}
+function drumPattern(startBeat, end, bpb) {
+  const ev = [];
+  for (let b = Math.ceil(startBeat * 2) / 2; b < end - 1e-6; b += 0.5) {
+    const pos = ((b % bpb) + bpb) % bpb, whole = Math.abs(pos - Math.round(pos)) < 1e-6;
+    let k = "h";
+    if (whole) {
+      const beat = Math.round(pos);
+      if (bpb === 3) k = beat === 0 ? "kh" : beat === 2 ? "sh" : "h";
+      else if (bpb === 4) k = beat % 2 === 0 ? "kh" : "sh";
+      else k = beat === 0 ? "kh" : beat === bpb - 1 ? "sh" : "h";
+    } else if (pos > bpb - 0.6) k = "ho";
+    ev.push({ beat: b, drum: k });
+  }
+  return ev;
+}
+
+/* ════════ Le compte joueur : un pseudo, une fiche, une sauvegarde à transférer ════════ */
+
+prof.player = prof.player || null;
+function ensurePlayer(name) {
+  if (!prof.player) prof.player = { id: Math.random().toString(36).slice(2, 10), name: "", created: Date.now() };
+  if (name != null) prof.player.name = name.trim().slice(0, 18);
+  if (!prof.player.name) prof.player.name = "Recrue-" + prof.player.id.slice(0, 4).toUpperCase();
+  saveProf();
+  return prof.player;
+}
+function saveCode() {
+  const data = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("pupitre.")) data[k] = localStorage.getItem(k); } } catch {}
+  return "DRM1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+function loadCode(code) {
+  const raw = String(code || "").trim();
+  if (!raw.startsWith("DRM1:")) throw new Error("format");
+  const data = JSON.parse(decodeURIComponent(escape(atob(raw.slice(5)))));
+  if (!data || typeof data !== "object") throw new Error("format");
+  try {
+    const old = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("pupitre.")) old.push(k); }
+    old.forEach(k => localStorage.removeItem(k));
+    for (const [k, v] of Object.entries(data)) if (k.startsWith("pupitre.")) localStorage.setItem(k, v);
+  } catch { throw new Error("stockage"); }
+}
+function renderAccount() {
+  const p = ensurePlayer(), L = levelOf(prof.xp);
+  const wins = zoo.list.reduce((s, m) => s + (m.wins || 0), 0), act = activeMon();
+  $("accountBody").innerHTML = `
+    <div class="acc-card">
+      <div class="acc-ava">${act ? monsterSvg(act, 96, { cls: "idle" }) : ""}</div>
+      <div class="acc-id"><span class="k">Joueur</span><input id="accName" value="${esc(p.name)}" maxlength="18" aria-label="Pseudo">
+        <span class="acc-lv">Niveau ${L + 1} · ${LEVELS[L][1]}</span></div>
+    </div>
+    <div class="acc-stats">
+      <div><b>${prof.xp}</b><span>XP</span></div><div><b>${prof.tokens}</b><span>jetons</span></div>
+      <div><b>${zoo.list.length}</b><span>monstres</span></div><div><b>${wins}</b><span>victoires</span></div>
+      <div><b>${prof.badges.length}</b><span>trophées</span></div><div><b>${prof.streak || 0}</b><span>jours de série</span></div>
+    </div>
+    <section><h3>Transférer ma partie</h3>
+      <p class="sub">Ta partie vit dans ce navigateur. Pour la passer du téléphone au Mac, copie ton code ici, envoie-le-toi, et colle-le sur l'autre appareil.</p>
+      <div class="row"><button type="button" class="pill primary" id="accCopy">Copier mon code</button><span class="status" id="accCopied"></span></div>
+      <textarea id="accCode" rows="4" placeholder="Colle ici un code de sauvegarde (il commence par DRM1:)" spellcheck="false"></textarea>
+      <div class="row"><button type="button" class="pill" id="accLoad">Charger ce code</button><span class="err" id="accErr" hidden></span></div>
+    </section>
+    <section><h3>En ligne</h3>
+      <p class="sub">Les combats entre joueurs et la sauvegarde automatique dans le nuage demandent un serveur de jeu. Ton pseudo et ton identifiant de joueur sont déjà prêts pour ça.</p>
+      <div class="row"><button type="button" class="pill" disabled>Combat entre joueurs · bientôt</button><span class="k">ID ${p.id.toUpperCase()}</span></div>
+    </section>`;
+  $("accName").onchange = e => { ensurePlayer(e.target.value); renderAccount(); };
+  $("accCopy").onclick = async () => {
+    const code = saveCode(), out = $("accCopied");
+    try { await navigator.clipboard.writeText(code); out.textContent = "Copié. Envoie-le-toi."; }
+    catch { $("accCode").value = code; $("accCode").select(); out.textContent = "Sélectionné : copie-le à la main."; }
+  };
+  let armed = false;
+  $("accLoad").onclick = () => {
+    const err = $("accErr");
+    if (!armed) { armed = true; $("accLoad").textContent = "Sûr ? Ça remplace la partie de cet appareil"; return; }
+    try { loadCode($("accCode").value); location.reload(); }
+    catch (e) { err.hidden = false; err.textContent = e.message === "stockage" ? "Ce navigateur refuse l'enregistrement." : "Ce code n'est pas valide. Il doit commencer par DRM1:."; armed = false; $("accLoad").textContent = "Charger ce code"; }
+  };
+}
+function openAccount() { stopPlayback(); renderAccount(); $("accountBack").hidden = false; }
+$("openAccount").onclick = openAccount;
+$("closeAccount").onclick = () => { $("accountBack").hidden = true; if (state.mode === "train" && !ex) renderTrain(); };
+$("accountBack").addEventListener("click", e => { if (e.target === e.currentTarget) $("closeAccount").click(); });
+
+document.querySelectorAll(".drumSeg button").forEach(b => b.onclick = () => {
+  drumsOn = b.dataset.drums === "1"; store.set("pupitre.drums", drumsOn ? "1" : "0");
+  document.querySelectorAll(".drumSeg button").forEach(x => x.setAttribute("aria-pressed", (x.dataset.drums === "1") === drumsOn));
+  if (state.playing?.mode === "listen") { const bt = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(bt), mode: "listen" }); }
+});
+document.querySelectorAll(".drumSeg button").forEach(x => x.setAttribute("aria-pressed", (x.dataset.drums === "1") === drumsOn));
+
 /* ══ Écran titre ══ */
 function openTitle() {
   const v = state.score.parts[state.voice]?.name;
   $("titleSub").textContent = `${state.score.title}${v ? ` · voix ${v}` : ""}`;
+  $("titleName").value = prof.player?.name || "";
   $("titleScreen").classList.remove("gone");
 }
 $("titleScreen").addEventListener("click", e => {
   const b = e.target.closest("[data-start]"); if (!b) return;
+  ensurePlayer($("titleName").value);
   ac();
   if (ctx) { const t = ctx.currentTime; blip(440, t, 0.06); blip(880, t + 0.06, 0.08); blip(1320, t + 0.14, 0.12); }
   $("titleScreen").classList.add("gone");
@@ -3347,7 +3644,7 @@ $("titleScreen").addEventListener("click", e => {
   const m = b.dataset.start;
   if (state.mode !== m) setMode(m); else if (m === "train") renderTrain();
 });
-document.addEventListener("keydown", e => { if (!$("titleScreen").classList.contains("gone") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); $("titleScreen").querySelector("[data-start]").click(); } });
+document.addEventListener("keydown", e => { if (!$("titleScreen").classList.contains("gone") && (e.key === "Enter" || (e.key === " " && document.activeElement?.tagName !== "INPUT"))) { e.preventDefault(); $("titleScreen").querySelector("[data-start]").click(); } });
 $("openTitle").onclick = () => { stopPlayback(); openTitle(); };
 
 /* ════════ Démarrage ════════ */
