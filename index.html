@@ -1023,7 +1023,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <button type="button" class="t-acc" id="titleAcc" hidden></button>
     <span class="t-sub" id="titleSub">Carol of the Bells</span>
     <nav class="t-menu">
-      <button type="button" data-start="train" style="--d:0s">Jouer<small>le mode histoire, chapitre par chapitre</small></button>
+      <button type="button" data-start="train" style="--d:0s">Jouer<small>l'aventure reprend là où tu l'as laissée</small></button>
       <button type="button" data-start="intro" style="--d:.3s">L'histoire<small>revoir la cinématique d'ouverture</small></button>
     </nav>
     <span class="t-foot">CASQUE RECOMMANDÉ · LES FAUSSES NOTES SERONT PUNIES</span>
@@ -3647,7 +3647,7 @@ async function startBattle(ri, free = false) {
   setTimeout(nextTurn, 1400);
 }
 function updateHp() {
-  if (!ex || ex.type !== "battle") return;
+  if (!ex || ex.type !== "battle" || !$("meHp")) return;
   $("meHp").style.width = Math.max(0, ex.myHp / ex.myMax * 100) + "%";
   $("foeHp").style.width = Math.max(0, ex.foeHp / ex.foeMax * 100) + "%";
 }
@@ -4449,12 +4449,7 @@ function worldLayout() {
   W_.dpr = Math.min(2, devicePixelRatio || 1);
   W_.cv.width = Math.round(W_.W * W_.dpr); W_.cv.height = Math.round(W_.H * W_.dpr);
   const H = W_.H, gY = W_.gY = Math.round(H * (W_.W < W_.H ? 0.64 : 0.72));
-  let x = 260; W_.places = PLACES.map((p, i) => {
-    const w = p.plaza ? 330 : 250 + (i % 3) * 30, h = Math.min(H * 0.58, (p.plaza ? 0.42 : 0.36 + ((i * 37) % 5) * 0.035) * H + 40);
-    const o = Object.assign({}, p, { x, w, h, door: x + w / 2 });
-    x += w + 170; return o;
-  });
-  W_.worldW = x + 120;
+  advLayout();
   W_.far = []; let fx = -200; const rnd = rngOf(86);
   while (fx < W_.worldW * 0.35 + W_.W + 400) { const w = 50 + rnd() * 110, h = H * (0.18 + rnd() * 0.3); W_.far.push({ x: fx, w, h, win: rnd() }); fx += w + rnd() * 18; }
   W_.stars = Array.from({ length: 90 }, () => ({ x: rnd() * 1.3, y: rnd() * 0.55, r: 0.4 + rnd() * 1.4, ph: rnd() * 6.3 }));
@@ -4495,7 +4490,7 @@ function worldCast() {
   const others = zoo.list.filter(o => o.id !== m.id).slice(0, 10);
   W_.crew = others.map((o, i) => {
     const old = W_.crew.find(c => c.m.id === o.id);
-    return old ? Object.assign(old, { m: o }) : { m: o, x: 200 + ((i * 431) % (W_.worldW - 300)), tx: null, wait: 1000 + i * 700, ph: Math.random() * 6, dir: 1, z: (i % 3) * 7 - 7, say: "", sayT: 0, hop: 0 };
+    return old ? Object.assign(old, { m: o }) : { m: o, x: (W_.me?.x || 300) - 80 * (i + 1), tx: null, wait: 1000 + i * 700, ph: Math.random() * 6, dir: 1, z: (i % 3) * 7 - 7, say: "", sayT: 0, hop: 0 };
   });
 }
 function openWorld() {
@@ -4571,10 +4566,10 @@ function worldHud() {
     <div class="w-right"><span class="w-tok">${prof.tokens ?? 0}<small>jetons</small></span>
       <button type="button" class="w-btn" data-w="sheet">${esc(state.score.parts[state.voice]?.name || "Voix")}</button>
       <button type="button" class="w-btn" data-w="account">${cloud.user ? '<i class="dot on"></i>' : cloudReady() ? '<i class="dot"></i>' : ""}${esc(prof.player?.name || "Compte")}</button>
-      <button type="button" class="w-btn" data-w="storymap">Histoire</button>
+      <button type="button" class="w-btn" data-w="storymap">Carte</button>
       <button type="button" class="w-btn" data-w="title">Menu</button></div>
-    ${storyNext ? `<div class="w-mission story"><span class="k">Histoire · chapitre ${storyIdx + 1}</span><b>${esc(storyNext.title)}</b><small>Doc Vinyle t'attend. La suite de l'histoire est par ici.</small>
-      <button type="button" class="main-btn wide" data-w="story">${ICON.play}Go</button></div>`
+    ${storyNext ? `<div class="w-mission story"><span class="k">Objectif · chapitre ${storyIdx + 1}</span><b>${esc(storyNext.title)}</b><small>${esc(objectiveText())}</small>
+      <button type="button" class="main-btn wide" data-w="goal">${ICON.play}Y aller</button></div>`
     : `<div class="w-mission"><span class="k">Mission</span><b>${esc(missionNow.label)}</b><small>${esc(missionNow.why)}${mp ? ` · ${mp.name}` : ""}</small>
       <button type="button" class="main-btn wide" data-w="mission">${ICON.play}Go</button></div>`}`;
 }
@@ -4585,6 +4580,7 @@ $("wHud").addEventListener("click", e => {
   else if (w === "account") openAccount();
   else if (w === "title") openTitle();
   else if (w === "storymap") openStory();
+  else if (w === "goal") { if (ADV.cur) goToSpot(ADV.cur); else openStory(); }
   else if (w === "story") { const nx = nextChapter(); if (nx) playChapter(nx); else openStory(); }
   else if (w === "mission" && missionNow) {
     const mp = W_.places.find(p => p.id === MISSION_PLACE[missionNow.kind]);
@@ -4596,7 +4592,7 @@ $("wHud").addEventListener("click", e => {
     else if (k === "full") startFull(); else if (k === "battle") startBattle(missionNow.k);
   }
 });
-$("wPrompt").onclick = () => { const n = W_.near; if (!n) return; if (n.place) enterPlace(n.place); else if (n.crew) swapTo(n.crew); };
+$("wPrompt").onclick = () => { const n = W_.near; if (!n) return; if (n.spot) interactSpot(n.spot); else if (n.place) enterPlace(n.place); else if (n.crew) swapTo(n.crew); };
 function swapTo(cr) {
   zoo.active = cr.m.id; saveZoo();
   const me = W_.me; worldCast(); W_.me.x = cr.x; cr.x = me.x;
@@ -4618,8 +4614,10 @@ $("wcv").addEventListener("pointerdown", e => {
   const r = W_.cv.getBoundingClientRect(), x = e.clientX - r.left + W_.cam, y = e.clientY - r.top;
   const cr = W_.crew.find(c => Math.abs(c.x - x) < W_.size * 0.4 && y > W_.gY - W_.size * 0.9 && y < W_.gY + 40);
   if (cr) { cr.hop = 1; cr.say = pick(["Hé, emmène-moi !", "Moi aussi je veux chanter !", "Tu m'oublies ?", "J'ai faim de notes.", "Je suis prêt pour l'arène."]); cr.sayT = performance.now(); W_.me.tx = cr.x - W_.size * 0.6; W_.me.auto = null; return; }
+  const sp = ADV.spots.find(q => Math.abs(q.x - x) < 130 && q.x < ADV.barrierX && y > W_.gY - 300 && y < W_.gY + 30);
+  if (sp) { goToSpot(sp); store.set("drm.walked", "1"); return; }
   const p = W_.places.find(q => x > q.x && x < q.x + q.w && y > W_.gY - q.h - 40 && y < W_.gY + 20);
-  if (p) { W_.me.tx = p.door; W_.me.auto = p; } else { W_.me.tx = x; W_.me.auto = null; }
+  if (p) { W_.me.tx = p.door; W_.me.auto = p; } else { W_.me.tx = Math.min(x, ADV.barrierX - 60); W_.me.auto = null; }
   store.set("drm.walked", "1"); W_.hintUntil = 0;
 });
 
@@ -4637,28 +4635,26 @@ function worldUpdate(now, dt) {
     if (W_.keys.arrowleft || W_.keys.q || W_.keys.a) v = -1;
     if (W_.keys.arrowright || W_.keys.d) v = 1;
     if (v) { store.set("drm.walked", "1"); W_.hintUntil = 0; }
-    if (!v && me.tx != null) { const d = me.tx - me.x; if (Math.abs(d) < 6) { me.tx = null; if (me.auto) { enterPlace(me.auto); me.auto = null; } } else v = Math.sign(d); }
+    if (!v && me.tx != null) { const d = me.tx - me.x; if (Math.abs(d) < 8) { me.tx = null; if (me.auto) { const a = me.auto; me.auto = null; if (a.spot) interactSpot(a.spot); else enterPlace(a); } } else v = Math.sign(d); }
   }
-  const sp = 0.36 * dt;
-  me.x = Math.max(80, Math.min(W_.worldW - 80, me.x + v * sp));
+  const sp = 0.36 * dt * (me.tx != null && Math.abs(me.tx - me.x) > 700 ? 3.2 : 1);
+  me.x = Math.max(80, Math.min(W_.worldW - 80, ADV.barrierX - 60, me.x + v * sp));
   me.walking = !!v; if (v) { me.dir = v; me.ph += dt * 0.016; }
   me.hop = Math.max(0, me.hop - dt * 0.0025);
   const target = me.x - W_.W * 0.42;
   W_.cam += (Math.max(0, Math.min(W_.worldW - W_.W, target)) - W_.cam) * Math.min(1, dt * 0.006);
   if (W_.worldW < W_.W) W_.cam = (W_.worldW - W_.W) / 2;
-  for (const c of W_.crew) {
-    c.hop = Math.max(0, c.hop - dt * 0.003);
-    if (c.tx == null) { c.wait -= dt; if (c.wait <= 0) { c.tx = Math.max(120, Math.min(W_.worldW - 120, c.x + (Math.random() - 0.5) * 700)); } }
-    else { const d = c.tx - c.x; if (Math.abs(d) < 4) { c.tx = null; c.wait = 1500 + Math.random() * 4000; } else { c.dir = Math.sign(d); c.x += c.dir * 0.12 * dt; c.ph += dt * 0.012; } }
-  }
+  for (const c of W_.crew.slice(3)) { c.hop = Math.max(0, c.hop - dt * 0.003); c.tx = null; c.x = (W_.places[0]?.door || 300) + 60 + W_.crew.indexOf(c) * 50; }
+  W_.crew.forEach(c => c.hop = Math.max(0, c.hop - dt * 0.003));
+  advUpdate(now, dt);
   let near = null;
   if (!busy) {
-    for (const p of W_.places) if (Math.abs(me.x - p.door) < 70) near = { place: p, label: `Entrer · ${p.name}`, col: p.col };
-    if (!near) for (const c of W_.crew) if (Math.abs(me.x - c.x) < W_.size * 0.75) near = { crew: c, label: `Sortir avec ${c.m.name}`, col: "#00F5D4" };
+    for (const s of ADV.spots) if (Math.abs(me.x - s.x) < 120 && s.x < ADV.barrierX) near = { spot: s, label: spotAction(s), col: s.done ? "#00F5D4" : "#FFE45E" };
+    if (!near) for (const p of W_.places) if (Math.abs(me.x - p.door) < 70) near = { place: p, label: `Entrer · ${p.name}`, col: p.col };
   }
-  if ((near?.place || near?.crew) !== (W_.near?.place || W_.near?.crew)) {
+  if ((near?.place || near?.crew || near?.spot) !== (W_.near?.place || W_.near?.crew || W_.near?.spot)) {
     W_.near = near; const pr = $("wPrompt");
-    pr.hidden = !near; if (near) { pr.style.top = (W_.gY + 46) + "px"; pr.innerHTML = `<b>${esc(near.label)}</b><small>${near.place ? esc(near.place.sub) : "Il te suivra partout"}</small><kbd>Entrée</kbd>`; pr.style.setProperty("--pc", near.col); }
+    pr.hidden = !near; if (near) { pr.style.top = (W_.gY + 46) + "px"; pr.innerHTML = `<b>${esc(near.label)}</b><small>${near.spot ? `Chapitre ${near.spot.i + 1} · ${esc(ACTS[near.spot.c.act].split(" · ")[1])}` : near.place ? esc(near.place.sub) : "Il te suivra partout"}</small><kbd>Entrée</kbd>`; pr.style.setProperty("--pc", near.col); }
     if (near && ctx) blip(1320, ctx.currentTime, 0.04, 0.025);
   }
   if (now - me.sayAt > 9000) { me.say = monsterLine(me.m); me.sayAt = now; }
@@ -4685,8 +4681,9 @@ function worldDraw(now, dt) {
   for (const f of W_.far) { const x = f.x - cam * 0.35; if (x > W || x + f.w < 0) continue; c.fillRect(x, gY - f.h, f.w, f.h); }
   c.fillStyle = "rgba(255,46,136,.22)";
   for (const f of W_.far) { const x = f.x - cam * 0.35; if (x > W || x + f.w < 0) continue; for (let k = 0; k < 4; k++) if ((f.win * 10 + k) % 3 < 1) c.fillRect(x + 8 + k * 11, gY - f.h + 14 + k * 9, 4, 3); }
+  advDrawBack(c, now, cam, gY, pulse);
   // bâtiments
-  const mp = missionNow && W_.places.find(p => p.id === MISSION_PLACE[missionNow.kind]);
+  const mp = !ADV.cur && missionNow && W_.places.find(p => p.id === MISSION_PLACE[missionNow.kind]);
   W_.places.forEach((p, i) => {
     const x = p.x - cam; if (x > W + 60 || x + p.w < -60) return;
     c.drawImage(W_.bldg[i], x, gY - p.h - 60, W_.bldg[i].width / d, W_.bldg[i].height / d);
@@ -4701,6 +4698,7 @@ function worldDraw(now, dt) {
     c.restore();
     c.save(); c.font = "26px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillStyle = p.col; c.shadowColor = p.col; c.shadowBlur = 14;
     c.globalAlpha = 0.6 + pulse * 0.4; c.fillText(p.glyph, x + p.w / 2, gY - 120); c.restore();
+    if (p.x > ADV.barrierX) { c.fillStyle = "rgba(8,6,12,.78)"; c.fillRect(x - 4, gY - p.h - 64, p.w + 8, p.h + 66); }
     if (p === mp) {
       const ay = gY - p.h - 30 - Math.abs(Math.sin(now / 260)) * 16;
       c.save(); c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 20;
@@ -4753,6 +4751,7 @@ function worldDraw(now, dt) {
       if (me.say && now - me.sayAt < 4200 && !tr && !W_.near) speechBubble(c, x, gY + 26 - S * 0.95 - lift, me.say);
     }
   }
+  advDrawFront(c, now, cam, gY, dt);
   // aide
   if (W_.hintUntil > now && !W_.near) {
     c.save(); c.font = "20px 'VT323', monospace"; c.textAlign = "center"; c.fillStyle = `rgba(0,240,255,${0.6 + 0.4 * Math.sin(now / 300)})`;
@@ -5507,7 +5506,9 @@ document.addEventListener("keydown", e => {
 function storyBackdrop(place) {
   state.lairView = "home";
   if (state.mode !== "train") setMode("train"); else renderTrain();
-  if (!W_.open) openWorld();
+  if (!W_.open) openWorld(); else { worldLayout(); worldHud(); }
+  const spot = ADV.spots.find(q => q.c.id === place);
+  if (spot && W_.me) { W_.me.x = Math.min(spot.x - 150, ADV.barrierX - 60); W_.me.tx = null; W_.me.auto = null; W_.me.dir = 1; W_.cam = Math.max(0, Math.min(W_.worldW - W_.W, spot.x - W_.W * 0.55)); $("world").classList.add("in-story"); return; }
   const p = W_.places.find(q => q.id === place) || W_.places.find(q => q.id === "home");
   if (p && W_.me) { W_.me.x = p.door; W_.me.tx = null; W_.me.auto = null; W_.cam = Math.max(0, Math.min(W_.worldW - W_.W, p.door - W_.W * 0.5)); }
   $("world").classList.add("in-story");
@@ -5521,7 +5522,7 @@ function openStory(focusId) {
   let html = `<div class="st-top"><div><span class="k">Partie ${partNo()} · ${esc(state.score.title)}</span><h2>${SP().finished ? "Synthville chante juste" : esc(ACTS[nx ? nx.act : 2])}</h2>
       <span class="st-prog"><i style="width:${Math.round(SP().done.filter(id => L.some(c => c.id === id)).length / L.length * 100)}%"></i></span>
       <small>${SP().done.filter(id => L.some(c => c.id === id)).length} chapitres sur ${L.length}</small></div>
-    <div class="st-btns"><button type="button" class="w-btn" data-st="world">Quartier libre</button><button type="button" class="w-btn" data-st="account">${cloud.user ? '<i class="dot on"></i>' : ""}${esc(prof.player?.name || "Compte")}</button><button type="button" class="w-btn" data-st="title">Menu</button></div></div>`;
+    <div class="st-btns"><button type="button" class="w-btn" data-st="world">Retour sur la route</button><button type="button" class="w-btn" data-st="account">${cloud.user ? '<i class="dot on"></i>' : ""}${esc(prof.player?.name || "Compte")}</button><button type="button" class="w-btn" data-st="title">Menu</button></div></div>`;
   if (nx) {
     const isBoss = nx.boss, who = isBoss ? rivalMon(nx.r) : null;
     html += `<button type="button" class="st-next${isBoss ? " boss" : ""}" data-play="${nx.id}">
@@ -5550,7 +5551,7 @@ $("storyMap").addEventListener("click", e => {
   const b = e.target.closest("[data-st]");
   if (b) {
     const w = b.dataset.st;
-    if (w === "world") { closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }
+    if (w === "world") backToRoad();
     else if (w === "account") openAccount(); else if (w === "title") openTitle(); else if (w === "sheet") openSheet();
     return;
   }
@@ -5562,7 +5563,7 @@ $("storyMap").addEventListener("click", e => {
 /* ════════ Un chapitre : dialogue, épreuve, dénouement ════════ */
 function playChapter(c, replay = false) {
   const L = storyChapters(), i = chapterIndex(L, c.id);
-  closeStoryMap(); storyBackdrop(c.place);
+  closeStoryMap(); storyBackdrop(c.id);
   const lines = c.pre.slice();
   if (c.kind === "starter") {
     if (zoo.list.length) lines.push(["doc", "Ah, mais tu as déjà un monstre. {m}, c'est ça ? Joli nom. Un peu ridicule.", "smile"]);
@@ -5605,21 +5606,271 @@ function storyResult(run, passed) {
   else { SP().fails[c.id] = (SP().fails[c.id] || 0) + 1; }
   if (c.id === "epilogue" && passed) SP().finished = true;
   saveStory();
-  closeStoryMap(); storyBackdrop(c.place);
+  closeStoryMap(); storyBackdrop(c.id);
   const lines = (passed ? c.win : c.fail || []).slice();
   if (first && c.gift) lines.push({ run: next => { zoo.tapes.push({ seed: (Date.now() ^ 0x5eed) >>> 0, type: pick(["neon", "chrome", "basse"]), rar: c.gift.rar, from: "Doc Vinyle" }); saveZoo(); hatchTape(zoo.tapes.length - 1); $("hatch").querySelector("button").onclick = () => { $("hatch").hidden = true; next(); }; } });
   if (first && c.id !== "epilogue") lines.push(["narr", "+3 jetons pour le juke-box. Chapitre terminé."]);
   const nx = nextChapter(L);
   if (passed) {
-    if (nx) lines.push({ choice: [[`Chapitre suivant : ${nx.title}`, () => { vnEnd(); playChapter(nx); }, "primary", "▶ "], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
-    else lines.push({ choice: [["Explorer le quartier", () => { vn.done = null; vnEnd(); closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }, "primary"], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
+    lines.push({ choice: [[nx ? "Continuer l'aventure" : "Explorer Synthville", () => backToRoad(c.id, first), "primary", "▶ "], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
   } else {
-    const opts = [["Réessayer", () => { vnEnd(); launchChapter(c, run.replay); }, "primary", "↻ "], ["Revoir le chapitre", () => { vnEnd(); playChapter(c, run.replay); }], ["La carte", () => { vn.done = null; vnEnd(); openStory(); }]];
-    if ((SP().fails[c.id] || 0) >= 3 && !SP().done.includes(c.id)) opts.push(["Passer ce chapitre", () => { vnEnd(); SP().done.push(c.id); saveStory(); openStory(); }]);
+    const opts = [["Réessayer", () => { vnEnd(); launchChapter(c, run.replay); }, "primary", "↻ "], ["Revoir le chapitre", () => { vnEnd(); playChapter(c, run.replay); }], ["Retour sur la route", () => backToRoad(c.id, false)]];
+    if ((SP().fails[c.id] || 0) >= 3 && !SP().done.includes(c.id)) opts.push(["Passer ce chapitre", () => { SP().done.push(c.id); saveStory(); backToRoad(c.id, true); }]);
     lines.push({ choice: opts });
   }
-  vnPlay(lines, () => openStory(), { boss: c.boss && !passed });
+  vnPlay(lines, () => backToRoad(c.id, first), { boss: c.boss && !passed });
   if (passed && c.boss) { celebrate(120); flash("#FFE45E", 0.4); if (ctx) fanfare(); }
+}
+
+/* ════════ L'aventure : une seule route à travers Synthville, du Repaire au Néon Club ════════
+   Chaque chapitre est un lieu sur la route. Un mur de parasites des Muets barre le passage
+   tant que le chapitre n'est pas gagné, et la ville se rallume derrière le joueur. */
+
+const SIDE_AFTER = { reveil: "box", oreille: "listen", ph0: "step", boss0: "fight", attaques: "train", filage: "sing" };
+const ADV = { spots: [], gates: [], decor: [], cits: [], notes: [], barrierX: Infinity, cur: null, dissolve: null, fx: [], arrowT: 0 };
+const docCache = new Map();
+function docSprite(mood = "talk") {
+  let s = docCache.get(mood);
+  if (!s) { s = new Image(); s.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(docSvg(mood, 260).replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ')); docCache.set(mood, s); }
+  return s.complete && s.naturalWidth ? s : null;
+}
+const CIT_DARK = ["Depuis que les Muets sont là, je chante en mi bémol faux.", "Ma radio ne fait plus que des larsens.", "Tu vas nous débarrasser des Muets ?", "Chut… ils écoutent tout.", "J'avais une belle voix, avant. Enfin je crois.", "Les néons se sont éteints un par un."];
+const CIT_LIT = ["Merci ! J'ai retrouvé ma note préférée.", "La rue chante de nouveau !", "Doc dit que tu as une sacrée oreille.", "Ding dong ! Ça me reprend.", "Les néons sont revenus. Et mes cheveux aussi.", "Tu repasses quand tu veux, star."];
+
+/* ── La route : le Repaire, puis les chapitres, avec les bâtiments bonus entre eux ── */
+function advLayout() {
+  const L = storyChapters(), done = SP().done, H = W_.H, gY = W_.gY, rnd = rngOf(1986);
+  const place = (id, x) => {
+    const p = PLACES.find(q => q.id === id), i = PLACES.indexOf(p);
+    const w = p.plaza ? 330 : 250 + (i % 3) * 30, h = Math.min(H * 0.58, (p.plaza ? 0.42 : 0.36 + ((i * 37) % 5) * 0.035) * H + 40);
+    return Object.assign({}, p, { x, w, h, door: x + w / 2 });
+  };
+  W_.places = []; ADV.spots = []; ADV.gates = []; ADV.cits = []; ADV.notes = [];
+  let x = 160;
+  W_.places.push(place("home", x)); x += 330 + 220;
+  let act = 0;
+  L.forEach((c, i) => {
+    if (c.act !== act) { act = c.act; ADV.gates.push({ x: x + 40, act }); x += 300; }
+    ADV.cits.push({ x: x - 120, seed: (i * 7919 + 77) >>> 0, said: 0 });
+    ADV.notes.push({ x: x - 250, key: `${c.id}:a` }, { x: x - 30, key: `${c.id}:b` });
+    const sx = x + 140;
+    ADV.spots.push({ c, i, x: sx, done: done.includes(c.id) });
+    x = sx + 300;
+    const side = SIDE_AFTER[c.id];
+    if (side) { const p = place(side, x); W_.places.push(p); x += p.w + 200; }
+  });
+  W_.worldW = x + 300;
+  ADV.cur = ADV.spots.find(s => !s.done) || null;
+  ADV.barrierX = ADV.cur ? ADV.cur.x + 170 : Infinity;
+  ADV.decor = []; let dx = 0;
+  while (dx < W_.worldW) { const w = 60 + rnd() * 120, h = H * (0.2 + rnd() * 0.32); ADV.decor.push({ x: dx, w, h, win: rnd(), roof: rnd() }); dx += w + 10 + rnd() * 40; }
+  ADV.cits.forEach(cz => { const r = rngOf(cz.seed), type = ["neon", "chrome", "basse"][Math.floor(r() * 3)]; cz.m = { id: "cit" + cz.seed, name: nameOf(cz.seed), type, stage: r() < 0.3 ? 2 : 1, dna: dnaOf(cz.seed, type) }; });
+}
+const spotLit = x => x < ADV.barrierX;
+const actAt = x => { let a = 0; for (const gt of ADV.gates) if (x >= gt.x) a = gt.act; return a; };
+
+/* Ce que l'on fait à chaque lieu, en une ligne */
+function spotAction(s) {
+  const c = s.c;
+  if (s.done) return `Rejouer · ${c.title}`;
+  if (c.kind === "battle") return `Affronter ${RIVALS[c.r].name}`;
+  if (c.kind === "phrase") return `Entrer · ${c.title.split(" · ")[0]}`;
+  if (c.kind === "full") return "Monter sur scène";
+  if (c.kind === "none") return "Retrouver Doc";
+  return "Parler à Doc Vinyle";
+}
+function objectiveText() {
+  const s = ADV.cur; if (!s) return "Synthville chante juste. Explore, collectionne, rejoue tes salles préférées.";
+  const c = s.c;
+  if (c.kind === "battle") return `Va affronter ${RIVALS[c.r].name}, plus loin sur la route.`;
+  if (c.kind === "phrase") return `Ouvre la ${c.title.split(" · ")[0].toLowerCase()} du Studio 86.`;
+  if (c.kind === "starter") return "Va voir Doc Vinyle.";
+  if (c.kind === "full") return "Le grand filage t'attend sur la grande scène.";
+  if (["hold", "echo", "attack"].includes(c.kind)) return "Doc t'attend à la roulotte de la Cantine.";
+  if (c.kind === "none") return "Rejoins Doc devant le Néon Club.";
+  return "Doc Vinyle t'attend plus loin.";
+}
+function goToSpot(s, autoplay = true) {
+  if (!s || !W_.me) return;
+  W_.me.tx = s.x - 70; W_.me.auto = autoplay ? { spot: s } : null; W_.hintUntil = 0;
+}
+function interactSpot(s) { playChapter(s.c, s.done); }
+
+/* Revenir sur la route après un chapitre : la caméra sur le lieu, le mur qui se dissout */
+function backToRoad(id, justDone) {
+  vn.done = null; if (vn.on) vnEnd();
+  closeStoryMap();
+  state.lairView = "home";
+  if (state.mode !== "train") setMode("train"); else renderTrain();
+  if (!W_.open) openWorld(); else { worldLayout(); worldHud(); }
+  $("world").classList.remove("in-story");
+  const s = ADV.spots.find(q => q.c.id === id) || ADV.cur || ADV.spots[0];
+  if (s && W_.me) { W_.me.x = s.x + (justDone ? 90 : -90); W_.me.tx = null; W_.me.auto = null; W_.cam = Math.max(0, Math.min(W_.worldW - W_.W, W_.me.x - W_.W * 0.42)); }
+  if (justDone && s) { ADV.dissolve = { x: s.x + 170, t: 0 }; flash("#00F5D4", 0.25); }
+  worldHud();
+}
+
+/* ── Dessin : immeubles de la route, portiques d'acte, lieux, habitants, notes, mur ── */
+function advDrawBack(c, now, cam, gY, pulse) {
+  const W = W_.W;
+  for (const b of ADV.decor) {
+    const x = b.x - cam * 0.7; if (x > W || x + b.w < 0) continue;
+    const lit = spotLit(b.x), y = gY - b.h * 0.85;
+    c.fillStyle = lit ? "#1E0838" : "#141018"; c.fillRect(x, y, b.w, gY - y);
+    if (lit) { c.fillStyle = "rgba(255,46,136,.6)"; c.fillRect(x, y, b.w, 2); }
+    for (let k = 0; k < 9; k++) {
+      const wx = x + 8 + (k % 3) * (b.w - 16) / 3, wy = y + 14 + Math.floor(k / 3) * 22;
+      if (wy > gY - 30) break;
+      c.fillStyle = lit ? ((b.win * 10 + k) % 3 < 1.2 ? "rgba(0,240,255,.55)" : (b.win * 7 + k) % 4 < 1 ? "rgba(255,228,94,.5)" : "rgba(255,255,255,.05)") : "rgba(255,255,255,.03)";
+      c.fillRect(wx, wy, (b.w - 16) / 3 - 6, 10);
+    }
+  }
+  // portiques d'acte
+  for (const gt of ADV.gates) {
+    const x = gt.x - cam; if (x < -400 || x > W + 400) continue;
+    const lit = spotLit(gt.x), col = ["#FF2E88", "#00F0FF", "#FF3B3B"][gt.act];
+    c.save(); c.fillStyle = "#1A0630"; c.fillRect(x - 160, gY - 230, 14, 230); c.fillRect(x + 146, gY - 230, 14, 230);
+    c.fillStyle = "rgba(12,0,28,.92)"; c.fillRect(x - 170, gY - 262, 340, 46);
+    c.strokeStyle = lit ? col : "#3A3040"; c.lineWidth = 2; c.strokeRect(x - 170, gY - 262, 340, 46);
+    c.font = "24px 'Anton', Impact, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = lit ? "#fff" : "#5A4A66"; if (lit) { c.shadowColor = col; c.shadowBlur = 14 + pulse * 10; }
+    c.fillText(ACTS[gt.act].toUpperCase(), x, gY - 239); c.restore();
+  }
+  // les lieux des chapitres
+  const S = W_.size;
+  for (const s of ADV.spots) {
+    const x = s.x - cam; if (x < -300 || x > W + 300) continue;
+    drawSpot(c, s, x, gY, now, S, pulse);
+  }
+  // les notes à ramasser
+  for (const n of ADV.notes) {
+    if (SP().notes?.includes(n.key)) continue;
+    const x = n.x - cam; if (x < -20 || x > W + 20) continue;
+    const y = gY - 70 + Math.sin(now / 300 + n.x) * 8;
+    c.save(); c.font = "26px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 16; c.fillText("♪", x, y); c.restore();
+  }
+  // les habitants
+  for (const cz of ADV.cits) {
+    const x = cz.x - cam; if (x < -100 || x > W + 100) continue;
+    const lit = spotLit(cz.x), near = W_.me && Math.abs(W_.me.x - cz.x) < 140;
+    drawMon(c, cz.m, x, gY + 18, S * 0.55, { mood: lit ? (near ? "joy" : "ok") : "sad", flip: W_.me && W_.me.x < cz.x, lift: Math.abs(Math.sin(now / (lit ? 300 : 900) + cz.seed)) * (lit ? 6 : 2), alpha: lit ? 1 : 0.75 });
+    if (near) { if (!cz.line || cz.lit !== lit) { cz.line = pick(lit ? CIT_LIT : CIT_DARK); cz.lit = lit; } speechBubble(c, x, gY + 18 - S * 0.5, cz.line, 180, lit ? "#00F5D4" : "#C39BD3"); }
+    else cz.line = null;
+  }
+}
+function drawSpot(c, s, x, gY, now, S, pulse) {
+  const k = s.c.kind, cur = ADV.cur === s, col = s.done ? "#00F5D4" : cur ? "#FFE45E" : "#5A4A66";
+  const lit = s.done || cur;
+  c.save();
+  if (k === "battle") {
+    if (!s.done) {
+      const foe = rivalMon(s.c.r), FS = S * [1, 1.5, 1.3, 1.15][foe.stage || 1] * 1.15;
+      if (!cur && canFilter) c.filter = "brightness(.35)";
+      drawMon(c, foe, x + 30, gY + 22, FS, { mood: "angry", flip: true, glow: cur ? "#FF3B3B" : null, glowR: 30, lift: Math.abs(Math.sin(now / 500)) * 6 });
+      c.filter = "none";
+      if (cur && W_.me && Math.abs(W_.me.x - s.x) < 420) speechBubble(c, x + 30, gY - FS * 0.85, pick2(s, ["Approche, si tu oses.", "Wub wub… enfin, à ma façon.", "Je sens une fausse note arriver.", "Tu ne passeras pas."]), 190, "#FF3B3B");
+    } else {
+      c.fillStyle = "#12001F"; c.strokeStyle = "#00F5D4"; c.lineWidth = 2; c.fillRect(x - 22, gY + 6, 44, 28); c.strokeRect(x - 22, gY + 6, 44, 28);
+      c.font = "12px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillStyle = "#00F5D4"; c.fillText("K.O.", x, gY + 24);
+    }
+  } else if (k === "phrase") {
+    const dw = 120, dh = Math.min(200, gY * 0.42);
+    c.fillStyle = "#170528"; c.fillRect(x - dw / 2 - 20, gY - dh - 40, dw + 40, dh + 40);
+    c.fillStyle = s.done ? "rgba(0,245,212,.35)" : "#0A0014"; c.fillRect(x - dw / 2, gY - dh, dw, dh);
+    if (s.done) { const lg = c.createLinearGradient(0, gY - dh, 0, gY); lg.addColorStop(0, "rgba(0,245,212,.6)"); lg.addColorStop(1, "rgba(0,245,212,0)"); c.fillStyle = lg; c.fillRect(x - dw / 2, gY - dh, dw, dh); }
+    else { c.strokeStyle = cur ? "#FF3B3B" : "#3A2A44"; c.lineWidth = 4; c.beginPath(); c.moveTo(x - dw / 2, gY - dh); c.lineTo(x + dw / 2, gY); c.moveTo(x + dw / 2, gY - dh); c.lineTo(x - dw / 2, gY); c.stroke(); }
+    c.font = "22px 'Anton', Impact, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = lit ? "#fff" : "#5A4A66"; if (lit) { c.shadowColor = s.done ? "#00F5D4" : "#FF2E88"; c.shadowBlur = 14 + pulse * 10; }
+    c.fillText(`SALLE ${s.c.k + 1}`, x, gY - dh - 20);
+  } else if (k === "full" || k === "none") {
+    const w = 260, h = Math.min(190, gY * 0.4);
+    c.fillStyle = "#170528"; c.fillRect(x - w / 2, gY - h - 30, w, h); c.fillStyle = "#0A0014"; c.fillRect(x - w / 2 + 10, gY - h - 20, w - 20, h - 20);
+    c.font = `${k === "full" ? 30 : 34}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = lit ? "#FFE45E" : "#5A4A66"; if (lit) { c.shadowColor = "#FF2E88"; c.shadowBlur = 18 + pulse * 12; }
+    c.fillText(k === "full" ? "GRAND FILAGE" : "NÉON CLUB", x, gY - h / 2 - 30);
+    if (k === "none") { const im = docSprite("smile"); if (im) c.drawImage(im, x + w / 2 - 40, gY - S * 1.05, S * 0.9, S * 0.99); }
+  } else {
+    // Doc Vinyle à son poste : la roulotte de la Cantine, sa table de mixage, ou seul
+    if (["hold", "echo", "attack"].includes(k)) {
+      c.fillStyle = "#2A0D4A"; c.fillRect(x - 150, gY - 120, 180, 100); c.fillStyle = "#12001F"; c.fillRect(x - 135, gY - 105, 90, 40);
+      c.fillStyle = lit ? "#FFE45E" : "#4A3A56"; c.fillRect(x - 150, gY - 132, 180, 14);
+      c.fillStyle = "#0A0014"; c.beginPath(); c.arc(x - 120, gY - 16, 14, 0, 6.283); c.arc(x, gY - 16, 14, 0, 6.283); c.fill();
+      c.font = "18px 'Anton', Impact, sans-serif"; c.textAlign = "center"; c.fillStyle = lit ? "#12001F" : "#2A2030"; c.fillText("CANTINE", x - 60, gY - 121);
+    } else if (k === "melody" || k === "drill") {
+      c.fillStyle = "#1A0630"; c.fillRect(x - 150, gY - 60, 130, 50); c.strokeStyle = lit ? "#00F0FF" : "#3A3040"; c.lineWidth = 2; c.strokeRect(x - 150, gY - 60, 130, 50);
+      for (let i = 0; i < 6; i++) { c.fillStyle = lit ? ["#FF2E88", "#00F0FF", "#FFE45E"][i % 3] : "#3A3040"; c.fillRect(x - 140 + i * 20, gY - 52 + Math.abs(Math.sin(now / 200 + i)) * 20, 8, 6); }
+    }
+    const im = docSprite(cur ? "talk" : "smile");
+    if (im) { c.globalAlpha = lit ? 1 : 0.4; c.drawImage(im, x - S * 0.4, gY + 20 - S * 0.99, S * 0.9, S * 0.99); c.globalAlpha = 1; }
+  }
+  c.restore();
+  // repère au-dessus du lieu
+  const my = gY - Math.min(260, gY * 0.55) - (cur ? Math.abs(Math.sin(now / 260)) * 14 : 0);
+  c.save(); c.textAlign = "center"; c.textBaseline = "middle";
+  if (cur) {
+    c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 20; c.font = "54px 'Anton', Impact, sans-serif"; c.fillText("!", x, my);
+    c.shadowBlur = 0; c.font = "15px 'VT323', monospace"; c.fillStyle = "#fff"; c.fillText(`CHAPITRE ${s.i + 1} · ${s.c.title.toUpperCase()}`, x, my + 36);
+  } else if (s.done) { c.fillStyle = "#00F5D4"; c.font = "22px 'Chakra Petch', sans-serif"; c.fillText("✓", x, my + 20); }
+  c.restore();
+}
+const pick2 = (s, arr) => { if (!s.taunt || performance.now() - s.tauntAt > 5000) { s.taunt = pick(arr); s.tauntAt = performance.now(); } return s.taunt; };
+
+/* Le mur de parasites des Muets, et sa dissolution quand on gagne */
+function advDrawFront(c, now, cam, gY, dt) {
+  const H = W_.H, W = W_.W;
+  const wall = (wx, alpha) => {
+    const x = wx - cam; if (x < -80 || x > W + 80) return;
+    c.save(); c.globalAlpha = alpha;
+    for (let y = 0; y < gY + 30; y += 6) {
+      const jx = (Math.random() - 0.5) * 14, w = 30 + Math.random() * 30;
+      c.fillStyle = Math.random() < 0.15 ? "rgba(255,0,51,.7)" : `rgba(${120 + Math.random() * 80},${110 + Math.random() * 60},${130 + Math.random() * 80},${0.25 + Math.random() * 0.35})`;
+      c.fillRect(x - w / 2 + jx, y, w, 5);
+    }
+    c.fillStyle = "rgba(255,0,51,.9)"; c.font = "18px 'Anton', Impact, sans-serif"; c.textAlign = "center";
+    c.save(); c.translate(x, gY - 160); c.rotate(-Math.PI / 2); c.fillText("ZONE MUETTE", 0, 0); c.restore();
+    c.restore();
+  };
+  if (ADV.barrierX < Infinity) wall(ADV.barrierX, 0.9);
+  if (ADV.dissolve) {
+    ADV.dissolve.t += dt; const k = ADV.dissolve.t / 1200;
+    if (k >= 1) ADV.dissolve = null;
+    else { wall(ADV.dissolve.x, 1 - k); if (Math.random() < 0.6) ADV.fx.push({ x: ADV.dissolve.x + (Math.random() - 0.5) * 60, y: Math.random() * gY, vx: (Math.random() - 0.5) * 0.3, vy: -0.1 - Math.random() * 0.2, t: 0, life: 700, col: Math.random() < 0.5 ? "#00F5D4" : "#FFE45E" }); }
+  }
+  ADV.fx = ADV.fx.filter(p => (p.t += dt) < p.life);
+  for (const p of ADV.fx) { p.x += p.vx * dt; p.y += p.vy * dt; c.globalAlpha = 1 - p.t / p.life; c.fillStyle = p.col; c.fillRect(p.x - cam - 2, p.y - 2, 4, 4); }
+  c.globalAlpha = 1;
+  // la flèche vers l'objectif, quand il est hors de l'écran
+  const s = ADV.cur;
+  if (s && W_.me && !W_.trans) {
+    const sx = s.x - cam;
+    if (sx > W - 40 || sx < 40) {
+      const right = sx > W - 40, ax = right ? W - 34 : 34, ay = gY - 120 + Math.sin(now / 200) * 6;
+      c.save(); c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 18;
+      c.beginPath(); if (right) { c.moveTo(ax + 18, ay); c.lineTo(ax - 10, ay - 18); c.lineTo(ax - 10, ay + 18); } else { c.moveTo(ax - 18, ay); c.lineTo(ax + 10, ay - 18); c.lineTo(ax + 10, ay + 18); }
+      c.fill(); c.shadowBlur = 0; c.font = "16px 'VT323', monospace"; c.textAlign = right ? "right" : "left";
+      c.fillText(`${Math.round(Math.abs(s.x - W_.me.x) / 40)} m`, right ? ax - 16 : ax + 16, ay + 34); c.restore();
+    }
+  }
+}
+
+/* Ramasser les notes, et la bande qui suit le joueur à la file */
+function advUpdate(now, dt) {
+  const me = W_.me; if (!me) return;
+  for (const n of ADV.notes) {
+    if (Math.abs(me.x - n.x) > 36) continue;
+    const sp = SP(); sp.notes = sp.notes || [];
+    if (sp.notes.includes(n.key)) continue;
+    sp.notes.push(n.key); saveStory();
+    prof.tokens = (prof.tokens || 0) + 1; saveProf(); worldHud();
+    for (let i = 0; i < 14; i++) ADV.fx.push({ x: n.x, y: W_.gY - 70, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.8) * 0.35, t: 0, life: 600, col: "#FFE45E" });
+    if (ctx) { const t = ctx.currentTime; blip(1568, t, 0.05, 0.04, "triangle"); blip(2093, t + 0.06, 0.08, 0.04, "triangle"); }
+  }
+  W_.crew.slice(0, 3).forEach((cr, i) => {
+    const tx = me.x - me.dir * W_.size * 0.5 * (i + 1);
+    const d = tx - cr.x;
+    if (Math.abs(d) > 6) { cr.dir = Math.sign(d); cr.x += Math.sign(d) * Math.min(Math.abs(d), (Math.abs(d) > 300 ? 1.2 : 0.4) * dt); cr.ph += dt * 0.016; cr.tx = tx; }
+    else cr.tx = null;
+  });
 }
 
 $("toWorld").onclick = () => { const st = ex?.story; if (st) { exAbort(); openStory(); } else goWorld(); };
@@ -5639,7 +5890,7 @@ $("titleScreen").addEventListener("click", e => {
   $("titleScreen").classList.add("gone");
   flash("#FF2E88", 0.35); shake(10);
   const m = b.dataset.start;
-  const begin = () => { const nx = nextChapter(); if (!SP().done.length && nx) playChapter(nx); else openStory(); };
+  const begin = () => { const nx = nextChapter(); if (!SP().done.length && nx) playChapter(nx); else backToRoad(); };
   if (m === "intro" || !store.get("drm.intro")) playIntro(begin);
   else begin();
 });
