@@ -1119,7 +1119,23 @@ function ac() {
   if (ctx.state === "suspended") ctx.resume();
   return ctx;
 }
-document.addEventListener("pointerdown", () => ac(), { once: true, capture: true });
+/* iPhone : le bouton silencieux coupe le son généré par une page, mais pas les médias.
+   Un son muet joué en boucle comme média, lancé au premier toucher, rend le jeu audible même en silencieux.
+   Chaque toucher relance aussi le son, qu'iOS suspend parfois au retour sur l'onglet. */
+let unlockEl = null;
+function silentWavUrl() {
+  const sr = 8000, n = sr / 2, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n * 2, true);
+  return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+}
+function unlockAudio() {
+  ac();
+  if (!unlockEl) { unlockEl = new Audio(silentWavUrl()); unlockEl.loop = true; unlockEl.setAttribute("playsinline", ""); unlockEl.preload = "auto"; }
+  if (unlockEl.paused) unlockEl.play().catch(() => {});
+}
+["touchend", "pointerdown", "click", "keydown"].forEach(ev => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 
 /* Réverbération de salle : pré-délai, premières réflexions, queue sombre et large */
 function impulse(sec) {
