@@ -927,6 +927,38 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 .sw-state { font-family: var(--f-display); font-size: 30px; text-transform: uppercase; color: #fff; }
 .sw-state.ok { color: #00F5D4; text-shadow: 0 0 14px #00F5D4; } .sw-state.off { color: #FF6B6B; }
 .sw-btns { display: flex; gap: 10px; }
+
+/* ══ La partition et la leçon ══ */
+.r-col { flex: 1; display: grid; gap: 6px; max-width: 520px; }
+.r-song { border: 0; padding: 5px 10px; background: rgba(12, 0, 28, .86); box-shadow: inset 0 0 0 1px rgba(0, 240, 255, .45); text-align: left; color: #fff; }
+.song-strip { display: grid; gap: 3px; }
+.ss-k { font-family: var(--f-mono); font-size: 13px; color: var(--cyan); letter-spacing: .1em; text-transform: uppercase; }
+.ss-bar { display: flex; gap: 3px; align-items: center; }
+.ss-bar i { flex: 1; height: 9px; background: rgba(255, 255, 255, .12); font-style: normal; font-size: 11px; display: grid; place-items: center; color: #12001F; font-weight: 700; }
+.song-strip.big .ss-bar i { height: 22px; }
+.ss-bar i.s1 { background: rgba(255, 46, 136, .55); } .ss-bar i.s2 { background: #FF2E88; box-shadow: 0 0 8px #FF2E88; } .ss-bar i.s3 { background: #FFE45E; box-shadow: 0 0 10px #FFE45E; }
+.ss-bar i.z0 { border-bottom: 2px solid #00F5D4; }
+.ss-goal { color: #FFE45E; font-size: 14px; margin-left: 2px; }
+.sp-zone { padding: 10px 12px; background: rgba(255, 255, 255, .03); box-shadow: inset 0 0 0 1px rgba(195, 155, 211, .25); display: grid; gap: 6px; opacity: .55; }
+.sp-zone.open, .sp-zone.final { opacity: 1; } .sp-zone.final { box-shadow: inset 0 0 0 1px rgba(255, 228, 94, .5); }
+.sp-zone h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 20px; text-transform: uppercase; color: #fff; }
+.sp-zone h3 small { font-family: inherit; color: var(--muted); font-size: 14px; }
+.sp-ph { display: grid; gap: 1px; padding: 6px 10px; border-left: 3px solid rgba(255, 255, 255, .2); }
+.sp-ph.s1 { border-color: rgba(255, 46, 136, .6); } .sp-ph.s2 { border-color: #FF2E88; } .sp-ph.s3 { border-color: #FFE45E; }
+.sp-ph b { font-family: var(--f-display); font-weight: 400; font-size: 16px; text-transform: uppercase; }
+.sp-ph span { font-style: italic; color: #E8D8F0; font-size: 13px; } .sp-ph small { color: var(--muted); font-size: 12px; }
+.sing-w { position: fixed; }
+.sw-lesson { position: absolute; inset: 120px 0 0; z-index: 2; overflow-y: auto; padding: 8px 16px 20px; display: grid; gap: 10px; align-content: start; justify-items: center; background: linear-gradient(180deg, rgba(7, 0, 15, .97), rgba(20, 2, 40, .98)); }
+.sw-k { font-family: var(--f-mono); color: var(--cyan); font-size: 16px; letter-spacing: .25em; text-transform: uppercase; }
+.sw-what { font-family: var(--f-display); font-weight: 400; font-size: 22px; text-transform: uppercase; color: #fff; text-align: center; line-height: 1.15; }
+.sw-notes { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.sw-notes span { display: grid; justify-items: center; padding: 6px 12px; background: rgba(255, 228, 94, .12); box-shadow: inset 0 0 0 1px rgba(255, 228, 94, .5); }
+.sw-notes b { font-family: var(--f-display); font-weight: 400; font-size: 26px; color: #FFE45E; } .sw-notes small { color: var(--muted); font-size: 11px; }
+.sw-notes i { color: var(--muted); font-style: normal; font-size: 20px; }
+.sw-kb { width: min(320px, 90vw); height: auto; }
+.sw-steps { margin: 0; padding-left: 20px; color: #E8D8F0; font-size: 14px; display: grid; gap: 2px; }
+.sw-tip { margin: 0; color: #DCC8EA; font-size: 14px; line-height: 1.45; max-width: 440px; text-align: center; }
+.sing-w.lesson-on .sw-foot { visibility: hidden; }
 </style>
 
 <div class="app">
@@ -1124,6 +1156,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 <div class="rpg-creator" id="rpgCreator" hidden></div>
 <div class="sing-w" id="singW" hidden>
   <div class="sw-head"><div class="sw-portrait"></div><div><div class="sw-title"></div><div class="sw-sub"></div></div></div>
+  <div class="sw-lesson" hidden></div>
   <canvas id="swCv"></canvas>
   <div class="sw-foot"><span class="sw-state">Écoute…</span><div class="sw-btns"><button type="button" class="pill" id="swAgain">🔊 Réécouter</button><button type="button" class="pill" id="swQuit">Abandonner</button></div></div>
 </div>
@@ -2864,6 +2897,17 @@ async function startFull() {
   playRef(tgtOf(ns[from]), 1.5);
   setTimeout(() => { if (ex?.type === "full") singNow(); }, state.headphones ? 1800 : 2600);
 }
+async function startExam(k0, k1, ri) {
+  if (!(await needMic())) return;
+  buildPhrases();
+  const a = phrases[k0], b = phrases[k1] || a;
+  const ph = { from: a.from, to: b.to, a: a.a, until: b.until };
+  exBegin({ type: "exam", k: k0, k1, ri, R: RIVALS[ri], foe: rivalMon(ri), ph, bpm: state.bpm, title: `Examen · ${RIVALS[ri].name}` });
+  view.target = view.beat = ph.a;
+  ex.phase = "Première note"; renderHud();
+  playRef(tgtOf(notes()[ph.from]), 1.5);
+  setTimeout(() => { if (ex?.type === "exam") singNow(); }, state.headphones ? 1800 : 2600);
+}
 function singNow() {
   ex.phase = "À toi"; ex.evalAt = ex.ph.from; ex.prevT = null; renderHud();
   state.trace = []; state.results = [];
@@ -2947,6 +2991,11 @@ function finishSung() {
     if (pct === 1 && ex.rated >= 4) award("phrase-parfaite");
     if (totalStars() * 2 >= phrases.length * 3) award("moitie");
     complete(pct, { stars: prog.ph[ex.k] || 0, fresh, passed });
+  } else if (ex.type === "exam") {
+    const passed = pct >= 0.7;
+    if (passed) for (let k = ex.k; k <= ex.k1; k++) if ((prog.ph[k] || 0) < 2) prog.ph[k] = 2;
+    if (passed) { award("arene"); addXp(120); }
+    complete(pct, { stars: passed ? 2 : 0, fresh: 0, passed });
   } else {
     const s = pct >= 0.9 ? 3 : pct >= 0.75 ? 2 : pct >= 0.6 ? 1 : 0, prev = prog.full || 0;
     const fresh = Math.max(0, s - prev);
@@ -3110,6 +3159,9 @@ function showEnd(pct, info, goalHit) {
   } else if (ex.type === "attack") {
     title = info.passed ? "Attaques réussies" : "Attaques à travailler";
     sub = `${Math.round(pct * 100)} % de netteté sur les attaques${ex.scoops ? `, dont ${ex.scoops} glissée${ex.scoops > 1 ? "s" : ""} par en dessous` : ""}.`;
+  } else if (ex.type === "exam") {
+    title = info.passed ? `${ex.R.name} au tapis` : "K.O.";
+    sub = `${Math.round(pct * 100)} % de notes justes sur les phrases ${ex.k + 1} à ${ex.k1 + 1}. ${info.passed ? "Examen réussi !" : "Il en faut 70 %."}`;
   } else if (ex.type === "full") {
     title = info.passed ? "Filage réussi" : "Le filage résiste";
     sub = `${Math.round(pct * 100)} % de notes justes sur tout le morceau.`;
@@ -3125,7 +3177,7 @@ function showEnd(pct, info, goalHit) {
   const canNext = ex.type === "phrase" && info.passed && ex.L < 3;
   const nextPhrase = ex.type === "phrase" && info.passed && ex.L === 3 && phrases[ex.k + 1];
   const rows = [];
-  if (ex.type === "phrase" || ex.type === "full" || ex.type === "drill") {
+  if (ex.type === "phrase" || ex.type === "full" || ex.type === "drill" || ex.type === "exam") {
     rows.push(["Notes justes", `${ex.okN}/${ex.rated}`, ex.okN * 100]);
     rows.push(["Série max", `×${ex.maxCombo}`, ex.maxCombo * 50]);
     if (ex.music) rows.push(["Style", `${Math.round(ex.music.score * 100)}/100`, Math.round(ex.music.score * 1000)]);
@@ -5090,7 +5142,7 @@ const SKY_FAR = (() => { const r = rngOf(31), a = []; let x = 0; while (x < 2400
 const SKY_MID = (() => { const r = rngOf(77), a = []; let x = 0; while (x < 2400) { const w = 70 + r() * 120; a.push({ x, w, h: 0.1 + r() * 0.22, win: r() }); x += w + 40 + r() * 120; } return a; })();
 const gameOn = () => typeof ex !== "undefined" && !!ex && state.mode === "train";
 const gameTheme = () => GAME_THEMES[ex?.story?.act ?? (ex?.type === "battle" ? 2 : ex?.type === "phrase" || ex?.type === "full" || ex?.type === "drill" ? 1 : 0)];
-const RAIL_KINDS = new Set(["phrase", "full", "drill"]);
+const RAIL_KINDS = new Set(["phrase", "full", "drill", "exam"]);
 
 function gameReset() {
   gs.exRef = ex; gs.pel.clear(); gs.mins.clear(); gs.shots = []; gs.parts = []; gs.lastBeat = null; gs.eaten = 0; gs.total = 0;
@@ -5110,6 +5162,11 @@ const isMinion = i => i % 3 === 1;
 
 /* Une note jugée : le sbire posé dessus explose, ou s'enfuit en ricanant */
 function gameJudge(i, r) {
+  if (gameOn() && ex.type === "exam") {
+    if (r.status === "ok") { gameShot(true); setTimeout(() => gameHit("foeMon"), 400); }
+    else { gameShot(false); setTimeout(() => gameHit("meMon"), 400); }
+    return;
+  }
   if (!gameOn() || !RAIL_KINDS.has(ex.type) || !isMinion(i) || gs.mins.get(i)) return;
   const n = notes()[i]; if (!n || n.midi == null) return;
   const x = xOf(n.start + n.beats) - 4, y = yOf(tgtOf(n)) - 16;
@@ -5180,6 +5237,7 @@ function drawGame(now, dt) {
     band.addColorStop(0, `rgba(${T.grid},0)`); band.addColorStop(0.5, `rgba(${T.grid},.28)`); band.addColorStop(1, `rgba(${T.grid},0)`);
     g.fillStyle = band; g.fillRect(LEFT, y - bh, W - LEFT, bh * 2);
   }
+  if (ex.type === "exam") drawExamBoss(now, dt, NX, bot);
   if (RAIL_KINDS.has(ex.type) && ex.ph) drawRails(now, dt, T, NX, p);
   else if (ex.type === "hold") drawHoldGame(now, dt, NX);
   else if (ex.type === "echo") drawOrbs(now, NX, ex.fig || [], ex.j || 0, "#00F0FF", ex.k);
@@ -5201,7 +5259,7 @@ function drawGame(now, dt) {
   }
   drawRider(now, dt, NX, bot);
   // les tirs du combat
-  if (ex.type === "battle") drawShots(dt, NX);
+  if (ex.type === "battle" || ex.type === "exam") drawShots(dt, NX);
   // particules du jeu
   gs.parts = gs.parts.filter(q => (q.t += dt) < q.life);
   for (const q of gs.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 0.0003 * dt; g.fillStyle = q.col; g.globalAlpha = 1 - q.t / q.life; g.fillRect(q.x - q.r / 2, q.y - q.r / 2, q.r, q.r); }
@@ -5252,7 +5310,7 @@ function drawRails(now, dt, T, NX, p) {
       const r = 4.5 + Math.sin(now / 200 + j) * 0.8;
       g.save(); g.fillStyle = T.rail; g.shadowColor = T.rail; g.shadowBlur = 10; g.beginPath(); g.arc(px, y, r, 0, 6.283); g.fill(); g.restore();
     }
-    if (isMinion(i)) { const st = gs.mins.get(i); if (!st || st.s === 2) drawMinion(x1 - 4, y - 16, now, st); }
+    if (ex.type !== "exam" && isMinion(i)) { const st = gs.mins.get(i); if (!st || st.s === 2) drawMinion(x1 - 4, y - 16, now, st); }
   }
 }
 function drawGameHud(T) {
@@ -5329,6 +5387,28 @@ function drawBattle(now, dt, NX, bot) {
   if (gs.meHit > 0) { g.fillStyle = `rgba(255,0,51,${gs.meHit * 0.25})`; g.fillRect(0, 0, W, H); }
   const ph = ex.phase || "";
   if (ph) { g.save(); g.font = `${Math.min(34, W / 18)}px 'Anton', Impact, sans-serif`; g.textAlign = "center"; g.fillStyle = /Répète|parer/.test(ph) ? "#FF3B3B" : /Chante|frapper/.test(ph) ? "#00F5D4" : "#FFF2FA"; g.shadowColor = g.fillStyle; g.shadowBlur = 16; g.fillText(ph.toUpperCase(), W / 2, H * 0.2); g.restore(); }
+}
+/* L'examen : le boss écoute, chaque note juste le frappe, chaque fausse note revient */
+function drawExamBoss(now, dt, NX, bot) {
+  const foe = ex.foe, S = Math.min(H * 0.5, 260) * [1, 1.5, 1.25, 1.1][foe.stage || 1], bx = W - Math.min(W * 0.2, 200), by = bot + 6;
+  gs.bossHit = Math.max(0, gs.bossHit - dt * 0.003); gs.meHit = Math.max(0, gs.meHit - dt * 0.003);
+  const total = (() => { let n = 0; for (let i = ex.ph.from; i <= ex.ph.to; i++) if (notes()[i].midi != null) n++; return n; })();
+  const need = Math.ceil(total * 0.7), miss = ex.rated - ex.okN, allowed = total - need + 1;
+  g.save(); g.globalAlpha = 0.85;
+  if (gs.bossHit > 0 && canFilter) g.filter = `brightness(${1 + gs.bossHit * 2.5})`;
+  drawMon(g, foe, bx + (gs.bossHit ? Math.sin(now / 15) * 8 * gs.bossHit : 0), by, S, { mood: gs.bossHit > 0.3 ? "hurt" : "angry", flip: true, glow: "#FF3B3B", glowR: 26, lift: Math.abs(Math.sin(now / 400)) * 6 });
+  g.restore();
+  const bar = (x, w, k, col, name, right) => {
+    g.save(); g.translate(x, H - BOTTOM() + 12); g.transform(1, 0, -0.2, 1, 0, 0);
+    g.fillStyle = "rgba(12,0,28,.85)"; g.fillRect(0, 0, w, 22); g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 10;
+    const fw = (w - 6) * Math.max(0, Math.min(1, k)); g.fillRect(right ? 3 + (w - 6 - fw) : 3, 3, fw, 16); g.shadowBlur = 0;
+    g.font = "15px 'Anton', Impact, sans-serif"; g.textBaseline = "top"; g.fillStyle = "#fff"; g.textAlign = right ? "right" : "left";
+    g.fillText(name.toUpperCase(), right ? w : 0, 25); g.restore();
+  };
+  const bw = Math.min(W * 0.34, 320);
+  bar(14, bw, 1 - miss / allowed, "#00F5D4", `${activeMon()?.name || "Toi"} · ${miss}/${allowed} erreurs`, false);
+  bar(W - bw - 20, bw, 1 - ex.okN / need, "#FF3B3B", `${ex.R.name} · ${ex.okN}/${need} coups`, true);
+  if (gs.meHit > 0) { g.fillStyle = `rgba(255,0,51,${gs.meHit * 0.18})`; g.fillRect(0, 0, W, H); }
 }
 function drawShots(dt, NX) {
   const bx = W - Math.min(W * 0.2, 200), by = (H - BOTTOM()) * 0.55;
@@ -5997,16 +6077,24 @@ const croonieOf = sp => ({ id: "sp-" + sp.id, name: sp.name, type: sp.type, stag
 /* ── La progression du quartier ── */
 const rpg = Object.assign({ q: 0, lamps: [false, false, false], fountain: false, door: false, minion: false, phrase: false, boss: false, notes: [], tamed: [], pos: null, done: false }, readJSON("drm.rpg"));
 const saveRpg = () => store.set("drm.rpg", JSON.stringify(rpg));
+if (!rpg.v) { if (rpg.q >= 5) rpg.q += 1; else if (rpg.q === 4 && rpg.door) rpg.q = 5; rpg.v = 2; saveRpg(); }
 
-/* Les notes des défis viennent de la voix chantée : toujours dans sa tessiture */
-function voiceNotes() {
-  const ms = notes().filter(n => n.midi != null).map(tgtOf).sort((a, b) => a - b);
-  const q = f => ms[Math.min(ms.length - 1, Math.floor(ms.length * f))];
-  const ph = (buildPhrases(), phrases[0]);
-  const motif = [];
-  if (ph) for (let i = ph.from; i <= ph.to && motif.length < 3; i++) { const t = tgtOf(notes()[i]); if (t != null && motif[motif.length - 1] !== t) motif.push(t); }
-  return { low: q(0.08), mid: q(0.5), lamp: [q(0.3), q(0.55), q(0.75)], hold: q(0.4), motif: motif.length === 3 ? motif : [q(0.5), q(0.6), q(0.4)] };
+/* Les notes des défis : les deux premières phrases de sa voix, dans l'ordre de la chanson */
+function songBits() {
+  buildPhrases();
+  const ns = notes(), all = ns.filter(n => n.midi != null).map(tgtOf);
+  const sungOf = ph => { const out = []; if (ph) for (let i = ph.from; i <= ph.to; i++) if (ns[i].midi != null) out.push(tgtOf(ns[i])); return out; };
+  const p0 = sungOf(phrases[0]), p1 = sungOf(phrases[1]);
+  while (p0.length < 4) p0.push(p0[p0.length - 1] ?? all[0]);
+  return { first: p0[0], d1: p0.slice(0, 2), d2: p0.slice(0, 3), d3: p0.slice(0, 4), dong: p0[p0.length - 1], low: Math.min(...all), w0: phrases[0]?.words || "", w1: phrases[1]?.words || "", bars0: phrases[0]?.bars || [1, 4], p1note: p1[0] };
 }
+const INTERVALS = ["l'unisson", "un demi-ton", "un ton", "une tierce mineure", "une tierce majeure", "une quarte", "un triton", "une quinte"];
+function intervalTxt(a, b) {
+  const d = b - a, n = Math.abs(d);
+  if (!d) return "la même note";
+  return `${n < INTERVALS.length ? INTERVALS[n] : `${n} demi-tons`} ${d < 0 ? "plus bas" : "plus haut"}`;
+}
+function motifTip(ms) { return ms.slice(1).map((m, i) => `${noteName(ms[i])} → ${noteName(m)} : ${intervalTxt(ms[i], m)}`).join(" · "); }
 
 /* ── Les éléments de la carte ── */
 function rpgEntities() {
@@ -6036,13 +6124,14 @@ const SIGNS = [
 /* ── Les quêtes, une à la fois ── */
 const QUESTS = [
   { title: "Parle à Doc Vinyle", target: "doc" },
-  { title: "Fouille le juke-box cassé", target: "jukebox" },
-  { title: "Allume les 3 lampadaires", target: () => ["lamp0", "lamp1", "lamp2"].find((_, i) => !rpg.lamps[i]), count: () => `${rpg.lamps.filter(Boolean).length}/3` },
-  { title: "Réveille la fontaine du parc", target: "fountain" },
-  { title: "Ouvre la porte du Studio 86", target: () => rpg.door ? "minion" : "door" },
-  { title: "Aide le musicien de la placette", target: "musician" },
-  { title: "Affronte Wubby sur le pont", target: "wubby" },
-  { title: "Quartier libéré ! Le Parc à Écho ouvre bientôt", target: null },
+  { title: "Le premier « Ding » : fouille le juke-box", target: "jukebox" },
+  { title: "« Ding dong » : allume les 3 lampadaires", target: () => ["lamp0", "lamp1", "lamp2"].find((_, i) => !rpg.lamps[i]), count: () => `${rpg.lamps.filter(Boolean).length}/3` },
+  { title: "Le long « dong » : réveille la fontaine", target: "fountain" },
+  { title: "Phrase 1 au ralenti : ouvre le Studio 86", target: "door" },
+  { title: "Phrase 1 en rythme : chasse le sbire", target: "minion" },
+  { title: "Phrase 2 : aide le musicien", target: "musician" },
+  { title: "L'examen : bats Wubby avec les phrases 1 et 2", target: "wubby" },
+  { title: "Rue des Néons libérée ! Le Parc à Écho ouvre bientôt", target: null },
 ];
 const questTarget = () => { const q = QUESTS[rpg.q]; if (!q || !q.target) return null; return typeof q.target === "function" ? q.target() : q.target; };
 
@@ -6222,14 +6311,14 @@ function bindRpgInput() {
   $("rpgHud").addEventListener("click", e => {
     const b = e.target.closest("[data-r]"); if (!b) return;
     const w = b.dataset.r;
-    if (w === "dex") openDex(); else if (w === "band") openBand(); else if (w === "menu") openRpgMenu();
+    if (w === "dex") openDex(); else if (w === "band") openBand(); else if (w === "menu") openRpgMenu(); else if (w === "song") openSongPanel();
     else if (w === "goal") { const t = R.ents.find(en => en.id === questTarget()); if (t) walkTo(t.x, t.y, t); }
   });
   $("rpgPanel").addEventListener("click", rpgPanelClick);
 }
 const rpgBusy = () => vn.on || !$("rpgPanel").hidden || singW.on || !$("hatch").hidden || !$("rpgCreator").hidden || !$("accountBack").hidden || !$("sheetBack").hidden;
 function entVisible(e) {
-  if (e.kind === "minion") return !rpg.minion;
+  if (e.kind === "minion") return rpg.door && !rpg.minion;
   if (e.kind === "wubby") return !rpg.boss;
   if (e.kind === "cassette") return rpg.minion && !rpg.cassette;
   if (e.kind === "note") return !rpg.notes.includes(e.id);
@@ -6445,10 +6534,10 @@ function entLabel(e) {
     case "jukebox": return rpg.tamed.includes("ampli") ? "Le juke-box" : "Fouiller le juke-box";
     case "lamp": return rpg.lamps[e.i] ? "Lampadaire allumé" : "Chanter pour l'allumer";
     case "fountain": return rpg.fountain ? (rpg.tamed.includes("gargouille") ? "La fontaine" : "Apprivoiser Gargouille") : "Réveiller la fontaine";
-    case "door": return rpg.door ? "La ruelle" : "Le code musical";
-    case "minion": return "Affronter le sbire";
+    case "door": return rpg.door ? "La ruelle" : "Ouvrir le Studio 86";
+    case "minion": return "Chasser le sbire";
     case "cassette": return "Ramasser la cassette";
-    case "musician": return rpg.phrase ? "Le musicien" : "Écouter le musicien";
+    case "musician": return rpg.phrase ? "Le musicien" : "Aider le musicien";
     case "arcade": return rpg.tamed.includes("grumble") ? "Les bornes" : "Réveiller Grumble";
     case "wubby": return "Affronter Wubby";
     case "citizen": return "Parler";
@@ -6464,7 +6553,8 @@ function rpgActBtn() {
 function rpgHud() {
   const q = QUESTS[rpg.q], m = activeMon(), found = CROONIES_Q1.filter(s => rpg.tamed.includes(s.id)).length;
   $("rpgHud").innerHTML = `<div class="r-top">
-      <button type="button" class="r-quest" data-r="goal"><span class="k">Quête${q?.count ? ` · ${q.count()}` : ""}</span><b>${esc(q?.title || "")}</b>${q?.target ? "<em>Y aller ▶</em>" : ""}</button>
+      <div class="r-col"><button type="button" class="r-song" data-r="song">${songStripHtml()}</button>
+      <button type="button" class="r-quest" data-r="goal"><span class="k">Quête${q?.count ? ` · ${q.count()}` : ""}</span><b>${esc(q?.title || "")}</b>${q?.target ? "<em>Y aller ▶</em>" : ""}</button></div>
       <div class="r-side"><span class="r-tok">${prof.tokens ?? 0}<small>jetons</small></span></div></div>
     <div class="r-bottom">
       <button type="button" class="r-btn" data-r="band">${m ? monsterSvg(m, 36, { mood: "ok" }) : ""}<span>Bande</span></button>
@@ -6476,7 +6566,7 @@ function rpgHud() {
 function rpgAct(e) {
   if (rpgBusy()) return;
   R.path = []; R.auto = null;
-  const v = voiceNotes();
+  const v = songBits();
   const need = (q, msg) => { if (rpg.q < q) { vnPlay([["doc", msg, "worried"]], null); return true; } return false; };
   switch (e.kind) {
     case "npc": return docTalk();
@@ -6485,75 +6575,74 @@ function rpgAct(e) {
       if (rpg.tamed.includes("ampli")) return vnPlay([["doc", "Le juke-box remarche. Il ne passe que des slows, mais il remarche.", "smile"]], null);
       if (need(1, "Viens d'abord me voir, que je t'explique deux trois trucs.")) return;
       return vnPlay([["narr", "Le juke-box grésille. Quelque chose bouge à l'intérieur…"], ["cr:ampli", "Bzz ? Bzzz !", "sad"],
-        ["doc", "Un Croonie ! Ampli. Il a peur du silence des Muets. Les Croonies aiment chacun quelque chose. Lui, c'est une note juste."],
-        ["doc", `Chante-lui un ${fullName(v.mid)} et tiens-le. S'il aime, il te suit.`]],
-        () => singChallenge({ kind: "note", targets: [v.mid], title: "Apprivoise Ampli", sub: `Chante un ${fullName(v.mid)} et tiens-le`, portrait: croonieOf(CROONIES_Q1[0]) }, ok => ok ? tame("ampli", () => advanceQuest(2)) : null));
+        ["doc", "Un Croonie ! Ampli. Il a peur du silence des Muets. Chaque Croonie aime quelque chose. Lui, c'est la toute première note de ta partie."],
+        ["doc", `Le premier « Ding » de Carol, mesure ${v.bars0[0]}. C'est un ${fullName(v.first)}. Si tu le poses juste, il te suit.`]],
+        () => singChallenge({ kind: "note", targets: [v.first], ms: 1600, title: "Apprivoise Ampli", sub: `Le premier « Ding » : ${fullName(v.first)}`, portrait: croonieOf(CROONIES_Q1[0]),
+          lesson: { what: `Le tout premier « Ding » de Carol (mesure ${v.bars0[0]})`, tip: "C'est la note de départ de toute ta partie. Pose-la directement, sans glisser par en dessous." } },
+          ok => ok ? tame("ampli", () => advanceQuest(2)) : null));
     case "lamp": {
       if (rpg.lamps[e.i]) return;
       if (need(2, "Les lampadaires, ce sera pour après. D'abord le juke-box : quelqu'un s'y cache.")) return;
-      const t = v.lamp[e.i];
-      return singChallenge({ kind: "note", targets: [t], title: "Allume le lampadaire", sub: `Chante un ${fullName(t)}. La lumière monte quand tu tiens la note juste.`, portrait: null, icon: "💡" }, ok => {
+      const done = rpg.lamps.filter(Boolean).length, seq = [v.d1, v.d2, v.d3][done];
+      const what = ["« Ding dong » : les 2 premières notes", "« Ding dong ding » : 3 notes qui descendent", "Le motif entier : « Ding dong ding dong »"][done];
+      const go = () => singChallenge({ kind: "seq", targets: seq, title: `Lampadaire ${done + 1}/3`, sub: what, icon: "💡", lesson: { what, tip: motifTip(seq) } }, ok => {
         if (!ok) return;
         rpg.lamps[e.i] = true; saveRpg(); rpgBurst((e.x + 0.5) * R.T, (e.y - 0.6) * R.T, "#FFE45E", 30); flash("#FFE45E", 0.25);
-        if (rpg.lamps.every(Boolean)) { rpgToast("La rue se rallume !"); setTimeout(() => vnPlay([["narr", "Un à un, les néons de la Rue des Néons se rallument. Les habitants sortent sur les trottoirs."], ["doc", "Ça, c'est ma rue ! Prochaine étape : la fontaine du parc. Elle est à sec depuis des semaines.", "smile"]], () => advanceQuest(3)), 900); }
+        if (rpg.lamps.every(Boolean)) { rpgToast("La rue se rallume !"); setTimeout(() => vnPlay([["narr", "Un à un, les néons de la Rue des Néons se rallument. Les habitants sortent sur les trottoirs."], ["doc", "Tu viens de chanter tout le motif d'ouverture de Carol. Il revient partout dans la chanson, alors garde-le bien en tête.", "smile"], ["doc", "Il te manque la fin de la phrase : le long « dong ». Va voir la fontaine du parc."]], () => advanceQuest(3)), 900); }
         else rpgToast(`Lampadaire ${rpg.lamps.filter(Boolean).length}/3`);
         rpgHud();
       });
+      if (done === 0) return vnPlay([["doc", "Chaque lampadaire s'allume avec un bout du « Ding dong ». Le premier : deux notes, et ça descend."], ["doc", "On progresse marche par marche : 2 notes, puis 3, puis le motif entier."]], go);
+      return go();
     }
     case "fountain":
       if (need(3, "La fontaine ? On y viendra. Allume d'abord la rue.")) return;
-      if (!rpg.fountain) return vnPlay([["doc", "La fontaine chante quand quelqu'un tient une note longtemps. Les Muets l'ont fait taire."], ["doc", `Tiens un ${fullName(v.hold)} le plus droit possible. Respire par le ventre.`]],
-        () => singChallenge({ kind: "hold", targets: [v.hold], ms: 3500, title: "Réveille la fontaine", sub: `Tiens un ${fullName(v.hold)} pendant 3,5 secondes`, icon: "⛲" }, ok => {
+      if (!rpg.fountain) return vnPlay([["doc", `La phrase 1 finit sur un long « dong » : un ${fullName(v.dong)} tenu trois temps. La fontaine adore les notes tenues.`], ["doc", "Respire par le ventre avant de chanter, et garde la même ouverture de bouche jusqu'au bout."]],
+        () => singChallenge({ kind: "hold", targets: [v.dong], ms: 4000, title: "Réveille la fontaine", sub: `Tiens le « dong » (${fullName(v.dong)}) 4 secondes`, icon: "⛲", lesson: { what: `Le long « dong » qui termine la phrase 1`, tip: "Une note droite, c'est une note qui ne bouge pas. Si elle chute à la fin, c'est que le souffle s'arrête : garde de l'air." } }, ok => {
           if (!ok) return; rpg.fountain = true; saveRpg(); flash("#00F0FF", 0.3);
           vnPlay([["narr", "L'eau jaillit. Et avec elle, une créature toute ronde qui gargouille de bonheur."], ["cr:gargouille", "Glouglou… encore…", "joy"], ["doc", "Gargouille ! Elle adore les notes tenues. Encore une, plus longue, et elle est à toi."]],
-            () => singChallenge({ kind: "hold", targets: [v.hold], ms: 4500, title: "Apprivoise Gargouille", sub: `Encore un ${fullName(v.hold)}, 4,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]) }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null));
+            () => singChallenge({ kind: "hold", targets: [v.dong], ms: 5500, title: "Apprivoise Gargouille", sub: `Le « dong », 5,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]), lesson: { what: "Le même « dong », plus longtemps", tip: "Prends une grande inspiration avant. Si tu manques d'air, ne force pas : recommence." } }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null));
         }));
-      if (!rpg.tamed.includes("gargouille")) return singChallenge({ kind: "hold", targets: [v.hold], ms: 4500, title: "Apprivoise Gargouille", sub: `Un ${fullName(v.hold)}, 4,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]) }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null);
+      if (!rpg.tamed.includes("gargouille")) return singChallenge({ kind: "hold", targets: [v.dong], ms: 5500, title: "Apprivoise Gargouille", sub: `Le « dong », 5,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]), lesson: { what: "Le « dong », plus longtemps", tip: "Grande inspiration avant, même ouverture de bouche jusqu'au bout." } }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null);
       return;
     case "door":
       if (rpg.door) return;
       if (need(4, "Le Studio 86 ? Patience. Chaque chose en son temps.")) return;
-      return vnPlay([["doc", "La porte du Studio est verrouillée par un code musical. Trois notes, celles du début de Carol."], ["doc", "Écoute-les, puis rechante-les dans l'ordre."]],
-        () => singChallenge({ kind: "seq", targets: v.motif, title: "Le code de la porte", sub: "Rechante les 3 notes dans l'ordre", icon: "🔒" }, ok => {
-          if (!ok) return; rpg.door = true; e.solid = false; saveRpg(); flash("#00F5D4", 0.3); rpgToast("Porte ouverte !");
-          setTimeout(() => vnPlay([["narr", "La porte s'ouvre… sur un sbire des Muets qui garde la ruelle."], ["doc", "Il va te lancer des notes. Renvoie-les-lui juste, il ne le supportera pas."]], null), 600);
-        }));
-    case "minion": {
-      const fig = pickFigureN(3);
-      return singChallenge({ kind: "seq", targets: fig, title: "Duel contre le sbire", sub: "Il te lance 3 notes : renvoie-les", icon: "👾", foe: true }, ok => {
-        if (!ok) return vnPlay([["doc", "Il a gagné cette manche. Respire, écoute bien, et retente.", "worried"]], null);
-        rpg.minion = true; R.ents.find(x => x.id === "minion").solid = false; saveRpg(); rpgBurst(13.5 * R.T, 12.5 * R.T, "#FF3B3B", 40); boom(true); shake(12);
-        vnPlay([["narr", "Le sbire éclate en confettis. Il a laissé tomber une cassette."], ["doc", "Ramasse-la, on ne sait jamais."]], () => { advanceQuest(5); });
-      });
-    }
+      return vnPlay([["doc", "La porte du Studio s'ouvre avec la phrase 1 en entier. Tu en connais déjà tous les morceaux : on les recolle."], ["doc", "Au ralenti d'abord. Tu l'écoutes une fois, puis tu la chantes sur la partition qui défile. Il faut 70 % de notes justes."]], () => rpgExercise("door"));
+    case "minion":
+      if (!rpg.door) return;
+      return vnPlay([["narr", "Un sbire des Muets bloque la ruelle."], ["doc", "Il ne supporte pas la phrase 1 chantée au vrai tempo. Même phrase, mais en rythme cette fois."]], () => rpgExercise("minion"));
     case "cassette":
       rpg.cassette = true; saveRpg(); prof.tokens = (prof.tokens || 0) + 5; saveProf(); rpgToast("+5 jetons"); rpgHud();
-      return vnPlay([["doc", "Une cassette de démo du Studio. Garde les jetons pour le juke-box. Et va voir le musicien de la placette : il a un problème avec Carol."]], null);
+      return vnPlay([["doc", "Une cassette de démo du Studio : 5 jetons pour le juke-box. Va voir le musicien de la placette, il a besoin de la phrase 2."]], null);
     case "musician":
-      if (rpg.phrase) return vnPlay([["mus", "Ding dong ding dong ! Merci encore, l'artiste.", "joy"]], null);
-      if (need(5, "Le musicien est un peu ronchon en ce moment. Repasse plus tard.")) return;
-      return vnPlay([["mus", "Ding… dong… non. Ding dong… NON. Les Muets m'ont volé la première phrase de Carol, je n'arrive plus à la chanter.", "sad"],
-        ["doc", "C'est le moment de montrer ce que tu sais faire. La première phrase, au ralenti. Montre-lui."]], () => rpgExercise("phrase"));
+      if (rpg.phrase) return vnPlay([["mus", "One seems to hear words of good cheer ! Merci encore, l'artiste.", "joy"]], null);
+      if (need(6, "Le musicien est un peu ronchon en ce moment. Repasse plus tard.")) return;
+      return vnPlay([["mus", `« ${v.w1.split(" ").slice(0, 5).join(" ")}… » Non, je n'y arrive plus. Les Muets m'ont volé le rythme de la phrase 2.`, "sad"],
+        ["doc", `La phrase 2 est toute sur une seule note, ${fullName(v.p1note ?? v.first)}. Ici, tout est dans le rythme : les syllabes courtes, les longues.`],
+        ["doc", "Écoute bien comment les mots tombent sur les temps, puis montre-lui."]], () => rpgExercise("musician"));
     case "arcade":
       if (rpg.tamed.includes("grumble")) return vnPlay([["cr:grumble", "Grmbl. Content.", "joy"]], null);
       return vnPlay([["narr", "Derrière les bornes, une grosse boule ronfle. Elle entrouvre un œil."], ["cr:grumble", "Grmbl… pas aigu… grave…", "sad"],
-        ["doc", `Grumble ! Il n'aime que le grave. Va chercher tout en bas : un ${fullName(v.low)}.`]],
-        () => singChallenge({ kind: "note", targets: [v.low], ms: 1800, title: "Apprivoise Grumble", sub: `Descends jusqu'au ${fullName(v.low)} et tiens-le`, portrait: croonieOf(CROONIES_Q1[3]) }, ok => ok ? tame("grumble") : null));
+        ["doc", `Grumble ! Il n'aime que le grave. Va chercher la note la plus basse de ta partie : ${fullName(v.low)}.`]],
+        () => singChallenge({ kind: "note", targets: [v.low], ms: 2000, title: "Apprivoise Grumble", sub: `Descends jusqu'au ${fullName(v.low)}`, portrait: croonieOf(CROONIES_Q1[3]), lesson: { what: "La note la plus grave de ta partie d'alto", tip: "Relâche la mâchoire et la nuque. Le grave vient de la détente, pas de la force." } }, ok => ok ? tame("grumble") : null));
     case "wubby":
-      if (need(6, "Wubby garde le pont. Tu n'es pas encore prête… enfin, prêt·e. Termine d'abord la rue.")) return;
-      return vnPlay([["r0", "Wub wub. Le pont, c'est à moi. Personne passe."], ["doc", "Wubby. Le plus nul des Monstres Muets, mais il garde la sortie du quartier."], ["doc", "Ta bande va se battre avec ta voix. Il chante une figure, tu la rechantes juste, et ton Croonie frappe."], ["r0", "Wub. Prépare-toi à pleurer en fa dièse."]], () => rpgExercise("battle"));
+      if (need(7, "Wubby garde le pont. Termine d'abord la rue : il te faut les phrases 1 et 2.")) return;
+      return vnPlay([["r0", "Wub wub. Le pont, c'est à moi. Personne passe."], ["doc", "Wubby. C'est l'examen du quartier : les phrases 1 et 2, enchaînées, au vrai tempo."],
+        ["doc", "Chaque note juste, c'est un coup pour lui. Chaque fausse note, il te la renvoie. 70 % et il est au tapis."], ["r0", "Wub. Prépare-toi à pleurer en fa dièse."]], () => rpgExercise("exam"));
   }
 }
 function docTalk() {
-  const lines = {
-    0: [["doc", "Hé, toi ! Oui, toi, avec ton walkman. Bienvenue à Synthville. Moi c'est Doc Vinyle, ancien ingé son du Néon Club."],
-      ["doc", "Depuis que les Monstres Muets ont volé les notes justes, les Croonies se cachent. Ce sont des petites bêtes musicales, et chacune aime quelque chose."],
-      ["doc", "Les apprivoiser, c'est simple : tu leur chantes ce qu'ils aiment, juste. Ta voix est ta meilleure arme."],
-      { choice: [["Je chante comme une casserole.", [["doc", "Parfait, les casseroles c'est mon rayon. On va te récurer.", "smile"]]], ["C'est parti !", [["doc", "J'aime cette énergie. Garde-la pour le premier contre-ut.", "smile"]]]] },
-      ["doc", "J'ai entendu grésiller le juke-box cassé, au coin de la rue. Va voir. Touche l'écran pour marcher, le gros bouton pour agir."]],
-  };
-  const hint = { 1: "Le juke-box, au coin de la rue. Quelque chose s'y cache.", 2: "Allume les trois lampadaires de la rue. Chacun a sa note.", 3: "La fontaine du parc, à gauche de la rue.", 4: "La ruelle du Studio 86, sur la droite.", 5: "Le musicien de la placette a besoin de toi.", 6: "Wubby t'attend sur le pont, tout en haut.", 7: "Tu as libéré la Rue des Néons. Le Parc à Écho ouvre bientôt. En attendant, cherche les Croonies cachés !" };
-  if (rpg.q === 0) return vnPlay(lines[0], () => advanceQuest(1));
+  const v = songBits();
+  const intro = [["doc", "Hé, toi ! Oui, toi, avec ton walkman. Bienvenue à Synthville. Moi c'est Doc Vinyle, ancien ingé son du Néon Club."],
+    ["doc", "Les Monstres Muets ont volé la chanson de la ville : Carol of the Bells. Tant qu'elle se tait, les Croonies se cachent."],
+    ["doc", "Ton but : le Grand Concert du Néon Club. Chanter ta partie d'alto en entier, devant tout Synthville."],
+    ["doc", "La chanson est découpée en 9 phrases. Chaque quartier t'en apprend quelques-unes, et son boss te fait passer l'examen. Regarde la partition en haut : elle se rallume phrase par phrase."],
+    { choice: [["Je chante comme une casserole.", [["doc", "Parfait, les casseroles c'est mon rayon. On va te récurer.", "smile"]]], ["C'est parti !", [["doc", "J'aime cette énergie. Garde-la pour le Grand Concert.", "smile"]]]] },
+    ["doc", `Ici, Rue des Néons, tu apprends le début : la phrase 1, « ${v.w0} », puis la phrase 2. Note par note, puis en entier.`],
+    ["doc", "J'ai entendu grésiller le juke-box cassé, au coin de la rue. Va voir. Touche l'écran pour marcher, le gros bouton pour agir."]];
+  const hint = { 1: "Le juke-box, au coin de la rue. Quelque chose s'y cache.", 2: "Les lampadaires : le « Ding dong », marche par marche.", 3: "La fontaine du parc, à gauche de la rue : le long « dong ».", 4: "La porte du Studio 86, dans la ruelle à droite : la phrase 1 au ralenti.", 5: "Le sbire de la ruelle : la phrase 1 en rythme.", 6: "Le musicien de la placette a besoin de la phrase 2.", 7: "Wubby t'attend sur le pont, tout en haut. C'est l'examen.", 8: "La Rue des Néons est libre. Le Parc à Écho ouvre bientôt : en attendant, cherche les Croonies cachés et révise tes phrases !" };
+  if (rpg.q === 0) return vnPlay(intro, () => advanceQuest(1));
   vnPlay([["doc", hint[rpg.q] || "Continue comme ça.", "smile"]], null);
 }
 function advanceQuest(to) {
@@ -6572,106 +6661,213 @@ function tame(id, then) {
   $("hatch").querySelector("button").onclick = () => { $("hatch").hidden = true; rpgHud(); then && then(); };
 }
 /* Les grandes épreuves passent par le niveau de jeu, puis on revient sur la carte */
+const RPG_EX = {
+  door: { title: "Phrase 1 · au ralenti", run: () => startPhrase(0, 1), act: 0 },
+  minion: { title: "Phrase 1 · en rythme", run: () => startPhrase(0, 2), act: 0 },
+  musician: { title: "Phrase 2", run: () => startPhrase(1, 1), act: 1 },
+  exam: { title: "Examen · Wubby", run: () => startExam(0, 1, 0), act: 2 },
+};
 async function rpgExercise(kind) {
   const m = await ensureMic();
   if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Autorise le micro dans ton navigateur.", "worried"]], null); return; }
   closeRpg();
-  storyRun = { id: "rpg:" + kind, title: kind === "battle" ? "Wubby" : "La première phrase", act: kind === "battle" ? 2 : 1, rpg: true };
+  const X = RPG_EX[kind];
+  storyRun = { id: "rpg:" + kind, title: X.title, act: X.act, rpg: true };
   state.lairView = "train"; if (state.mode !== "train") setMode("train");
   $("train").hidden = true;
-  if (kind === "phrase") startPhrase(0, 1); else startBattle(0, true);
+  X.run();
 }
 function rpgResult(run, passed) {
   storyRun = null;
   openRpg();
-  if (run.id === "rpg:phrase") {
-    if (!passed) return vnPlay([["mus", "Presque ! Il faut 70 % de notes justes. Réessaie, je t'écoute.", "sad"]], null);
-    rpg.phrase = true; saveRpg();
-    return vnPlay([["mus", "C'est ça ! Ding dong ding dong ! Tu m'as rendu ma chanson.", "joy"], ["narr", "Une petite cloche argentée sort de l'étui de guitare et se met à tinter."], ["cr:dingdong", "Ding ! Dong !", "joy"], ["doc", "Dingdong ! Il adore cette phrase. Il veut te suivre."]],
-      () => tame("dingdong", () => advanceQuest(6)));
+  const k = run.id.slice(4);
+  if (k === "door") {
+    if (!passed) return vnPlay([["doc", "La porte résiste. Il faut 70 % de notes justes. Regarde où ta ligne passe en rouge, c'est là qu'il faut viser.", "worried"]], null);
+    rpg.door = true; R.ents = rpgEntities(); saveRpg(); flash("#00F5D4", 0.3);
+    return vnPlay([["narr", "La porte du Studio 86 s'ouvre dans un grincement de vinyle."], ["doc", "Phrase 1 libérée ! Regarde la partition : elle s'est allumée.", "smile"], ["narr", "Mais un sbire des Muets surgit dans la ruelle…"]], () => advanceQuest(5));
   }
-  if (run.id === "rpg:battle") {
-    if (!passed) return vnPlay([["r0", "Wub wub wub ! Même moi je chante mieux !"], ["doc", "Ça, c'est vexant. Fais grandir ta bande et retente : il a gagné une bataille, pas la guerre.", "worried"]], null);
-    rpg.boss = true; saveRpg(); R.ents = rpgEntities();
+  if (k === "minion") {
+    if (!passed) return vnPlay([["doc", "Le sbire tient bon. Au vrai tempo, pense à respirer avant la phrase, pas au milieu.", "worried"]], null);
+    rpg.minion = true; R.ents = rpgEntities(); saveRpg(); rpgBurst(13.5 * R.T, 12.5 * R.T, "#FF3B3B", 40); boom(true); shake(12);
+    return vnPlay([["narr", "Le sbire éclate en confettis. Il a laissé tomber une cassette."], ["doc", "La phrase 1 tient au vrai tempo. Ramasse la cassette, puis va voir le musicien."]], () => advanceQuest(6));
+  }
+  if (k === "musician") {
+    if (!passed) return vnPlay([["mus", "Presque ! Écoute où tombent les syllabes courtes. Réessaie, je t'écoute.", "sad"]], null);
+    rpg.phrase = true; saveRpg();
+    return vnPlay([["mus", "C'est ça ! One seems to hear words of good cheer ! Tu m'as rendu ma chanson.", "joy"], ["narr", "Une petite cloche argentée sort de l'étui de guitare et se met à tinter."], ["cr:dingdong", "Ding ! Dong !", "joy"], ["doc", "Dingdong ! Il adore cette phrase. Il veut te suivre."]],
+      () => tame("dingdong", () => advanceQuest(7)));
+  }
+  if (k === "exam") {
+    if (!passed) return vnPlay([["r0", "Wub wub wub ! Même moi je chante mieux !"], ["doc", "Ça, c'est vexant. Révise les phrases 1 et 2 depuis le menu, puis reviens : il a gagné une bataille, pas la guerre.", "worried"]], null);
+    rpg.boss = true; saveRpg(); R.ents = rpgEntities(); zoo.league = Math.max(zoo.league, 1); saveZoo();
     return vnPlay([["r0", "Wub… c'était pas juste… enfin si, c'était juste. C'est bien ça le problème."], ["narr", "Wubby s'enfuit par le pont. La Rue des Néons est libre !"],
-      ["doc", "Tu as libéré tout le quartier. Le Parc à Écho est de l'autre côté du pont. Il ouvre très bientôt.", "smile"]], () => { advanceQuest(7); rpgBilan(); });
+      ["doc", "Tu sais chanter les deux premières phrases de Carol au vrai tempo. C'est le début de ton Grand Concert.", "smile"],
+      ["doc", "Le Parc à Écho est de l'autre côté du pont : les phrases 3 et 4 t'y attendent. Il ouvre très bientôt."]], () => { advanceQuest(8); rpgBilan(); });
   }
 }
 function rpgBilan() {
   const found = CROONIES_Q1.filter(s => rpg.tamed.includes(s.id)).length;
   openPanel(`<div class="rp-head"><b>Quartier libéré</b><button type="button" class="pill" data-close>Fermer</button></div>
+    ${songStripHtml(true)}
     <div class="bilan"><div><b>${found}/${CROONIES_Q1.length}</b><span>Croonies</span></div><div><b>${rpg.notes.length}/8</b><span>notes trouvées</span></div><div><b>${prof.tokens}</b><span>jetons</span></div></div>
     <p class="sub">${found < CROONIES_Q1.length ? "Il reste des Croonies cachés dans la Rue des Néons. Ouvre ton carnet pour les indices." : "Tous les Croonies du quartier sont dans ta bande. Bravo !"}</p>
-    <p class="sub">À suivre : <b>le Parc à Écho</b>, de l'autre côté du pont.</p>`);
+    <p class="sub">À suivre : <b>le Parc à Écho</b> et les phrases 3 et 4.</p>`);
 }
 
-/* ════════ Le défi chanté : un instrument de visée, plein écran, au pouce ════════ */
-const singW = { on: false, o: null, done: null, i: 0, held: 0, raf: 0, last: 0, trail: [], listenAt: 0, result: null };
+/* ════════ La partition : 9 phrases, 4 quartiers, un Grand Concert ════════ */
+const SONG_PLAN = [
+  { name: "Rue des Néons", phrases: [0, 1], boss: "Wubby" },
+  { name: "Parc à Écho", phrases: [2, 3], boss: "Croc-Synthé" },
+  { name: "Studio 86", phrases: [4, 5, 6], boss: "Vocodor" },
+  { name: "Néon Club", phrases: [7, 8], boss: "La Reine du Fausset" },
+];
+function songStripHtml(big = false) {
+  loadProg(); buildPhrases();
+  const n = phrases.length, got = phrases.filter(p => (prog.ph[p.k] || 0) >= 1).length;
+  return `<div class="song-strip${big ? " big" : ""}"><span class="ss-k">Carol of the Bells · ${got}/${n} phrases</span><div class="ss-bar">${phrases.map(p => {
+    const st = prog.ph[p.k] || 0, zone = SONG_PLAN.findIndex(z => z.phrases.includes(p.k));
+    return `<i class="s${st} z${zone}" title="Phrase ${p.k + 1}">${big ? p.k + 1 : ""}</i>`; }).join("")}<b class="ss-goal">★</b></div></div>`;
+}
+function openSongPanel() {
+  loadProg(); buildPhrases();
+  const LV = ["à apprendre", "au ralenti", "en rythme", "sans filet"];
+  openPanel(`<div class="rp-head"><b>Ta partition</b><button type="button" class="pill" data-close>Fermer</button></div>
+    <p class="sub">Le but : le <b>Grand Concert du Néon Club</b>, Carol of the Bells en entier. Chaque quartier t'apprend quelques phrases, et son boss te fait passer l'examen.</p>
+    ${songStripHtml(true)}
+    ${SONG_PLAN.map((z, zi) => `<section class="sp-zone${zi === 0 ? " open" : ""}"><h3>${esc(z.name)} <small>· boss : ${esc(z.boss)}</small></h3>
+      ${z.phrases.filter(k => phrases[k]).map(k => { const p = phrases[k], st = prog.ph[k] || 0;
+        return `<div class="sp-ph s${st}"><b>Phrase ${k + 1}</b><span>« ${esc((p.words || "…").split(" ").slice(0, 7).join(" "))}${(p.words || "").split(" ").length > 7 ? "…" : ""} »</span><small>Mesures ${p.bars[0]}-${p.bars[1]} · ${LV[st]}</small></div>`; }).join("")}
+      ${zi === 0 ? "" : `<p class="sub">Ouvre bientôt.</p>`}</section>`).join("")}
+    <section class="sp-zone final"><h3>★ Le Grand Concert</h3><p class="sub">Toute la chanson, au vrai tempo, contre la Reine du Fausset.</p></section>`);
+}
+
+/* ════════ Le défi chanté : une leçon, puis une visée au pouce, puis un retour précis ════════ */
+const singW = { on: false, o: null, done: null, i: 0, held: 0, raf: 0, last: 0, trail: [], listenAt: 0, phase: "lesson", cents: [], singFor: 0 };
+const SW_TOL = 30;
+function guideTone(midi, t, dur, out) {
+  const f = freq(midi), o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g1 = ctx.createGain(), g2 = ctx.createGain();
+  o1.type = "triangle"; o1.frequency.value = f; o2.type = "sine"; o2.frequency.value = f * 2; g2.gain.value = 0.12;
+  g1.gain.setValueAtTime(0.0001, t); g1.gain.exponentialRampToValueAtTime(0.34, t + 0.04); g1.gain.setValueAtTime(0.32, t + Math.max(0.05, dur - 0.08)); g1.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.12);
+  o1.connect(g1); o2.connect(g2).connect(g1); g1.connect(out);
+  o1.start(t); o2.start(t); o1.stop(t + dur + 0.2); o2.stop(t + dur + 0.2);
+}
+function keyboardSvg(targets) {
+  const lo = Math.min(...targets) - 4, hi = Math.max(...targets) + 4, whites = [];
+  for (let m = lo; m <= hi; m++) if (!BLACK.has(pcOf(m))) whites.push(m);
+  const kw = 300 / whites.length;
+  const order = m => targets.map((t, i) => t === m ? i + 1 : 0).filter(Boolean);
+  let out = `<svg class="sw-kb" viewBox="0 0 300 90" aria-label="Les notes sur le clavier">`;
+  whites.forEach((m, i) => { const o = order(m); out += `<rect x="${i * kw + 1}" y="0" width="${kw - 2}" height="88" rx="3" fill="${o.length ? "#FFE45E" : "#F2EAF8"}"/>`;
+    out += `<text x="${i * kw + kw / 2}" y="80" text-anchor="middle" font-size="9" fill="#12001F">${noteName(m)}</text>`;
+    if (o.length) out += `<text x="${i * kw + kw / 2}" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#FF2E88">${o.join("·")}</text>`; });
+  for (let m = lo; m <= hi; m++) if (BLACK.has(pcOf(m))) {
+    const wi = whites.filter(w => w < m).length, o = order(m);
+    out += `<rect x="${wi * kw - kw * 0.3}" y="0" width="${kw * 0.6}" height="54" rx="2" fill="${o.length ? "#FF2E88" : "#12001F"}"/>`;
+    if (o.length) out += `<text x="${wi * kw}" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${o.join("·")}</text>`;
+  }
+  return out + `</svg>`;
+}
 async function singChallenge(o, done) {
   const m = await ensureMic();
   if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Autorise le micro dans ton navigateur.", "worried"]], null); return; }
-  Object.assign(singW, { on: true, o, done, i: 0, held: 0, trail: [], result: null, okT: 0 });
+  Object.assign(singW, { on: true, o, done, i: 0, held: 0, trail: [], phase: "lesson", cents: [], singFor: 0, best: null });
   const el = $("singW"); el.hidden = false;
   el.querySelector(".sw-title").textContent = o.title;
   el.querySelector(".sw-sub").textContent = o.sub;
   el.querySelector(".sw-portrait").innerHTML = o.portrait ? monsterSvg(o.portrait, 90, { mood: "sad", cls: "idle" }) : `<span class="sw-icon">${o.icon || "♪"}</span>`;
   el.classList.toggle("foe", !!o.foe);
   singW.cv = $("swCv"); singW.c = singW.cv.getContext("2d");
+  swLesson();
+}
+function swPanel(html) { const p = $("singW").querySelector(".sw-lesson"); p.innerHTML = html; p.hidden = false; $("singW").classList.add("lesson-on"); }
+function swLesson() {
+  const o = singW.o;
+  swPanel(`<span class="sw-k">La leçon</span><b class="sw-what">${esc(o.lesson?.what || o.sub)}</b>
+    <div class="sw-notes">${o.targets.map(m => `<span><b>${noteName(m)}</b><small>${fullName(m)}</small></span>`).join("<i>›</i>")}</div>
+    ${keyboardSvg(o.targets)}
+    <ol class="sw-steps"><li><b>Écoute</b> ${o.targets.length > 1 ? "les notes" : "la note"}</li><li><b>Fredonne</b> dans ta tête</li><li><b>Chante</b>${o.kind === "hold" ? " et tiens longtemps" : " et tiens"}</li></ol>
+    ${o.lesson?.tip ? `<p class="sw-tip">💡 ${esc(o.lesson.tip)}</p>` : ""}
+    <button type="button" class="main-btn wide" id="swStart">Écouter puis chanter ▶</button>`);
+  $("swStart").onclick = () => swGo();
+}
+function swGo() {
+  $("singW").querySelector(".sw-lesson").hidden = true; $("singW").classList.remove("lesson-on");
   const r = singW.cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); singW.cv.width = r.width * d; singW.cv.height = r.height * d; singW.d = d; singW.W = r.width; singW.H = r.height;
   swListen();
   singW.last = performance.now(); cancelAnimationFrame(singW.raf); singW.raf = requestAnimationFrame(swFrame);
 }
 function swListen() {
-  const o = singW.o, c = ac(), t0 = c.currentTime + 0.15, step = 0.55;
-  const seq = o.kind === "seq" ? o.targets : [o.targets[singW.i] ?? o.targets[0]];
+  const o = singW.o, c = ac(), t0 = c.currentTime + 0.15, step = 0.75;
+  const seq = o.kind === "seq" ? o.targets : [o.targets[0]];
   const bus = c.createGain(); bus.connect(OUT);
-  seq.forEach((m, q) => tone(m, t0 + q * step, o.kind === "seq" ? step * 0.9 : 1.2, bus));
-  singW.listenAt = performance.now() + ((seq.length - 1) * step + (o.kind === "seq" ? step : 1.2)) * 1000 + (state.headphones ? 250 : 1100);
-  singW.phase = "listen"; singW.held = 0; if (o.kind === "seq") singW.i = 0;
-  $("singW").querySelector(".sw-state").textContent = "Écoute…";
+  seq.forEach((m, q) => guideTone(m, t0 + q * step, o.kind === "seq" ? step * 0.85 : 1.4, bus));
+  singW.listenAt = performance.now() + ((seq.length - 1) * step + (o.kind === "seq" ? step : 1.4)) * 1000 + (state.headphones ? 300 : 1100);
+  singW.phase = "listen"; singW.held = 0; singW.cents = []; singW.singFor = 0; if (o.kind === "seq") singW.i = 0;
+  const st = $("singW").querySelector(".sw-state"); st.textContent = "Écoute…"; st.className = "sw-state";
+}
+/* Le retour précis : où était la voix, et quoi faire */
+function swFeedback() {
+  cancelAnimationFrame(singW.raf); singW.phase = "feedback";
+  const o = singW.o, cs = singW.cents, tgt = o.kind === "seq" ? o.targets[singW.i] : o.targets[0];
+  let head, tip;
+  if (cs.length < 8) { head = "Je ne t'ai presque pas entendue"; tip = "Rapproche le téléphone, chante un peu plus fort, et attends la fin de l'écoute avant de chanter."; }
+  else {
+    const med = median(cs), n = Math.round(Math.abs(med));
+    if (Math.abs(med) <= SW_TOL) { head = `Tu étais juste, à ${n} centièmes près`; tip = o.kind === "hold" ? "Mais la note bougeait trop : garde la même ouverture de bouche et un souffle régulier jusqu'au bout." : "Mais pas assez longtemps d'affilée : pose la note et ne bouge plus."; }
+    else if (med < 0) { head = n > 150 ? `Tu chantais une autre note, plus grave` : `Tu étais ${n} centièmes trop bas`; tip = n > 150 ? `Réécoute bien : la note visée est ${fullName(tgt)}. Fredonne-la doucement avant de chanter.` : "Vise le haut de la note : soutiens le souffle avec le ventre, et souris légèrement, ça éclaircit le son."; }
+    else { head = n > 150 ? `Tu chantais une autre note, plus aiguë` : `Tu étais ${n} centièmes trop haut`; tip = n > 150 ? `Réécoute bien : la note visée est ${fullName(tgt)}. Fredonne-la doucement avant de chanter.` : "Relâche : ne pousse pas la voix, laisse la note se poser un peu plus bas."; }
+  }
+  if (o.kind === "seq") head += ` (note ${singW.i + 1} sur ${o.targets.length})`;
+  swPanel(`<span class="sw-k">Le retour de Doc</span><b class="sw-what">${esc(head)}</b><p class="sw-tip">💡 ${esc(tip)}</p>
+    ${keyboardSvg([tgt])}
+    <div class="sw-btns"><button type="button" class="main-btn wide" id="swRetry">Réessayer ▶</button><button type="button" class="pill" id="swGiveUp">Plus tard</button></div>`);
+  $("swRetry").onclick = () => swGo();
+  $("swGiveUp").onclick = () => swEnd(false);
 }
 function swEnd(ok) {
   singW.on = false; cancelAnimationFrame(singW.raf);
   const el = $("singW");
   if (ok) {
-    el.querySelector(".sw-state").textContent = pick(["Parfait !", "Juste !", "Magnifique !", "Bingo !"]);
+    const cs = singW.okCents || [], acc = cs.length ? Math.round(median(cs.map(Math.abs))) : null;
+    swPanel(`<span class="sw-k">Réussi</span><b class="sw-what">${pick(["Parfait !", "Juste !", "Magnifique !", "Bingo !"])}</b>${acc != null ? `<p class="sw-tip">Justesse : à ${acc} centièmes près en moyenne. ${acc <= 10 ? "Pile dessus." : acc <= 20 ? "Très propre." : "Juste, et ça peut devenir encore plus précis."}</p>` : ""}`);
     celebrate(60); flash("#00F5D4", 0.3); if (ctx) fanfare();
-    const m = activeMon(); if (m) { const r = growMon(m, 14, 4); if (r.evolved) setTimeout(() => evolveShow(m, r.from), 1400); }
+    const m = activeMon(); if (m) { const r = growMon(m, 14, 4); if (r.evolved) setTimeout(() => evolveShow(m, r.from), 1600); }
   }
-  setTimeout(() => { el.hidden = true; const d = singW.done; singW.done = null; rpgHud(); d && d(ok); }, ok ? 1100 : 0);
+  setTimeout(() => { el.hidden = true; el.querySelector(".sw-lesson").hidden = true; el.classList.remove("lesson-on"); const d = singW.done; singW.done = null; rpgHud(); d && d(ok); }, ok ? 1600 : 0);
 }
-$("swAgain").onclick = () => { if (singW.on) swListen(); };
-$("swQuit").onclick = () => { if (singW.on) swEnd(false); };
+$("swAgain").onclick = () => { if (singW.on && singW.phase !== "lesson" && singW.phase !== "feedback") swListen(); };
+$("swQuit").onclick = () => { if (singW.on) { if (singW.phase === "sing" && singW.cents.length) swFeedback(); else swEnd(false); } };
 function swFrame(now) {
-  if (!singW.on) return;
+  if (!singW.on || singW.phase === "feedback") return;
   const dt = Math.min(50, now - singW.last); singW.last = now;
   const o = singW.o, c = singW.c, W = singW.W, H = singW.H, d = singW.d;
-  const tgt = o.kind === "seq" ? o.targets[singW.i] : o.targets[0], need = o.kind === "hold" ? o.ms : o.kind === "seq" ? 450 : (o.ms || 1200), tol = 40;
-  let live = null, cents = null;
+  const tgt = o.kind === "seq" ? o.targets[singW.i] : o.targets[0], need = o.kind === "hold" ? o.ms : o.kind === "seq" ? 700 : (o.ms || 1600), tol = SW_TOL;
+  let cents = null;
   if (singW.phase === "sing" || now >= singW.listenAt) {
-    if (singW.phase === "listen") { singW.phase = "sing"; $("singW").querySelector(".sw-state").textContent = "À toi !"; }
-    live = smoothed(readMic());
-    if (live != null) { cents = fold((live - tgt) * 100); singW.trail.push({ t: now, c: Math.max(-700, Math.min(700, cents)) }); }
+    if (singW.phase === "listen") { singW.phase = "sing"; singW.okCents = singW.okCents || []; $("singW").querySelector(".sw-state").textContent = "À toi !"; }
+    singW.singFor += dt;
+    const live = smoothed(readMic());
+    if (live != null) { cents = fold((live - tgt) * 100); singW.cents.push(cents); singW.trail.push({ t: now, c: Math.max(-700, Math.min(700, cents)) }); }
     const ok = cents != null && Math.abs(cents) <= tol;
-    singW.held = ok ? singW.held + dt : Math.max(0, singW.held - dt * (o.kind === "hold" ? 0.25 : 0.6));
+    if (ok) singW.okCents.push(cents);
+    singW.held = ok ? singW.held + dt : Math.max(0, singW.held - dt * (o.kind === "hold" ? 0.35 : 0.8));
     const st = $("singW").querySelector(".sw-state");
     st.textContent = cents == null ? "À toi !" : ok ? "Juste ! Tiens…" : cents < 0 ? (cents < -80 ? "Plus haut ↑↑" : "Un poil plus haut ↑") : (cents > 80 ? "Plus bas ↓↓" : "Un poil plus bas ↓");
     st.className = "sw-state " + (cents == null ? "" : ok ? "ok" : "off");
     if (singW.held >= need) {
-      if (o.kind === "seq" && singW.i < o.targets.length - 1) { singW.i++; singW.held = 0; if (ctx) blip(1320, ctx.currentTime, 0.08, 0.05); }
+      if (o.kind === "seq" && singW.i < o.targets.length - 1) { singW.i++; singW.held = 0; singW.cents = []; singW.singFor = 0; if (ctx) blip(1320, ctx.currentTime, 0.08, 0.05); }
       else { swEnd(true); return; }
     }
+    if (singW.singFor > (o.kind === "hold" ? o.ms + 9000 : 11000)) { swFeedback(); return; }
   }
   singW.trail = singW.trail.filter(p => now - p.t < 2500);
-  // dessin : la jauge verticale de hauteur, la cible au centre
   c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, W, H);
   const cy = H / 2, ppc = H / 1100;
-  for (let s = -5; s <= 5; s++) { const y = cy - s * 100 * ppc; c.fillStyle = s === 0 ? "rgba(255,255,255,0)" : "rgba(255,255,255,.06)"; c.fillRect(0, y, W, 1); c.fillStyle = "rgba(195,155,211,.6)"; c.font = "11px 'Chakra Petch', sans-serif"; c.textAlign = "left"; c.fillText(fullName(tgt + s), 6, y - 3); }
+  for (let s2 = -5; s2 <= 5; s2++) { const y = cy - s2 * 100 * ppc; c.fillStyle = "rgba(255,255,255,.06)"; if (s2) c.fillRect(0, y, W, 1); c.fillStyle = "rgba(195,155,211,.6)"; c.font = "11px 'Chakra Petch', sans-serif"; c.textAlign = "left"; c.fillText(fullName(tgt + s2), 6, y - 3); }
   const band = c.createLinearGradient(0, cy - tol * ppc * 2, 0, cy + tol * ppc * 2);
   band.addColorStop(0, "rgba(0,245,212,0)"); band.addColorStop(0.5, "rgba(0,245,212,.35)"); band.addColorStop(1, "rgba(0,245,212,0)");
   c.fillStyle = band; c.fillRect(0, cy - tol * ppc * 2, W, tol * ppc * 4);
   c.fillStyle = "#00F5D4"; c.font = "16px 'Anton', Impact, sans-serif"; c.textAlign = "right"; c.fillText(fullName(tgt).toUpperCase(), W - 8, cy - 8);
-  // la traînée de la voix, de droite à gauche
   c.lineWidth = 4; c.lineCap = "round"; let prev = null;
   for (const p of singW.trail) {
     const x = W * 0.7 - (now - p.t) * W * 0.00026, y = cy - p.c * ppc;
@@ -6682,12 +6878,11 @@ function swFrame(now) {
     const y = cy - Math.max(-700, Math.min(700, cents)) * ppc, ok = Math.abs(cents) <= tol, col = ok ? "#00F5D4" : "#FF3B3B";
     c.save(); c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 20; c.beginPath(); c.arc(W * 0.7, y, 11, 0, 6.283); c.fill(); c.restore();
   }
-  // la jauge de réussite
   const k = Math.min(1, singW.held / need);
   c.save(); c.strokeStyle = "rgba(255,255,255,.12)"; c.lineWidth = 8; c.beginPath(); c.arc(W * 0.7, cy, 30, 0, 6.283); c.stroke();
   c.strokeStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 12; c.beginPath(); c.arc(W * 0.7, cy, 30, -Math.PI / 2, -Math.PI / 2 + k * 6.283); c.stroke(); c.restore();
   if (o.kind === "seq") {
-    o.targets.forEach((m, q) => { const x = W / 2 + (q - (o.targets.length - 1) / 2) * 44; c.fillStyle = q < singW.i ? "#00F5D4" : q === singW.i ? "#FFE45E" : "rgba(255,255,255,.2)"; c.beginPath(); c.arc(x, 20, q === singW.i ? 10 : 7, 0, 6.283); c.fill(); c.fillStyle = "#12001F"; c.font = "10px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillText(noteName(m), x, 24); });
+    o.targets.forEach((m, q) => { const x = W / 2 + (q - (o.targets.length - 1) / 2) * 46; c.fillStyle = q < singW.i ? "#00F5D4" : q === singW.i ? "#FFE45E" : "rgba(255,255,255,.2)"; c.beginPath(); c.arc(x, 22, q === singW.i ? 13 : 9, 0, 6.283); c.fill(); c.fillStyle = "#12001F"; c.font = "10px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillText(noteName(m), x, 26); });
   }
   singW.raf = requestAnimationFrame(swFrame);
 }
@@ -6715,6 +6910,8 @@ function openRpgMenu() {
     <div class="rp-menu">
       <button type="button" data-m="listen"><b>Écouter le morceau</b><small>Ta voix et les autres, au calme</small></button>
       <button type="button" data-m="step"><b>Note par note</b><small>Viser chaque note de Carol</small></button>
+      <button type="button" data-m="rev0"><b>Réviser la phrase 1</b><small>« Ding dong », au ralenti ou en rythme</small></button>
+      <button type="button" data-m="rev1"><b>Réviser la phrase 2</b><small>Le rythme sur une seule note</small></button>
       <button type="button" data-m="sing"><b>Chanter tout le morceau</b><small>Le live, ta bande dévore</small></button>
       <button type="button" data-m="box"><b>Juke-box</b><small>${prof.tokens} jetons · des cassettes à ouvrir</small></button>
       <button type="button" data-m="avatar"><b>Changer de look</b><small>Coupe, couleurs, blouson</small></button>
@@ -6730,6 +6927,7 @@ function rpgPanelClick(e) {
   if (w === "avatar") openCreator(() => { $("rpg").hidden = false; });
   else if (w === "account") openAccount();
   else if (w === "title") openTitle();
+  else if (w === "rev0" || w === "rev1") { closeRpg(); state.lairView = "train"; if (state.mode !== "train") setMode("train"); $("train").hidden = true; startPhrase(w === "rev0" ? 0 : 1, Math.min(3, ((loadProg(), prog.ph[w === "rev0" ? 0 : 1]) || 0) + 1)); }
   else { closeRpg(); if (w === "box") { state.lairView = "box"; if (state.mode !== "train") setMode("train"); else renderTrain(); } else setMode(w); }
 }
 
