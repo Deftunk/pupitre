@@ -3764,7 +3764,7 @@ document.querySelectorAll(".drumSeg button").forEach(x => x.setAttribute("aria-p
    (la mineur, fa, ré mineur, mi majeur), pont de 8 mesures sur si bémol pour la tension, puis retour au thème.
    Basse et nappes « pompent » sur chaque grosse caisse, comme dans les productions synthwave des années 2010. */
 
-const MENU_BPM = 118;
+const MENU_BPM = 108;
 const CH = {
   Am: { bass: 45, pad: [57, 60, 64], arp: [69, 72, 76, 81] },
   F: { bass: 41, pad: [57, 60, 65], arp: [65, 69, 72, 77] },
@@ -3808,11 +3808,11 @@ function mKick(t) {
   const n = music.n, o = ctx.createOscillator(), g = ctx.createGain(), ws = ctx.createWaveShaper();
   ws.curve = n.kickCurve;
   o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.09);
-  g.gain.setValueAtTime(0.75, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+  g.gain.setValueAtTime(0.6, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
   o.connect(ws).connect(g).connect(n.drums); o.start(t); o.stop(t + 0.5);
-  const c = mNoise(t, 0.012, "highpass", 3000, 0.7, 0, n.drums); c.g.gain.setValueAtTime(0.35, t); c.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.012); c.go();
+  const c = mNoise(t, 0.012, "highpass", 3000, 0.7, 0, n.drums); c.g.gain.setValueAtTime(0.12, t); c.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.012); c.go();
   // la pompe : tout le reste s'écrase sous la grosse caisse puis remonte
-  const pg = n.pump.gain; pg.setValueAtTime(0.22, t); pg.linearRampToValueAtTime(1, t + 60 / MENU_BPM * 0.55);
+  const pg = n.pump.gain; pg.setValueAtTime(0.58, t); pg.linearRampToValueAtTime(1, t + 60 / MENU_BPM * 0.55);
 }
 function mClap(t) {
   const n = music.n;
@@ -3827,7 +3827,7 @@ function mClap(t) {
 }
 function mHat(t, open, accent) {
   const h2 = mNoise(t, open ? 0.25 : 0.045, "highpass", 8200, 0.7, 0, music.n.drums);
-  h2.g.gain.setValueAtTime(accent ? 0.13 : 0.07, t); h2.g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.25 : 0.045)); h2.go();
+  h2.g.gain.setValueAtTime(accent ? 0.075 : 0.042, t); h2.g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.25 : 0.045)); h2.go();
 }
 function mCrash(t) {
   const c = mNoise(t, 2.2, "highpass", 5200, 0.5, 0, music.n.clap);
@@ -3842,7 +3842,7 @@ function mBass(midi, t, dur, accent) {
   const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), sub = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
   o1.type = o2.type = "sawtooth"; o1.frequency.value = o2.frequency.value = f; o1.detune.value = -9; o2.detune.value = 9;
   sub.type = "sine"; sub.frequency.value = f / 2;
-  lp.type = "lowpass"; lp.Q.value = 7; lp.frequency.setValueAtTime(accent ? 2400 : 1500, t); lp.frequency.exponentialRampToValueAtTime(180, t + dur);
+  lp.type = "lowpass"; lp.Q.value = 4; lp.frequency.setValueAtTime(accent ? 1300 : 950, t); lp.frequency.exponentialRampToValueAtTime(180, t + dur);
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.15, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o1.connect(lp); o2.connect(lp); sub.connect(g); lp.connect(n.bassDrive).connect(g); g.connect(n.pump);
   for (const o of [o1, o2, sub]) { o.start(t); o.stop(t + dur + 0.05); }
@@ -3860,7 +3860,7 @@ function mArp(midi, t, open) {
   const n = music.n, o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
   o.type = "square"; o.frequency.value = freq(midi);
   lp.type = "lowpass"; lp.Q.value = 5; lp.frequency.setValueAtTime(700 + open * 5200, t); lp.frequency.exponentialRampToValueAtTime(500, t + 0.16);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.075, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
   o.connect(lp).connect(g).connect(n.arp); o.start(t); o.stop(t + 0.2);
 }
 function mLead(midi, t, dur) {
@@ -3896,12 +3896,12 @@ function musicStep(step, t) {
   // basse galopante
   if (!intro || bar >= 4) {
     if (brk) { if (s % 4 === 0) mBass(ch.bass, t, sd * 3.6, true); }
-    else mBass(ch.bass + (s % 2 ? 12 : 0), t, sd * 0.9, s % 4 === 0);
+    else if (s % 2 === 0) mBass(ch.bass + (s % 8 === 6 ? 12 : 0), t, sd * 1.8, s % 4 === 0);
   }
   // nappe
   if (s === 0) mPad(ch.pad, t, sd * 16, brk ? 0.05 : intro ? 0.03 : 0.035);
   // arpège, le filtre s'ouvre pendant l'intro
-  if (!brk || s % 2 === 0) mArp(ch.arp[ARP_ORDER[s]] + (brk ? 12 : 0), t, intro ? bar / 8 : brk ? 0.5 : 0.85);
+  if (!brk || s % 2 === 0) mArp(ch.arp[ARP_ORDER[s]] + (brk ? 12 : 0), t, intro ? bar / 10 : brk ? 0.4 : 0.6);
   // lead
   for (const [st, m, len] of LEAD[bar] || []) if (st === s) mLead(m, t, sd * len * 0.96);
 }
@@ -3909,17 +3909,17 @@ function startMusic() {
   if (music.playing || !ctx) return;
   music.playing = true;
   const n = music.n = {}, now = ctx.currentTime;
-  n.bus = ctx.createGain(); n.bus.gain.setValueAtTime(0, now); n.bus.gain.linearRampToValueAtTime(0.3, now + 1.5);
+  n.bus = ctx.createGain(); n.bus.gain.setValueAtTime(0, now); n.bus.gain.linearRampToValueAtTime(0.42, now + 1.5);
   const glue = ctx.createDynamicsCompressor(); glue.threshold.value = -14; glue.ratio.value = 4; glue.attack.value = 0.005; glue.release.value = 0.12;
   const limit = ctx.createDynamicsCompressor(); limit.threshold.value = -4; limit.ratio.value = 20; limit.knee.value = 0; limit.attack.value = 0.001; limit.release.value = 0.08;
   n.bus.connect(glue).connect(limit).connect(OUT);
   n.drums = ctx.createGain(); n.drums.gain.value = 0.62; n.drums.connect(n.bus);
   n.pump = ctx.createGain(); n.pump.gain.value = 1; n.pump.connect(n.bus);
-  const verb = ctx.createConvolver(); verb.buffer = impulse(2.4); const verbWet = ctx.createGain(); verbWet.gain.value = 0.55; verb.connect(verbWet).connect(n.bus);
-  n.clap = ctx.createGain(); n.clap.gain.value = 0.7; n.clap.connect(n.drums); n.clap.connect(verb);
-  n.kickCurve = driveCurve(3);
-  n.bassDrive = ctx.createWaveShaper(); n.bassDrive.curve = driveCurve(2.6);
-  n.leadDrive = ctx.createWaveShaper(); n.leadDrive.curve = driveCurve(1.8);
+  const verb = ctx.createConvolver(); verb.buffer = impulse(2.4); const verbWet = ctx.createGain(); verbWet.gain.value = 0.4; verb.connect(verbWet).connect(n.bus);
+  n.clap = ctx.createGain(); n.clap.gain.value = 0.42; n.clap.connect(n.drums); n.clap.connect(verb);
+  n.kickCurve = driveCurve(1.4);
+  n.bassDrive = ctx.createWaveShaper(); n.bassDrive.curve = driveCurve(1.2);
+  n.leadDrive = ctx.createWaveShaper(); n.leadDrive.curve = driveCurve(1.1);
   const mkEcho = (time, fbk, wetAmt, pan) => {
     const inp = ctx.createGain(), dl = ctx.createDelay(1.5), fb = ctx.createGain(), wet = ctx.createGain(), hp = ctx.createBiquadFilter();
     dl.delayTime.value = time; fb.gain.value = fbk; wet.gain.value = wetAmt; hp.type = "highpass"; hp.frequency.value = 400;
