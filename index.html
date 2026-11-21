@@ -44,7 +44,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
 .app {
   height: 100%; min-height: 600px; max-width: 2560px; margin: 0 auto;
-  display: grid; grid-template-rows: auto minmax(320px, 1fr) auto; gap: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(320px, 1fr) auto; gap: 12px;
   padding-block: 14px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -119,7 +119,7 @@ h1 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 
 
 /* Pupitre de commande */
 .dock { display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; align-items: center; padding: 12px 14px; border-radius: 24px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
-.modes { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 4px; border-radius: 18px; background: var(--glass-2); border: 1px solid var(--line); }
+.modes { display: grid; grid-template-columns: repeat(4, auto); gap: 4px; padding: 4px; border-radius: 18px; background: var(--glass-2); border: 1px solid var(--line); }
 .modes button { border: 0; background: transparent; border-radius: 14px; padding: 9px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; font-size: 13.5px; transition: background .2s, color .2s; }
 .modes button svg { width: 17px; height: 17px; }
 .modes button[aria-selected="true"] { background: rgba(243, 200, 112, .14); color: var(--gold); box-shadow: inset 0 0 0 1px rgba(243, 200, 112, .35); }
@@ -173,10 +173,100 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
 .err { color: var(--high); font-size: 12.5px; }
 .primary { background: var(--gold); color: #1A1306; border-color: var(--gold); }
 
+
+/* Progresser */
+.train { position: absolute; inset: 0; overflow-y: auto; padding: 22px clamp(14px, 3vw, 36px) 30px; background: linear-gradient(180deg, rgba(10, 12, 26, .93), rgba(6, 7, 13, .96)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; align-content: start; z-index: 2; }
+.train a { color: var(--gold); }
+.t-head { display: grid; grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(0, 1fr)); gap: 12px; }
+.t-card { border-radius: 18px; background: var(--glass-2); border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.t-card .k, .reco .k, .ex-k { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.t-card .big { font-family: var(--f-display); font-size: 34px; font-weight: 600; line-height: 1; }
+.t-card .big small { font-size: 18px; color: var(--muted); }
+.t-card .cap { font-size: 12px; color: var(--muted); }
+.t-card.lvl { grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.lv-badge { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-display); font-size: 30px; font-weight: 600; color: #1A1306; background: radial-gradient(circle at 35% 30%, #FFE3A6, var(--gold) 45%, var(--gold-deep)); box-shadow: 0 0 26px rgba(243, 200, 112, .4); }
+.lv-txt { display: grid; gap: 5px; min-width: 0; }
+.lv-name { font-family: var(--f-display); font-style: italic; font-size: 24px; font-weight: 600; line-height: 1.05; }
+.xpbar { display: block; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.xpbar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); box-shadow: 0 0 10px rgba(243, 200, 112, .5); }
+.xp-cap { font-size: 12px; color: var(--muted); }
+.t-card.goal { grid-template-columns: 46px 1fr; align-items: center; gap: 12px; }
+.t-card.goal svg { width: 46px; height: 46px; }
+.t-card.goal > div { display: grid; gap: 4px; min-width: 0; }
+.t-card .big, .lv-badge, .exend .gain b { font-variant-numeric: lining-nums tabular-nums; }
+.reco { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 18px; border-radius: 20px; background: linear-gradient(100deg, rgba(243, 200, 112, .18), rgba(243, 200, 112, .03)); border: 1px solid rgba(243, 200, 112, .35); }
+.reco > div { display: grid; gap: 3px; min-width: 0; }
+.reco b { font-family: var(--f-display); font-style: italic; font-size: 26px; font-weight: 600; line-height: 1.1; }
+.reco span:not(.k) { color: var(--muted); font-size: 13px; }
+.reco.warn { background: rgba(255, 138, 102, .1); border-color: rgba(255, 138, 102, .4); }
+.reco.warn b { font-family: var(--f-ui); font-style: normal; font-size: 15px; }
+.t-sec h3 { margin: 0 0 4px; font-family: var(--f-display); font-style: italic; font-size: 26px; font-weight: 600; }
+.t-sec .sub { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+.ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 10px; }
+.ex-card { text-align: left; border-radius: 18px; background: var(--glass-2); border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 7px; align-content: start; min-width: 0; color: var(--text); transition: border-color .2s, transform .2s; }
+button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: rgba(243, 200, 112, .45); }
+button.ex-card:active { transform: scale(.99); }
+.ex-card > b { font-family: var(--f-display); font-size: 21px; font-weight: 600; line-height: 1.15; }
+.ex-card > b.words { font-style: italic; font-size: 18px; overflow-wrap: anywhere; }
+.ex-card .ex-d { font-size: 12.5px; color: var(--muted); }
+.ex-card.locked { opacity: .42; }
+.ex-card.done { border-color: rgba(243, 200, 112, .4); background: linear-gradient(160deg, rgba(243, 200, 112, .09), rgba(255, 255, 255, .02)); }
+.ex-card.final { border-style: dashed; }
+.ex-card .lock { font-size: 11.5px; color: var(--muted); }
+.stars { display: inline-flex; gap: 3px; align-items: center; }
+.stars em { font-style: normal; font-family: var(--f-mono); font-size: 11px; color: var(--muted); margin-left: 8px; }
+.st svg { width: 17px; height: 17px; fill: rgba(255, 255, 255, .12); display: block; }
+.st.on svg { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(243, 200, 112, .6)); }
+.stars.big .st svg { width: 52px; height: 52px; }
+.st.fresh svg { animation: starPop .7s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: var(--d); }
+@keyframes starPop { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.lvl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.lvl-btns button { border: 1px solid var(--line); background: rgba(255, 255, 255, .03); border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 600; color: var(--text); }
+.lvl-btns button:hover:not(:disabled) { border-color: var(--gold); }
+.lvl-btns button.done { border-color: rgba(243, 200, 112, .5); color: var(--gold); }
+.lvl-btns button:disabled { opacity: .35; cursor: default; }
+.spark { width: 100%; height: 80px; display: block; }
+.spark-cap { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+.tend { margin: 10px 0 0; font-size: 13.5px; color: var(--text); max-width: 70ch; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr)); gap: 8px; }
+.medal { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--glass-2); text-align: left; }
+.medal i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; font-style: normal; font-weight: 700; font-size: 14px; background: rgba(255, 255, 255, .06); color: var(--muted); }
+.medal.on i { background: radial-gradient(circle at 35% 30%, #FFE3A6, var(--gold) 45%, var(--gold-deep)); color: #1A1306; box-shadow: 0 0 16px rgba(243, 200, 112, .35); }
+.medal b { font-size: 12.5px; display: block; }
+.medal small { font-size: 11px; color: var(--muted); }
+.medal:not(.on) { opacity: .5; }
+.medal.fresh { animation: rise .6s cubic-bezier(.2, .8, .2, 1) both; }
+.exhud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; align-items: center; padding: 9px 16px; border-radius: 18px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); max-width: calc(100% - 100px); z-index: 1; font-size: 13px; }
+.exhud .t { font-family: var(--f-display); font-style: italic; font-size: 17px; font-weight: 600; }
+.exhud .ph { font-weight: 700; color: var(--gold); }
+.exhud .sc { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.exhud .sc b { color: var(--ok); }
+.exhud .combo { font-weight: 700; color: var(--ok); }
+.exhud .xp { font-family: var(--f-mono); font-size: 12px; color: var(--gold); }
+.exhud .fig { display: flex; gap: 5px; }
+.exhud .fig span { padding: 1px 9px; border-radius: 8px; border: 1px solid var(--line); font-family: var(--f-display); font-size: 17px; }
+.exhud .fig .cur { border-color: var(--gold); color: var(--gold); }
+.exhud .fig .got { background: rgba(110, 240, 194, .15); border-color: rgba(110, 240, 194, .5); color: var(--ok); }
+.exend { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 6, 12, .62); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 3; overflow-y: auto; padding: 12px; }
+.exend .card { width: min(480px, 100%); padding: 26px 22px; border-radius: 26px; background: #0F1224; border: 1px solid var(--line); display: grid; gap: 12px; justify-items: center; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); animation: rise .5s cubic-bezier(.2, .8, .2, 1); }
+.exend h3 { margin: 0; font-family: var(--f-display); font-style: italic; font-size: 32px; font-weight: 600; }
+.exend p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.exend .gain { display: grid; gap: 2px; }
+.exend .gain b { font-family: var(--f-mono); font-size: 20px; color: var(--gold); }
+.exend .gain span { font-size: 12px; color: var(--ok); }
+.lvl-line { display: grid; gap: 6px; width: 100%; font-size: 13px; }
+.exend .tip { color: var(--text); background: rgba(255, 255, 255, .04); border-radius: 12px; padding: 10px 12px; }
+.badges.mini { grid-template-columns: 1fr; width: 100%; }
+.row.center { justify-content: center; }
+
 @media (max-width: 760px) {
   .app { padding-block: 10px; gap: 10px; grid-template-rows: auto minmax(340px, 1fr) auto; }
   .dock { grid-template-columns: 1fr; padding: 10px; border-radius: 20px; }
-  .modes { grid-template-columns: repeat(3, 1fr); }
+  .modes { grid-template-columns: repeat(4, 1fr); }
+  .modes button { font-size: 12px; gap: 4px; flex-direction: column; }
+  .t-head { grid-template-columns: 1fr 1fr; }
+  .t-card.lvl { grid-column: 1 / -1; }
+  .exhud { max-width: calc(100% - 24px); top: 52px; }
   .modes button { justify-content: center; padding: 9px 6px; }
   .ctrls { justify-content: center; gap: 10px 14px; }
   .step-hud { top: auto; bottom: 100px; right: 12px; min-width: 120px; padding: 12px 14px; }
@@ -235,6 +325,9 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
       <button class="x" type="button" id="micToastClose" aria-label="Fermer">×</button>
     </div>
     <div class="results" id="results" hidden></div>
+    <div class="train" id="train" hidden></div>
+    <div class="exhud" id="exHud" hidden></div>
+    <div class="exend" id="exEnd" hidden></div>
   </section>
 
   <nav class="dock" aria-label="Commandes">
@@ -245,6 +338,8 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Note par note</button>
       <button role="tab" id="tab-sing" data-mode="sing" aria-selected="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Chanter</button>
+      <button role="tab" id="tab-train" data-mode="train" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Progresser</button>
     </div>
 
     <div class="ctrls" id="ctrl-listen">
@@ -281,6 +376,11 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
       <button type="button" class="pill" id="micBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Activer le micro</button>
     </div>
 
+    <div class="ctrls" id="ctrl-train" hidden>
+      <button class="pill" id="trainBack" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>Arrêter et revenir au parcours</button>
+      <button type="button" class="pill hpBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>J'ai un casque</button>
+      <span class="status">En exercice, une note est juste à ±30 centièmes de demi-ton.</span>
+    </div>
     <div class="ctrls" id="ctrl-sing" hidden>
       <button class="main-btn rec" id="singBtn" type="button" aria-label="Chanter"></button>
       <div class="field"><span>Mélodie guide</span>
@@ -514,6 +614,7 @@ const state = {
   live: null,
 };
 const view = { beat: 0, target: 0 };
+state.hidePiece = false; state.exBand = null;
 
 function loadScore(text) {
   const { score, errors } = parseScore(text);
@@ -693,12 +794,13 @@ function playRef(midi, seconds = 1.1) {
 
 /* Lecture : les notes sont programmées au fil de l'eau, une seconde à l'avance */
 let startToken = 0;
-async function startPlayback({ from, guide = 1, countIn = false, mode = "listen" }) {
+async function startPlayback({ from, guide = 1, countIn = false, mode = "listen", until = null, bpm = null }) {
   stopPlayback();
   const tok = ++startToken;
   ac();
   if (instrument === "piano" && !piano) { await loadPiano(); if (tok !== startToken) return; }
-  const c = ctx, ns = notes(), spb = 60 / state.bpm, bpb = state.score.beatsPerBar;
+  const B = bpm || state.bpm, end = until ?? state.score.total;
+  const c = ctx, ns = notes(), spb = 60 / B, bpb = state.score.beatsPerBar;
   const startBeat = ns[from].start;
   const lead = countIn ? bpb * spb : 0;
   const t0 = c.currentTime + 0.15 + lead;
@@ -713,19 +815,19 @@ async function startPlayback({ from, guide = 1, countIn = false, mode = "listen"
   if (countIn) for (let k = 0; k < bpb; k++) bell(t0 - lead + k * spb, k === 0, bus);
   const accent = n => Math.abs(n.start / bpb - Math.round(n.start / bpb)) < 1e-6 ? 1 : 0.84;
   const queue = [];
-  if (guide > 0) for (let i = from; i < ns.length; i++) { const n = ns[i]; if (n.midi != null) queue.push({ beat: n.start, midi: tgtOf(n), beats: n.beats, vel: accent(n), other: false }); }
-  const withOthers = state.others > 0 && (mode !== "sing" || state.headphones);
+  if (guide > 0) for (let i = from; i < ns.length && ns[i].start < end - 1e-6; i++) { const n = ns[i]; if (n.midi != null) queue.push({ beat: n.start, midi: tgtOf(n), beats: n.beats, vel: accent(n), other: false }); }
+  const withOthers = state.others > 0 && ((mode !== "sing" && mode !== "ex") || state.headphones);
   if (withOthers) state.score.parts.forEach((p, k) => {
     if (k === state.voice) return;
-    for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.9, other: k });
+    for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6 && n.start < end - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.9, other: k });
   });
   queue.sort((a, b) => a.beat - b.beat);
-  state.playing = { t0, startBeat, endBeat: state.score.total, bus, gBus, oBus, pans, queue, hasOthers: withOthers, qi: 0, mode, from, countIn, lastIdx: -1 };
+  state.playing = { t0, startBeat, endBeat: end, bpm: B, bus, gBus, oBus, pans, queue, hasOthers: withOthers, qi: 0, mode, from, countIn, lastIdx: -1 };
   pump(state.playing);
   updateButtons();
 }
 function pump(p) {
-  const spb = 60 / state.bpm, horizon = ctx.currentTime + 1.0;
+  const spb = 60 / p.bpm, horizon = ctx.currentTime + 1.0;
   while (p.qi < p.queue.length) {
     const e = p.queue[p.qi], t = p.t0 + (e.beat - p.startBeat) * spb;
     if (t > horizon) break;
@@ -746,7 +848,7 @@ function stopPlayback() {
   $("countdown").hidden = true;
   updateButtons();
 }
-function currentBeat() { const p = state.playing; return p && ctx ? p.startBeat + (ctx.currentTime - p.t0) * state.bpm / 60 : null; }
+function currentBeat() { const p = state.playing; return p && ctx ? p.startBeat + (ctx.currentTime - p.t0) * p.bpm / 60 : null; }
 
 /* ════════ Hauteur de la voix (YIN) ════════ */
 
@@ -825,6 +927,7 @@ function smoothed(p) {
   return smooth;
 }
 function showMicToast() {
+  if (state.mode === "train") { $("micToast").hidden = true; return; }
   $("micToastText").textContent = state.mode === "step"
     ? "Ce mode marche aussi à l'oreille : écoutez la note, chantez-la, puis passez à la suivante. Pour être guidée en direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur."
     : "Enregistrez-vous avec le dictaphone du téléphone, puis utilisez « Analyser un enregistrement » : chaque note sera vérifiée. Pour le direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur.";
@@ -884,6 +987,7 @@ const snow = Array.from({ length: reduced ? 0 : 70 }, () => ({ x: Math.random(),
 const fx = {
   items: [],
   ripple(x, y, col) { if (!reduced) this.items.push({ k: "r", x, y, col, t: 0, life: 900 }); },
+  text(x, y, s, col) { this.items.push({ k: "t", x, y, s, col, t: 0, life: 1150 }); },
   burst(x, y, col, n = 18) {
     if (reduced) return;
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 0.04 + Math.random() * 0.16; this.items.push({ k: "s", x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 0.05, col, t: 0, life: 600 + Math.random() * 500, r: 1 + Math.random() * 2 }); }
@@ -917,6 +1021,14 @@ function draw(now, dt) {
     if (BLACK.has(pcOf(m))) { g.fillStyle = "rgba(255,255,255,.022)"; g.fillRect(LEFT, y, W - LEFT, lanes.h); }
     if (pcOf(m) === 0) { g.fillStyle = "rgba(255,255,255,.07)"; g.fillRect(LEFT, y + lanes.h - 0.5, W - LEFT, 1); }
   }
+  // note visée d'un échauffement : une bande de lumière sur toute la largeur
+  if (state.exBand != null) {
+    const y = yOf(state.exBand), bh = lanes.h;
+    const band = g.createLinearGradient(0, y - bh, 0, y + bh);
+    band.addColorStop(0, "rgba(243,200,112,0)"); band.addColorStop(0.5, "rgba(243,200,112,.22)"); band.addColorStop(1, "rgba(243,200,112,0)");
+    g.fillStyle = band; g.fillRect(LEFT, y - bh, W - LEFT, bh * 2);
+    g.fillStyle = "rgba(243,200,112,.55)"; g.fillRect(LEFT, y - 0.5, W - LEFT, 1);
+  }
   // mesures
   const firstBar = Math.max(0, Math.floor((view.beat - (NX - LEFT) / P) / bpb));
   g.font = "500 10px 'JetBrains Mono', monospace"; g.textAlign = "left"; g.textBaseline = "top";
@@ -930,7 +1042,7 @@ function draw(now, dt) {
 
   // autres voix : de fines lignes argentées
   state.score.parts.forEach((p, k) => {
-    if (k === state.voice) return;
+    if (k === state.voice || state.hidePiece) return;
     for (const n of p.notes) {
       if (n.midi == null) continue;
       const x = xOf(n.start), w = n.beats * P; if (x > W || x + w < LEFT) continue;
@@ -943,7 +1055,7 @@ function draw(now, dt) {
   // mes notes
   const vb = view.beat, live = state.live;
   const curIdx = noteIndexAt(vb);
-  for (let i = 0; i < ns.length; i++) {
+  for (let i = 0; i < ns.length && !state.hidePiece; i++) {
     const n = ns[i]; if (n.midi == null) continue;
     const x = xOf(n.start), w = n.beats * P; if (x > W + 10) break; if (x + w < LEFT - 10) continue;
     const m = tgtOf(n), hh = Math.max(6, lanes.h * 0.74), y = yOf(m) - hh / 2;
@@ -1005,9 +1117,10 @@ function draw(now, dt) {
     const halo = g.createRadialGradient(NX, y, 0, NX, y, 30); halo.addColorStop(0, rgba(c, 0.55)); halo.addColorStop(1, rgba(c, 0));
     g.fillStyle = halo; g.beginPath(); g.arc(NX, y, 30, 0, 6.283); g.fill();
     g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 18; g.beginPath(); g.arc(NX, y, 7, 0, 6.283); g.fill(); g.shadowBlur = 0;
-    if (state.mode === "step" && hold > 0) {
+    const ring = state.mode === "step" ? hold / HOLD_MS : ex?.type === "hold" ? (ex.on || 0) / ex.goal : 0;
+    if (ring > 0) {
       g.strokeStyle = COL.ok; g.lineWidth = 3; g.lineCap = "round";
-      g.beginPath(); g.arc(NX, y, 17, -Math.PI / 2, -Math.PI / 2 + 6.283 * Math.min(1, hold / HOLD_MS)); g.stroke();
+      g.beginPath(); g.arc(NX, y, 17, -Math.PI / 2, -Math.PI / 2 + 6.283 * Math.min(1, ring)); g.stroke();
     }
   }
 
@@ -1015,7 +1128,11 @@ function draw(now, dt) {
   fx.items = fx.items.filter(it => (it.t += dt) < it.life);
   for (const it of fx.items) {
     const p = it.t / it.life;
-    if (it.k === "r") { g.strokeStyle = rgba(COL[it.col] || it.col, (1 - p) * 0.8); g.lineWidth = 2; g.beginPath(); g.arc(it.x, it.y, 8 + p * 54, 0, 6.283); g.stroke(); }
+    if (it.k === "t") {
+      g.globalAlpha = Math.min(1, (1 - p) * 1.6); g.fillStyle = COL[it.col] || it.col; g.font = "700 15px Manrope, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.shadowColor = "rgba(0,0,0,.6)"; g.shadowBlur = 6; g.fillText(it.s, it.x, it.y - p * 28); g.shadowBlur = 0; g.globalAlpha = 1;
+    }
+    else if (it.k === "r") { g.strokeStyle = rgba(COL[it.col] || it.col, (1 - p) * 0.8); g.lineWidth = 2; g.beginPath(); g.arc(it.x, it.y, 8 + p * 54, 0, 6.283); g.stroke(); }
     else { it.x += it.vx * dt; it.y += it.vy * dt; it.vy += 0.00025 * dt; g.fillStyle = rgba(COL[it.col] || it.col, 1 - p); g.beginPath(); g.arc(it.x, it.y, it.r, 0, 6.283); g.fill(); }
   }
 
@@ -1033,7 +1150,7 @@ function draw(now, dt) {
     g.fillText(fullName(m), LEFT - 6, yOf(m));
   }
 
-  drawLyrics(curIdx, bot);
+  if (!state.hidePiece) drawLyrics(curIdx, bot);
 }
 
 function drawLyrics(curIdx, bot) {
@@ -1081,17 +1198,19 @@ function frame(now) {
     else cd.hidden = true;
     const idx = noteIndexAt(b), n = notes()[idx];
     if (b >= n.start && idx !== p.lastIdx && n.midi != null) { p.lastIdx = idx; fx.ripple(nowX(), yOf(tgtOf(n)), "gold"); }
-    if (p.mode === "sing" && b >= p.startBeat - 0.25) {
+    if ((p.mode === "sing" || p.mode === "ex") && b >= p.startBeat - 0.25) {
       const m = readMic();
       state.trace.push({ beat: b, midi: m });
       setLive(smoothed(m), tgtOf(n));
     }
-    if (b >= p.endBeat + (p.mode === "sing" ? 0.5 : 0)) finishPlayback();
+    if (p.mode === "ex" && ex) exOnBeat(b);
+    if (b >= p.endBeat + (p.mode === "sing" || p.mode === "ex" ? 0.5 : 0)) finishPlayback();
   } else {
     view.beat += (view.target - view.beat) * Math.min(1, dt * 0.012);
     if (state.mode === "sing" && mic) setLive(smoothed(readMic()), tgtOf(notes()[noteIndexAt(view.beat)]));
   }
   if (state.mode === "step") stepTick(dt);
+  if (state.mode === "train" && ex && ctx) { if (ex.type === "hold") holdTick(dt); else if (ex.type === "echo") echoTick(dt); }
   if (mic) $("micBar").style.width = Math.min(100, Math.sqrt(mic.level) * 260) + "%";
   $("where").textContent = `MESURE ${Math.min(barOf(Math.max(0, view.beat)), Math.ceil(state.score.total / state.score.beatsPerBar))} / ${Math.ceil(state.score.total / state.score.beatsPerBar - 1e-6)}`;
   draw(now, dt);
@@ -1102,7 +1221,7 @@ function setLive(m, tgt) {
   if (m == null) { state.live = null; return; }
   if (tgt == null) { state.live = { midi: m, shown: m, cls: "" }; return; }
   const c = fold((m - tgt) * 100);
-  const cls = Math.abs(c) <= state.tol ? "ok" : c > 0 ? "high" : "low";
+  const cls = Math.abs(c) <= (state.mode === "train" ? TOL_EX : state.tol) ? "ok" : c > 0 ? "high" : "low";
   state.live = { midi: m, cents: c, shown: tgt + c / 100, cls };
 }
 
@@ -1113,6 +1232,8 @@ function finishPlayback() {
   view.target = p ? p.startBeat : 0;
   if (p?.mode === "listen" && state.loop) { startPlayback({ from: p.from, mode: "listen" }); return; }
   if (p?.mode === "sing") { state.results = evaluateTrace(state.trace, p.from); renderResults("live"); }
+  if (p?.mode === "preview" && ex) { ex.phase = "Préparez-vous"; renderHud(); setTimeout(() => { if (ex && (ex.type === "phrase" || ex.type === "full")) singNow(); }, state.headphones ? 500 : 1400); }
+  if (p?.mode === "ex" && ex) finishSung();
 }
 
 /* ════════ Écouter ════════ */
@@ -1389,8 +1510,12 @@ function setMode(mode) {
   if (state.mode === mode) return;
   stopPlayback(); state.live = null;
   state.mode = mode;
-  for (const m of ["listen", "step", "sing"]) { $("ctrl-" + m).hidden = m !== mode; $("tab-" + m).setAttribute("aria-selected", m === mode); }
+  for (const m of ["listen", "step", "sing", "train"]) { $("ctrl-" + m).hidden = m !== mode; $("tab-" + m).setAttribute("aria-selected", m === mode); }
   $("stepHud").hidden = mode !== "step";
+  if (ex) exAbort();
+  $("train").hidden = mode !== "train";
+  $("results").hidden = true;
+  if (mode === "train") { renderTrain(); if (micState === "idle") ensureMic().then(() => { if (state.mode === "train" && !ex) renderTrain(); }); }
   $("micToast").hidden = true;
   if (mode === "step") { renderStep(); if (micState === "idle") ensureMic(); }
   if (mode === "sing" && micState === "idle") ensureMic();
@@ -1414,6 +1539,7 @@ cv.addEventListener("pointerup", e => {
   if (beat < 0 || beat > state.score.total) return;
   let i = noteIndexAt(beat);
   if (notes()[i].midi == null) i = firstSungIndex(i, 1);
+  if (state.mode === "train") return;
   if (state.mode === "step") { stepGo(i); return; }
   if (state.playing) return;
   view.target = notes()[i].start;
@@ -1434,6 +1560,7 @@ function hideHint() { $("hintDrag").style.opacity = "0"; }
 document.addEventListener("keydown", e => {
   if (!$("sheetBack").hidden) { if (e.key === "Escape") closeSheet(); return; }
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+  if (state.mode === "train") return;
   if (e.code === "Space") { e.preventDefault(); (state.mode === "sing" ? $("singBtn") : state.mode === "step" ? $("stepListen") : $("playBtn")).click(); }
   if (e.key === "ArrowRight") { e.preventDefault(); if (state.mode === "step") $("stepNext").click(); else if (!state.playing) view.target = Math.min(state.score.total, view.target + state.score.beatsPerBar); }
   if (e.key === "ArrowLeft") { e.preventDefault(); if (state.mode === "step") $("stepPrev").click(); else if (!state.playing) view.target = Math.max(0, view.target - state.score.beatsPerBar); }
@@ -1460,9 +1587,11 @@ function renderVoices() {
   });
 }
 function refreshAll() {
+  if (ex) exAbort();
   renderVoices(); setTempo(state.bpm); layout(); renderMeta();
   $("results").hidden = true;
   if (state.mode === "step") renderStep();
+  if (state.mode === "train") renderTrain();
 }
 function openSheet() { $("scoreText").value = state.text; $("parseErr").hidden = true; $("sheetBack").hidden = false; }
 function closeSheet() { $("sheetBack").hidden = true; }
@@ -1518,6 +1647,471 @@ Réponds uniquement avec ce JSON : {"title": "…", "tempo": 80, "beatsPerBar": 
       : "La partition n'a pas pu être lue. Essayez une photo plus nette, prise bien à plat.";
   }
 };
+
+/* ════════ Progresser : parcours, exercices, récompenses ════════ */
+
+const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+const starRow = (n, max = 3, fresh = 0) => Array.from({ length: max }, (_, i) =>
+  `<span class="st${i < n ? " on" : ""}${i >= n - fresh && i < n ? " fresh" : ""}" style="--d:${i * 0.18}s">${STAR}</span>`).join("");
+const TOL_EX = 30;
+const DAY_GOAL = 3;
+const LEVELS = [
+  [0, "Voix qui s'éveille"], [150, "Choriste en herbe"], [400, "Oreille attentive"], [800, "Pupitre fiable"],
+  [1400, "Voix assurée"], [2200, "Pilier du pupitre"], [3500, "Soliste"],
+];
+const BADGES = [
+  { id: "premiere-note", g: "♪", name: "Première note", desc: "Une note juste en exercice" },
+  { id: "premiere-etoile", g: "★", name: "Première étoile", desc: "Réussir une phrase" },
+  { id: "tenue-5", g: "—", name: "Souffle long", desc: "Tenir une note juste 5 secondes" },
+  { id: "echo-parfait", g: "◎", name: "Oreille d'or", desc: "Un écho sans aucune erreur" },
+  { id: "serie-10", g: "10", name: "En série", desc: "10 notes justes d'affilée" },
+  { id: "serie-25", g: "25", name: "Inarrêtable", desc: "25 notes justes d'affilée" },
+  { id: "phrase-parfaite", g: "100", name: "Phrase parfaite", desc: "100 % sur une phrase" },
+  { id: "sans-filet", g: "∅", name: "Sans filet", desc: "Réussir une phrase au niveau 3" },
+  { id: "moitie", g: "½", name: "À mi-chemin", desc: "La moitié des étoiles du morceau" },
+  { id: "filage", g: "♫", name: "Le grand filage", desc: "Réussir le morceau entier" },
+  { id: "3-jours", g: "3", name: "Régulière", desc: "3 jours d'entraînement d'affilée" },
+  { id: "7-jours", g: "7", name: "Une semaine pleine", desc: "7 jours d'affilée" },
+];
+const PHRASE_LEVELS = [
+  { name: "Pas à pas", desc: "Tempo ralenti, on écoute d'abord", slow: 0.75, preview: true },
+  { name: "En rythme", desc: "Vrai tempo, on écoute d'abord", slow: 1, preview: true },
+  { name: "Sans filet", desc: "Seulement la première note", slow: 1, preview: false },
+];
+
+function readJSON(k) { try { return JSON.parse(store.get(k) || "null") || {}; } catch { return {}; } }
+const prof = Object.assign({ xp: 0, streak: 0, lastDay: null, today: { d: null, n: 0 }, badges: [], hist: [], comboBest: 0, lowN: 0, highN: 0 }, readJSON("pupitre.profile"));
+const saveProf = () => store.set("pupitre.profile", JSON.stringify(prof));
+const progKey = () => `pupitre.prog.${state.score.title}.${state.score.parts[state.voice].name}`;
+let prog = { ph: {}, best: {}, warm: {}, full: 0 };
+const loadProg = () => { prog = Object.assign({ ph: {}, best: {}, warm: {}, full: 0 }, readJSON(progKey())); };
+const saveProg = () => store.set(progKey(), JSON.stringify(prog));
+const levelOf = xp => { let i = 0; while (i + 1 < LEVELS.length && xp >= LEVELS[i + 1][0]) i++; return i; };
+const dayStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/* Le morceau découpé en phrases de quatre mesures, sans les doublons de la reprise */
+let phrases = [];
+function buildPhrases() {
+  const ns = notes(), span = 4 * state.score.beatsPerBar, seen = new Set();
+  phrases = [];
+  for (let w = 0; w * span < state.score.total - 1e-6; w++) {
+    const a = w * span, b = a + span, sung = [];
+    ns.forEach((n, i) => { if (n.midi != null && n.start >= a - 1e-6 && n.start < b - 1e-6) sung.push(i); });
+    if (!sung.length) continue;
+    const sig = sung.map(i => `${ns[i].midi}:${ns[i].beats}:${ns[i].start - a}:${ns[i].syl}`).join("|");
+    if (seen.has(sig)) continue;
+    seen.add(sig);
+    const to = sung[sung.length - 1];
+    phrases.push({ k: phrases.length, from: sung[0], to, a, until: Math.min(b, ns[to].start + ns[to].beats), bars: [barOf(a), barOf(b - 0.01)], words: sung.map(i => ns[i].syl).filter(Boolean).join(" "), count: sung.length });
+  }
+}
+const totalStars = () => phrases.reduce((s, p) => s + (prog.ph[p.k] || 0), 0);
+const phraseOpen = k => k === 0 || (prog.ph[k - 1] || 0) >= 1;
+const fullOpen = () => phrases.every(p => (prog.ph[p.k] || 0) >= 1);
+
+function recommendation() {
+  if (prof.today.d !== dayStr() || prof.today.n === 0) return { kind: "hold", label: "Échauffement · la note tenue", why: "On commence toujours par réveiller la voix." };
+  const open = phrases.filter(p => phraseOpen(p.k) && (prog.ph[p.k] || 0) < 3);
+  if (open.length) {
+    const p = open.reduce((a, b) => ((prog.ph[b.k] || 0) < (prog.ph[a.k] || 0) ? b : a));
+    const L = (prog.ph[p.k] || 0) + 1;
+    return { kind: "phrase", k: p.k, L, label: `Phrase ${p.k + 1} · ${PHRASE_LEVELS[L - 1].name}`, why: `Mesures ${p.bars[0]} à ${p.bars[1]} : la phrase la moins avancée.` };
+  }
+  if (fullOpen() && prog.full < 3) return { kind: "full", label: "Le grand filage", why: "Toutes les phrases sont acquises : place au morceau entier." };
+  return { kind: "echo", label: "Échauffement · l'écho", why: "Tout est acquis. L'écho garde l'oreille en forme." };
+}
+
+/* ── Le tableau du parcours ── */
+function renderTrain() {
+  loadProg(); buildPhrases();
+  const L = levelOf(prof.xp), cur = LEVELS[L], next = LEVELS[L + 1];
+  const pct = next ? (prof.xp - cur[0]) / (next[0] - cur[0]) : 1;
+  const today = prof.today.d === dayStr() ? prof.today.n : 0;
+  const streakAlive = prof.lastDay === dayStr() || prof.lastDay === dayStr(new Date(Date.now() - 864e5));
+  const streak = streakAlive ? prof.streak : 0;
+  const reco = recommendation();
+  const maxStars = phrases.length * 3;
+  const C = 2 * Math.PI * 16;
+  const hist = prof.hist.slice(-20);
+  let spark = `<p class="sub">Vos scores apparaîtront ici après quelques exercices.</p>`;
+  if (hist.length >= 2) {
+    const pts = hist.map((h, i) => [10 + i * (280 / (hist.length - 1)), 62 - h.acc * 0.54]);
+    spark = `<svg class="spark" viewBox="0 0 300 70" preserveAspectRatio="none" aria-label="Justesse des derniers exercices">
+      <line x1="10" x2="290" y1="${62 - 70 * 0.54}" y2="${62 - 70 * 0.54}" stroke="rgba(110,240,194,.35)" stroke-dasharray="3 4"/>
+      <polyline fill="none" stroke="${COL.gold}" stroke-width="2" stroke-linejoin="round" points="${pts.map(p => p.join(",")).join(" ")}"/>
+      ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === pts.length - 1 ? 4 : 2.5}" fill="${i === pts.length - 1 ? COL.gold : "rgba(243,200,112,.6)"}"/>`).join("")}
+    </svg><div class="spark-cap"><span>Il y a ${hist.length} exercices</span><span>Ligne pointillée : 70 %, le seuil d'une étoile</span><span>Dernier : ${hist[hist.length - 1].acc} %</span></div>`;
+  }
+  let tend = "";
+  if (prof.lowN + prof.highN >= 8) {
+    if (prof.lowN > prof.highN * 1.6) tend = "Tendance relevée : les notes fausses sont surtout <b>trop basses</b>. Gardez le souffle jusqu'au bout de la note et pensez la note un peu au-dessus.";
+    else if (prof.highN > prof.lowN * 1.6) tend = "Tendance relevée : les notes fausses sont surtout <b>trop hautes</b>. Détendez la gorge, sans pousser.";
+    else tend = "Les erreurs se répartissent entre trop haut et trop bas : c'est l'oreille qui s'affine, continuez la note tenue et l'écho.";
+  }
+  const warm = (id, title, desc, s) => `<button type="button" class="ex-card" data-go="${id}">
+      <span class="ex-k">Échauffement</span><b>${title}</b><span class="ex-d">${desc}</span>
+      <span class="stars">${starRow(s || 0)}</span></button>`;
+  const phraseCard = p => {
+    const s = prog.ph[p.k] || 0, open = phraseOpen(p.k), best = prog.best[p.k];
+    return `<div class="ex-card ph${open ? "" : " locked"}${s === 3 ? " done" : ""}">
+      <span class="ex-k">Phrase ${p.k + 1} · mesures ${p.bars[0]}-${p.bars[1]}</span>
+      <b class="words">${esc(p.words || "…")}</b>
+      <span class="stars">${starRow(s)}${best != null ? `<em>${Math.round(best * 100)} %</em>` : ""}</span>
+      <span class="lvl-btns">${PHRASE_LEVELS.map((lv, i) => `<button type="button" data-go="phrase" data-k="${p.k}" data-l="${i + 1}" ${open && s >= i ? "" : "disabled"} class="${s > i ? "done" : ""}" title="${lv.desc}">${i + 1}. ${lv.name}</button>`).join("")}</span>
+      ${open ? "" : `<span class="lock">Réussissez la phrase ${p.k} pour l'ouvrir</span>`}
+    </div>`;
+  };
+  $("train").innerHTML = `
+    ${micState === "denied" ? `<div class="reco warn"><div><b>Les exercices ont besoin du micro.</b><span>Sur cette page, il est bloqué. Ouvrez Pupitre en ligne, dans Chrome ou Safari : <a href="https://deftunk.github.io/pupitre/" target="_blank" rel="noopener">deftunk.github.io/pupitre</a></span></div></div>` : ""}
+    <div class="t-head">
+      <div class="t-card lvl">
+        <span class="lv-badge">${L + 1}</span>
+        <div class="lv-txt"><span class="k">Niveau ${L + 1}</span><b class="lv-name">${cur[1]}</b>
+          <span class="xpbar"><i style="width:${Math.round(pct * 100)}%"></i></span>
+          <span class="xp-cap">${prof.xp} XP${next ? ` · encore ${next[0] - prof.xp} pour « ${next[1]} »` : " · titre maximal"}</span></div>
+      </div>
+      <div class="t-card"><span class="k">Série</span><span class="big">${streak}</span><span class="cap">jour${streak > 1 ? "s" : ""} d'affilée</span></div>
+      <div class="t-card goal"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${COL.ok}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - Math.min(1, today / DAY_GOAL))}" transform="rotate(-90 20 20)"/></svg>
+        <div><span class="k">Objectif du jour</span><span class="big">${Math.min(today, DAY_GOAL)}<small>/${DAY_GOAL}</small></span><span class="cap">${today >= DAY_GOAL ? "atteint, bravo" : "exercices, +50 XP au bout"}</span></div></div>
+      <div class="t-card"><span class="k">Étoiles</span><span class="big">${totalStars()}<small>/${maxStars}</small></span><span class="cap">sur ce morceau</span></div>
+    </div>
+
+    <div class="reco"><div><span class="k">À faire maintenant</span><b>${reco.label}</b><span>${reco.why}</span></div>
+      <button type="button" class="main-btn wide" data-go="${reco.kind}" ${reco.k != null ? `data-k="${reco.k}" data-l="${reco.L}"` : ""}>${ICON.play}Commencer</button></div>
+
+    <section class="t-sec"><h3>Échauffements</h3><p class="sub">Cinq minutes pour réveiller la voix et l'oreille avant le morceau.</p>
+      <div class="ex-grid">
+        ${warm("hold", "La note tenue", "Trois notes de votre voix à tenir 5 secondes, bien droites.", prog.warm.hold)}
+        ${warm("echo", "L'écho", "Pupitre joue trois notes, vous les rechantez de mémoire.", prog.warm.echo)}
+      </div></section>
+
+    <section class="t-sec"><h3>Le morceau, phrase par phrase</h3><p class="sub">Une étoile par niveau réussi, avec au moins 70 % de notes justes. Chaque étoile ouvre la suite.</p>
+      <div class="ex-grid">${phrases.map(phraseCard).join("")}
+        <div class="ex-card ph final${fullOpen() ? "" : " locked"}">
+          <span class="ex-k">Le défi final</span><b>Le grand filage</b><span class="ex-d">Tout le morceau, au vrai tempo, sans la mélodie. 60, 75 et 90 % pour les trois étoiles.</span>
+          <span class="stars">${starRow(prog.full || 0)}</span>
+          <span class="lvl-btns"><button type="button" data-go="full" ${fullOpen() ? "" : "disabled"}>Lancer le filage</button></span>
+          ${fullOpen() ? "" : `<span class="lock">Une étoile sur chaque phrase pour l'ouvrir</span>`}
+        </div>
+      </div></section>
+
+    <section class="t-sec"><h3>Votre justesse</h3>${spark}${tend ? `<p class="tend">${tend}</p>` : ""}</section>
+
+    <section class="t-sec"><h3>Badges</h3><p class="sub">${prof.badges.length} sur ${BADGES.length}</p>
+      <div class="badges">${BADGES.map(b => `<div class="medal${prof.badges.includes(b.id) ? " on" : ""}"><i>${b.g}</i><div><b>${b.name}</b><small>${b.desc}</small></div></div>`).join("")}</div></section>`;
+}
+$("train").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b || b.disabled) return;
+  const go = b.dataset.go;
+  if (go === "hold") startHold();
+  else if (go === "echo") startEcho();
+  else if (go === "phrase") startPhrase(+b.dataset.k, +b.dataset.l);
+  else if (go === "full") startFull();
+});
+
+/* ── Moteur commun des exercices ── */
+let ex = null;
+const exHud = $("exHud");
+function exBegin(o) {
+  ex = Object.assign({ xp: 0, combo: 0, okN: 0, rated: 0, newBadges: [], lvl0: levelOf(prof.xp), low: 0, high: 0 }, o);
+  $("train").hidden = true; $("exEnd").hidden = true; exHud.hidden = false;
+  state.results = []; state.trace = []; state.live = null;
+  $("trainBack").hidden = false;
+  renderHud();
+}
+function exAbort() {
+  stopPlayback();
+  ex = null; state.hidePiece = false; state.exBand = null; state.live = null; state.results = null; state.trace = [];
+  exHud.hidden = true; $("exEnd").hidden = true;
+  if (state.mode === "train") { $("train").hidden = false; renderTrain(); }
+  $("trainBack").hidden = true;
+}
+function addXp(n, x, y) { if (!ex) return; ex.xp += n; prof.xp += n; if (x != null) fx.text(x, y - 20, "+" + n, "gold"); }
+function award(id) { if (ex && !prof.badges.includes(id)) { prof.badges.push(id); ex.newBadges.push(id); } }
+async function needMic() {
+  const m = await ensureMic();
+  if (!m) { renderTrain(); $("train").scrollTop = 0; }
+  return m;
+}
+function renderHud() {
+  if (!ex) { exHud.hidden = true; return; }
+  let mid = "";
+  if (ex.type === "echo") mid = `<span class="fig">${(ex.fig || []).map((m, q) => `<span class="${q < ex.j ? "got" : q === ex.j && ex.phase === "À vous" ? "cur" : ""}">${noteName(m)}</span>`).join("")}</span><span class="sc">Écho ${Math.max(1, ex.k + 1)}/${ex.rounds}</span>`;
+  else if (ex.type === "hold") mid = `<span class="sc">${ex.tgt != null ? fullName(ex.tgt) : ""} · <b id="holdT">${((ex.on || 0) / 1000).toFixed(1)}</b> / ${ex.goal / 1000} s</span><span class="sc">Note ${Math.max(1, ex.k + 1)}/${ex.targets.length}</span>`;
+  else mid = `<span class="sc">${ex.okN} juste${ex.okN > 1 ? "s" : ""} / ${ex.rated}</span>${ex.combo >= 3 ? `<span class="combo">Série ${ex.combo}${ex.combo >= 5 ? ` · ×${Math.min(4, 1 + Math.floor(ex.combo / 5))}` : ""}</span>` : ""}`;
+  exHud.innerHTML = `<span class="t">${esc(ex.title)}</span><span class="ph">${ex.phase || ""}</span>${mid}<span class="xp">+${ex.xp} XP</span>`;
+}
+
+/* ── Phrases et grand filage : chanter sur la partition qui défile ── */
+async function startPhrase(k, L) {
+  if (!(await needMic())) return;
+  buildPhrases();
+  const ph = phrases[k], lv = PHRASE_LEVELS[L - 1];
+  exBegin({ type: "phrase", k, L, ph, lv, bpm: Math.round(state.bpm * lv.slow), title: `Phrase ${k + 1} · ${lv.name}` });
+  view.target = view.beat = ph.a;
+  if (lv.preview) { ex.phase = "Écoutez"; renderHud(); startPlayback({ from: ph.from, mode: "preview", until: ph.until, bpm: ex.bpm }); }
+  else { ex.phase = "Première note"; renderHud(); playRef(tgtOf(notes()[ph.from]), 1.5); setTimeout(() => { if (ex?.type === "phrase") singNow(); }, state.headphones ? 1800 : 2600); }
+}
+async function startFull() {
+  if (!(await needMic())) return;
+  buildPhrases();
+  const ns = notes(), from = firstSungIndex(0, 1), to = ns.length - 1 - [...ns].reverse().findIndex(n => n.midi != null);
+  const ph = { from, to, a: ns[from].start, until: ns[to].start + ns[to].beats };
+  exBegin({ type: "full", ph, bpm: state.bpm, title: "Le grand filage" });
+  view.target = view.beat = ph.a;
+  ex.phase = "Première note"; renderHud();
+  playRef(tgtOf(ns[from]), 1.5);
+  setTimeout(() => { if (ex?.type === "full") singNow(); }, state.headphones ? 1800 : 2600);
+}
+function singNow() {
+  ex.phase = "À vous"; ex.evalAt = ex.ph.from; renderHud();
+  state.trace = []; state.results = [];
+  const guide = ex.type === "phrase" && ex.L === 1 && state.headphones ? 0.3 : 0;
+  startPlayback({ from: ex.ph.from, mode: "ex", until: ex.ph.until, bpm: ex.bpm, guide, countIn: true });
+}
+function rateTol(samples, target, tol) {
+  const v = samples.filter(x => x != null);
+  if (v.length < 3) return { status: "miss", cents: null };
+  const cents = median(v.map(x => fold((x - target) * 100)));
+  return { status: Math.abs(cents) <= tol ? "ok" : cents > 0 ? "high" : "low", cents };
+}
+function exOnBeat(b) {
+  const ns = notes();
+  while (ex.evalAt <= ex.ph.to) {
+    const n = ns[ex.evalAt];
+    if (n.midi == null) { ex.evalAt++; continue; }
+    if (b < n.start + n.beats + 0.08) break;
+    const a = n.start + Math.min(0.25, n.beats * 0.3), e = n.start + n.beats * 0.92;
+    const r = rateTol(state.trace.filter(p => p.beat >= a && p.beat < e).map(p => p.midi), tgtOf(n), TOL_EX);
+    state.results[ex.evalAt] = r;
+    judge(r, Math.max(LEFT + 30, Math.min(W - 30, xOf(n.start + n.beats / 2))), yOf(tgtOf(n)));
+    ex.evalAt++;
+  }
+}
+function judge(r, x, y) {
+  ex.rated++;
+  if (r.status === "ok") {
+    ex.okN++; ex.combo++;
+    prof.comboBest = Math.max(prof.comboBest, ex.combo);
+    const mult = Math.min(4, 1 + Math.floor(ex.combo / 5));
+    addXp(10 * mult, x, y);
+    fx.burst(x, y, "ok", 10);
+    fx.text(x, y - 40, ex.combo >= 5 ? `Juste ×${mult}` : "Juste", "ok");
+    award("premiere-note");
+    if (ex.combo >= 10) award("serie-10");
+    if (ex.combo >= 25) award("serie-25");
+  } else {
+    ex.combo = 0;
+    if (r.status === "miss") fx.text(x, y - 34, "…", "muted");
+    else {
+      const near = Math.abs(r.cents) <= 50;
+      if (near) addXp(3);
+      if (r.status === "low") { ex.low++; prof.lowN++; } else { ex.high++; prof.highN++; }
+      fx.text(x, y - 34, r.status === "high" ? (near ? "Un peu haut" : "Trop haut") : (near ? "Un peu bas" : "Trop bas"), r.status);
+    }
+  }
+  renderHud();
+}
+function finishSung() {
+  exOnBeat(Infinity);
+  const pct = ex.rated ? ex.okN / ex.rated : 0;
+  if (ex.type === "phrase") {
+    const prev = prog.ph[ex.k] || 0, passed = pct >= 0.7;
+    let fresh = 0;
+    if (passed && ex.L > prev) { fresh = ex.L - prev; prog.ph[ex.k] = ex.L; addXp(40 * fresh); }
+    prog.best[ex.k] = Math.max(prog.best[ex.k] || 0, pct);
+    if (passed) award("premiere-etoile");
+    if (passed && ex.L === 3) award("sans-filet");
+    if (pct === 1 && ex.rated >= 4) award("phrase-parfaite");
+    if (totalStars() * 2 >= phrases.length * 3) award("moitie");
+    complete(pct, { stars: prog.ph[ex.k] || 0, fresh, passed });
+  } else {
+    const s = pct >= 0.9 ? 3 : pct >= 0.75 ? 2 : pct >= 0.6 ? 1 : 0, prev = prog.full || 0;
+    const fresh = Math.max(0, s - prev);
+    if (fresh) { prog.full = s; addXp(80 * fresh); }
+    if (s >= 1) award("filage");
+    complete(pct, { stars: Math.max(s, prev), fresh, passed: s >= 1 });
+  }
+}
+
+/* ── Échauffement : la note tenue ── */
+async function startHold() {
+  if (!(await needMic())) return;
+  const use = new Map();
+  notes().forEach(n => { if (n.midi != null) use.set(tgtOf(n), (use.get(tgtOf(n)) || 0) + n.beats); });
+  const byUse = [...use.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
+  const main = byUse[0];
+  const up = byUse.find(m => m >= main + 2 && m <= main + 7) ?? Math.max(...byUse);
+  const down = byUse.find(m => m <= main - 2 && m >= main - 7) ?? Math.min(...byUse);
+  exBegin({ type: "hold", title: "La note tenue", targets: [main, up, down], k: -1, scores: [], goal: 5000 });
+  state.hidePiece = true;
+  nextHold();
+}
+function nextHold() {
+  if (!ex) return;
+  ex.k++;
+  if (ex.k >= ex.targets.length) return finishHold();
+  ex.on = 0; ex.t = 0; ex.tick = 0; ex.tgt = ex.targets[ex.k]; ex.phase = "Écoutez";
+  state.exBand = ex.tgt; state.live = null;
+  playRef(ex.tgt, 1.6);
+  renderHud();
+}
+function holdTick(dt) {
+  if (ex.phase === "Écoutez") { if (ctx.currentTime >= refUntil) { ex.phase = "Tenez la note"; renderHud(); } return; }
+  if (ex.phase !== "Tenez la note") return;
+  const m = smoothed(readMic());
+  setLive(m, ex.tgt);
+  ex.t += dt;
+  if (state.live && state.live.cents != null && Math.abs(state.live.cents) <= TOL_EX) {
+    ex.on += dt; ex.tick += dt;
+    if (ex.tick >= 500) { ex.tick -= 500; addXp(2); }
+  }
+  const el = document.getElementById("holdT"); if (el) el.textContent = (ex.on / 1000).toFixed(1);
+  if (ex.on >= ex.goal) {
+    award("tenue-5"); fx.burst(nowX(), yOf(ex.tgt), "ok", 30); fx.ripple(nowX(), yOf(ex.tgt), "ok"); chime(OUT);
+    fx.text(nowX(), yOf(ex.tgt) - 40, "Tenue !", "ok");
+    endHoldRound(1);
+  } else if (ex.t >= 9000) endHoldRound(ex.on / ex.goal);
+}
+function endHoldRound(s) {
+  ex.scores.push(Math.min(1, s)); ex.phase = s >= 1 ? "Bravo" : "Note suivante"; state.live = null; renderHud();
+  setTimeout(() => { if (ex?.type === "hold") nextHold(); }, 1100);
+}
+function finishHold() {
+  const pct = ex.scores.reduce((a, b) => a + b, 0) / ex.scores.length;
+  const s = pct >= 0.95 ? 3 : pct >= 0.75 ? 2 : pct >= 0.5 ? 1 : 0, prev = prog.warm.hold || 0;
+  if (s > prev) { prog.warm.hold = s; addXp(20 * (s - prev)); }
+  state.exBand = null;
+  complete(pct, { stars: Math.max(s, prev), fresh: Math.max(0, s - prev), passed: s >= 1 });
+}
+
+/* ── Échauffement : l'écho ── */
+async function startEcho() {
+  if (!(await needMic())) return;
+  exBegin({ type: "echo", title: "L'écho", rounds: 4, k: -1, got: 0, total: 0, perfect: true });
+  state.hidePiece = true;
+  nextEcho();
+}
+function pickFigure() {
+  const ns = notes(), idx = ns.map((n, i) => n.midi != null ? i : -1).filter(i => i >= 0);
+  for (let tries = 0; tries < 50; tries++) {
+    const s = Math.floor(Math.random() * (idx.length - 2));
+    const fig = [idx[s], idx[s + 1], idx[s + 2]].map(i => tgtOf(ns[i]));
+    if (new Set(fig).size >= 2 && fig[0] !== fig[1]) return fig;
+  }
+  return idx.slice(0, 3).map(i => tgtOf(ns[i]));
+}
+function nextEcho() {
+  if (!ex) return;
+  ex.k++;
+  if (ex.k >= ex.rounds) return finishEcho();
+  ex.fig = pickFigure(); ex.j = 0; ex.run = []; ex.t = 0; ex.phase = "Écoutez"; ex.total += 3;
+  state.exBand = null; state.live = null;
+  const c = ac();
+  if (refBus) { const old = refBus; old.gain.setTargetAtTime(0, c.currentTime, 0.03); setTimeout(() => old.disconnect(), 600); }
+  refBus = c.createGain(); refBus.connect(OUT);
+  ex.fig.forEach((m, q) => {
+    const at = c.currentTime + 0.2 + q * 0.62;
+    tone(m, at, 0.56, refBus);
+    setTimeout(() => { if (ex?.type === "echo") { state.exBand = m; fx.ripple(nowX(), yOf(m), "gold"); } }, (at - c.currentTime) * 1000);
+  });
+  refUntil = c.currentTime + 0.2 + 3 * 0.62 + (state.headphones ? 0.3 : 1.3);
+  renderHud();
+}
+function echoTick(dt) {
+  if (ex.phase === "Écoutez") { if (ctx.currentTime >= refUntil) { ex.phase = "À vous"; ex.t = 0; state.exBand = ex.fig[0]; renderHud(); } return; }
+  if (ex.phase !== "À vous") return;
+  ex.t += dt;
+  const tgt = ex.fig[ex.j], m = smoothed(readMic());
+  setLive(m, tgt);
+  const c = m == null ? null : fold((m - tgt) * 100);
+  if (c != null && Math.abs(c) <= 35) ex.run.push(c); else ex.run = [];
+  if (ex.run.length >= 8) {
+    ex.got++; addXp(15, nowX(), yOf(tgt)); fx.burst(nowX(), yOf(tgt), "ok", 14); award("premiere-note");
+    ex.j++; ex.run = [];
+    if (ex.j >= 3) { ex.phase = "Bravo"; chime(OUT); state.live = null; renderHud(); setTimeout(() => { if (ex?.type === "echo") nextEcho(); }, 1000); return; }
+    state.exBand = ex.fig[ex.j]; renderHud();
+  }
+  if (ex.t >= 5500) { ex.perfect = false; ex.phase = "Écho suivant"; state.live = null; renderHud(); setTimeout(() => { if (ex?.type === "echo") nextEcho(); }, 1000); }
+}
+function finishEcho() {
+  const pct = ex.total ? ex.got / ex.total : 0;
+  if (ex.perfect && ex.got === ex.total) award("echo-parfait");
+  const s = pct >= 0.95 ? 3 : pct >= 0.75 ? 2 : pct >= 0.5 ? 1 : 0, prev = prog.warm.echo || 0;
+  if (s > prev) { prog.warm.echo = s; addXp(20 * (s - prev)); }
+  state.exBand = null;
+  complete(pct, { stars: Math.max(s, prev), fresh: Math.max(0, s - prev), passed: s >= 1 });
+}
+
+/* ── Fin d'exercice : série de jours, objectif, bilan ── */
+function complete(pct, info) {
+  const today = dayStr();
+  if (prof.lastDay !== today) {
+    prof.streak = prof.lastDay === dayStr(new Date(Date.now() - 864e5)) ? prof.streak + 1 : 1;
+    prof.lastDay = today;
+  }
+  if (prof.streak >= 3) award("3-jours");
+  if (prof.streak >= 7) award("7-jours");
+  if (prof.today.d !== today) prof.today = { d: today, n: 0 };
+  prof.today.n++;
+  const goalHit = prof.today.n === DAY_GOAL;
+  if (goalHit) addXp(50);
+  prof.hist.push({ t: Date.now(), acc: Math.round(pct * 100), kind: ex.type });
+  prof.hist = prof.hist.slice(-40);
+  saveProf(); saveProg();
+  showEnd(pct, info, goalHit);
+}
+function showEnd(pct, info, goalHit) {
+  stopPlayback();
+  state.live = null;
+  const L1 = levelOf(prof.xp), up = L1 > ex.lvl0;
+  const next = LEVELS[L1 + 1], cur = LEVELS[L1];
+  const lvPct = next ? (prof.xp - cur[0]) / (next[0] - cur[0]) : 1;
+  let title, sub;
+  if (ex.type === "phrase") {
+    title = info.passed ? (info.fresh ? `Niveau ${ex.L} réussi` : "Réussi, encore") : "Pas encore";
+    sub = info.passed ? `${Math.round(pct * 100)} % de notes justes sur la phrase ${ex.k + 1}.` : `${Math.round(pct * 100)} % de notes justes. Il en faut 70 % pour l'étoile : vous y êtes presque, recommencez.`;
+  } else if (ex.type === "full") {
+    title = info.passed ? "Filage réussi" : "Le filage résiste";
+    sub = `${Math.round(pct * 100)} % de notes justes sur tout le morceau.`;
+  } else {
+    title = info.passed ? "Échauffement réussi" : "Échauffement terminé";
+    sub = ex.type === "hold" ? `${Math.round(pct * 100)} % du temps de tenue atteint.` : `${ex.got} notes retrouvées sur ${ex.total}.`;
+  }
+  let tip = "";
+  if (ex.low + ex.high >= 2) tip = ex.low >= ex.high * 2 ? "Les notes fausses étaient surtout trop basses : soutenez le souffle et visez le haut de la note."
+    : ex.high >= ex.low * 2 ? "Les notes fausses étaient surtout trop hautes : relâchez, sans pousser." : "";
+  if (!tip && ex.type === "echo" && pct < 0.75) tip = "Fredonnez les trois notes dans votre tête avant de chanter : l'oreille d'abord, la voix ensuite.";
+  if (!tip && ex.type === "hold" && pct < 0.75) tip = "Respirez bas avant d'attaquer, puis gardez la même ouverture de bouche jusqu'au bout.";
+  const canNext = ex.type === "phrase" && info.passed && ex.L < 3;
+  const nextPhrase = ex.type === "phrase" && info.passed && ex.L === 3 && phrases[ex.k + 1];
+  $("exEnd").innerHTML = `<div class="card">
+      <span class="stars big">${starRow(info.stars, 3, info.fresh)}</span>
+      <h3>${title}</h3><p>${sub}</p>
+      <div class="gain"><b>+${ex.xp} XP</b>${goalHit ? "<span>Objectif du jour atteint, +50 XP compris</span>" : ""}</div>
+      <div class="lvl-line"><span>${up ? `Nouveau titre : <b>${cur[1]}</b>` : `Niveau ${L1 + 1} · ${cur[1]}`}</span><span class="xpbar"><i style="width:${Math.round(lvPct * 100)}%"></i></span></div>
+      ${ex.newBadges.length ? `<div class="badges mini">${ex.newBadges.map(id => { const b = BADGES.find(x => x.id === id); return `<div class="medal on fresh"><i>${b.g}</i><div><b>${b.name}</b><small>${b.desc}</small></div></div>`; }).join("")}</div>` : ""}
+      ${tip ? `<p class="tip">${tip}</p>` : ""}
+      <div class="row center">
+        <button type="button" class="pill" data-end="again">Recommencer</button>
+        ${canNext ? `<button type="button" class="pill primary" data-end="next">Niveau ${ex.L + 1}</button>` : ""}
+        ${nextPhrase ? `<button type="button" class="pill primary" data-end="nextph">Phrase ${ex.k + 2}</button>` : ""}
+        <button type="button" class="pill" data-end="back">Parcours</button>
+      </div></div>`;
+  $("exEnd").hidden = false; exHud.hidden = true;
+  if (info.fresh || up) { fx.burst(W / 2, H * 0.3, "gold", 40); chime(OUT); }
+}
+$("exEnd").addEventListener("click", e => {
+  const b = e.target.closest("[data-end]"); if (!b || !ex) return;
+  const done = ex, act = b.dataset.end;
+  exAbort();
+  if (act === "back") return;
+  $("train").hidden = true;
+  if (act === "again") { if (done.type === "phrase") startPhrase(done.k, done.L); else if (done.type === "full") startFull(); else if (done.type === "hold") startHold(); else startEcho(); }
+  else if (act === "next") startPhrase(done.k, done.L + 1);
+  else if (act === "nextph") startPhrase(done.k + 1, 1);
+});
+$("trainBack").onclick = () => exAbort();
 
 /* ════════ Démarrage ════════ */
 
