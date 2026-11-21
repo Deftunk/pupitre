@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#0A0012"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Do Ré Monstres"><style>html,body{margin:0}</style></head><body><title>Do Ré Monstres</title>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#0A0012"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Synthville"><style>html,body{margin:0}</style></head><body><title>Synthville</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Monoton&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,600&family=VT323&display=swap">
@@ -856,11 +856,82 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 .st-part .k { font-family: var(--f-mono); color: var(--muted); font-size: 17px; letter-spacing: .2em; text-transform: uppercase; }
 .st-part b { font-family: var(--f-display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: #fff; }
 .st-part p { margin: 0; color: var(--muted); font-size: 14px; max-width: 560px; }
+
+/* ══ Synthville : la carte vue de dessus ══ */
+.rpg { position: fixed; inset: 0; z-index: 28; background: #07000F; overflow: hidden; touch-action: none; }
+.rpg canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rpg-hud { position: absolute; inset: 0; pointer-events: none; }
+.rpg-hud > * { pointer-events: auto; }
+.r-top { position: absolute; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; display: flex; gap: 8px; align-items: flex-start; pointer-events: none; }
+.r-top > * { pointer-events: auto; }
+.r-quest { flex: 1; display: grid; gap: 1px; text-align: left; border: 0; padding: 8px 12px; color: #fff; background: rgba(12, 0, 28, .86); box-shadow: inset 0 0 0 1.5px #FFE45E, 3px 3px 0 rgba(255, 46, 136, .6); transform: skewX(-6deg); max-width: 520px; }
+.r-quest > * { transform: skewX(6deg); }
+.r-quest .k { font-family: var(--f-mono); font-size: 15px; color: #FFE45E; letter-spacing: .15em; text-transform: uppercase; }
+.r-quest b { font-family: var(--f-display); font-weight: 400; font-size: 19px; text-transform: uppercase; line-height: 1.1; }
+.r-quest em { font-style: normal; font-family: var(--f-mono); font-size: 15px; color: var(--cyan); }
+.r-tok { display: flex; flex-direction: column; align-items: flex-end; font-family: var(--f-display); font-size: 24px; color: #FFE45E; text-shadow: 2px 2px 0 #FF2E88; background: rgba(12, 0, 28, .8); padding: 4px 10px; }
+.r-tok small { font-family: var(--f-mono); font-size: 13px; color: var(--muted); text-shadow: none; }
+.r-bottom { position: absolute; left: 10px; bottom: max(10px, env(safe-area-inset-bottom)); display: flex; gap: 8px; }
+.r-btn { display: grid; justify-items: center; gap: 2px; min-width: 64px; padding: 6px 8px; border: 0; color: #fff; background: rgba(12, 0, 28, .86); box-shadow: inset 0 0 0 1px rgba(0, 240, 255, .5); font-family: var(--f-mono); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+.r-btn i { font-style: normal; font-size: 22px; color: var(--cyan); line-height: 36px; }
+.r-act { position: absolute; right: 12px; bottom: max(14px, env(safe-area-inset-bottom)); min-width: 120px; min-height: 64px; padding: 10px 18px; border: 0; color: #12001F; background: #FFE45E; font-family: var(--f-display); font-size: 19px; text-transform: uppercase; box-shadow: 4px 4px 0 #FF2E88, 0 0 30px rgba(255, 228, 94, .5); transform: skewX(-8deg); animation: actPulse 1s ease-in-out infinite alternate; }
+@keyframes actPulse { to { box-shadow: 4px 4px 0 #FF2E88, 0 0 10px rgba(255, 228, 94, .3); } }
+.r-quest-pop { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); display: grid; justify-items: center; pointer-events: none; opacity: 0; }
+.r-quest-pop.go { animation: vnChap 2.2s ease-out forwards; }
+.r-quest-pop span { font-family: var(--f-mono); color: var(--cyan); font-size: 20px; letter-spacing: .25em; text-transform: uppercase; }
+.r-quest-pop b { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 7vw, 48px); color: #fff; text-transform: uppercase; text-align: center; text-shadow: 3px 3px 0 #FF2E88; padding: 0 16px; }
+.rpg-panel { position: absolute; inset: 0; z-index: 3; overflow-y: auto; padding: max(16px, env(safe-area-inset-top)) 16px 30px; background: rgba(7, 0, 15, .95); }
+.rp-in { max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
+.rp-head { display: flex; justify-content: space-between; align-items: center; }
+.rp-head b { font-family: var(--f-display); font-weight: 400; font-size: 32px; text-transform: uppercase; color: #fff; transform: skewX(-8deg); text-shadow: 3px 3px 0 #FF2E88; }
+.dex { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.dex-card { display: grid; justify-items: center; gap: 3px; padding: 10px 8px; border: 0; color: #fff; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(195, 155, 211, .3); text-align: center; }
+.dex-card:not(.got) .dex-art svg { filter: brightness(0) drop-shadow(0 0 6px rgba(195, 155, 211, .6)); }
+.dex-card.got { box-shadow: inset 0 0 0 1px rgba(0, 245, 212, .5); }
+.dex-card.lead { box-shadow: inset 0 0 0 2px #FFE45E, 0 0 20px rgba(255, 228, 94, .3); }
+.dex-card b { font-family: var(--f-display); font-weight: 400; font-size: 19px; text-transform: uppercase; }
+.dex-card small { color: var(--muted); font-size: 12px; }
+.dex-card em { font-style: italic; color: #DCC8EA; font-size: 12.5px; line-height: 1.35; }
+.dex-card .mini-belly { width: 80%; }
+.rp-menu { display: grid; gap: 8px; }
+.rp-menu button { display: grid; gap: 2px; text-align: left; padding: 12px 14px; border: 0; color: #fff; background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(0, 240, 255, .35); }
+.rp-menu b { font-family: var(--f-display); font-weight: 400; font-size: 20px; text-transform: uppercase; }
+.rp-menu small { color: var(--muted); font-size: 13px; }
+.bilan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.bilan div { display: grid; justify-items: center; padding: 12px 6px; background: rgba(255, 255, 255, .05); }
+.bilan b { font-family: var(--f-display); font-weight: 400; font-size: 30px; color: #FFE45E; }
+.bilan span { color: var(--muted); font-size: 12px; }
+/* ══ Le créateur d'avatar ══ */
+.rpg-creator { position: fixed; inset: 0; z-index: 66; overflow-y: auto; background: radial-gradient(circle at 50% 30%, #2A0848, #07000F 70%); padding: max(16px, env(safe-area-inset-top)) 16px 30px; }
+.cr-in { max-width: 460px; margin: 0 auto; display: grid; justify-items: center; gap: 10px; }
+.cr-in .k { font-family: var(--f-mono); color: var(--cyan); font-size: 18px; letter-spacing: .3em; }
+.cr-in h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 44px; text-transform: uppercase; color: #fff; transform: skewX(-8deg); text-shadow: 3px 3px 0 #FF2E88, -2px -1px 0 rgba(0, 240, 255, .7); }
+#crCv { width: min(240px, 60vw); height: min(240px, 60vw); }
+.cr-name { display: flex; gap: 8px; align-items: center; width: 100%; }
+.cr-name span, .cr-row > span { font-family: var(--f-mono); color: var(--cyan); font-size: 16px; letter-spacing: .15em; text-transform: uppercase; min-width: 74px; }
+.cr-name input { flex: 1; font-family: var(--f-display); font-size: 20px; text-transform: uppercase; color: #fff; background: rgba(255, 46, 136, .12); border: 2px solid var(--gold); padding: 6px 10px; }
+.cr-row { display: flex; gap: 8px; align-items: center; width: 100%; }
+.cr-row > div { display: flex; gap: 6px; flex-wrap: wrap; }
+.cr-row button { min-width: 40px; height: 40px; border: 0; padding: 0 10px; color: #fff; background: var(--c, rgba(255, 255, 255, .08)); font-family: var(--f-display); font-size: 15px; text-transform: uppercase; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); }
+.cr-row button.on { box-shadow: 0 0 0 3px #FFE45E, 0 0 14px #FFE45E; }
+/* ══ Le défi chanté ══ */
+.sing-w { position: fixed; inset: 0; z-index: 65; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(7, 0, 15, .96), rgba(20, 2, 40, .97)); }
+.sing-w.foe { background: linear-gradient(180deg, rgba(30, 0, 8, .96), rgba(10, 0, 4, .97)); }
+.sw-head { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+.sw-portrait { width: 90px; height: 90px; display: grid; place-items: center; }
+.sw-icon { font-size: 54px; filter: drop-shadow(0 0 12px #FFE45E); }
+.sw-title { font-family: var(--f-display); font-size: 26px; text-transform: uppercase; color: #fff; line-height: 1.05; }
+.sw-sub { color: var(--muted); font-size: 14px; }
+#swCv { width: 100%; height: 100%; min-height: 240px; }
+.sw-foot { display: grid; gap: 10px; justify-items: center; }
+.sw-state { font-family: var(--f-display); font-size: 30px; text-transform: uppercase; color: #fff; }
+.sw-state.ok { color: #00F5D4; text-shadow: 0 0 14px #00F5D4; } .sw-state.off { color: #FF6B6B; }
+.sw-btns { display: flex; gap: 10px; }
 </style>
 
 <div class="app">
   <header class="top">
-    <button class="logo" id="openTitle" type="button" aria-label="Écran titre">Do Ré<br>Monstres</button>
+    <button class="logo" id="openTitle" type="button" aria-label="Écran titre">Synth<br>ville</button>
     <button class="song" id="openSheet" type="button" aria-label="Partition et voix">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
       <span><b id="title">Carol of the Bells</b><small id="meta"></small></span>
@@ -1017,13 +1088,13 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 <div class="title" id="titleScreen" role="dialog" aria-label="Écran titre">
   <div class="t-rays"></div>
   <div class="t-inner">
-    <span class="t-pre">// CHANTE JUSTE · ÉLÈVE TES MONSTRES · 1986</span>
-    <h2 class="t-logo">Do Ré<br>Monstres</h2>
+    <span class="t-pre">// CHANTE · APPRIVOISE LES CROONIES · 1986</span>
+    <h2 class="t-logo">Synth<br>ville</h2>
     <label class="t-player"><span>Pseudo</span><input id="titleName" maxlength="18" placeholder="Ton pseudo" autocomplete="nickname"></label>
     <button type="button" class="t-acc" id="titleAcc" hidden></button>
     <span class="t-sub" id="titleSub">Carol of the Bells</span>
     <nav class="t-menu">
-      <button type="button" data-start="train" style="--d:0s">Jouer<small>l'aventure reprend là où tu l'as laissée</small></button>
+      <button type="button" data-start="train" style="--d:0s">Jouer<small>Synthville t'attend, et les Croonies aussi</small></button>
       <button type="button" data-start="intro" style="--d:.3s">L'histoire<small>revoir la cinématique d'ouverture</small></button>
     </nav>
     <span class="t-foot">CASQUE RECOMMANDÉ · LES FAUSSES NOTES SERONT PUNIES</span>
@@ -1042,6 +1113,19 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
   <div class="w-hud" id="wHud"></div>
   <button type="button" class="w-prompt" id="wPrompt" hidden></button>
   <div class="w-crew" id="wCrew" hidden></div>
+</div>
+<div class="rpg" id="rpg" hidden>
+  <canvas id="rcv" aria-label="La Rue des Néons"></canvas>
+  <div class="rpg-hud" id="rpgHud"></div>
+  <button type="button" class="r-act" id="rpgAct" hidden></button>
+  <div class="r-quest-pop" id="rpgQuestPop"></div>
+  <div class="rpg-panel" id="rpgPanel" hidden></div>
+</div>
+<div class="rpg-creator" id="rpgCreator" hidden></div>
+<div class="sing-w" id="singW" hidden>
+  <div class="sw-head"><div class="sw-portrait"></div><div><div class="sw-title"></div><div class="sw-sub"></div></div></div>
+  <canvas id="swCv"></canvas>
+  <div class="sw-foot"><span class="sw-state">Écoute…</span><div class="sw-btns"><button type="button" class="pill" id="swAgain">🔊 Réécouter</button><button type="button" class="pill" id="swQuit">Abandonner</button></div></div>
 </div>
 <div class="story-map" id="storyMap" hidden></div>
 <div class="vn" id="vn" hidden>
@@ -2600,7 +2684,7 @@ function renderTrain() {
     return;
   }
   const view = state.lairView || "home";
-  if (view === "home") { $("train").innerHTML = ""; openWorld(); return; }
+  if (view === "home") { $("train").innerHTML = ""; openRpg(); return; }
   const m = activeMon(), belly = Math.round(bellyOf(m)), mood = moodOf(m), need = xpNeed(m.lvl);
   const face = mood === "sad" ? "sad" : "ok";
   const sub = (title, hint) => `<div class="subnav"><button type="button" class="pill" data-view="home">‹ Quartier</button><b>${title}</b>
@@ -4339,7 +4423,7 @@ function stopMusic() {
 }
 
 function inMenus() {
-  if (document.hidden || cine.on) return false;
+  if (document.hidden || cine.on || singW.on) return false;
   const title = !$("titleScreen").classList.contains("gone");
   return title || (state.mode === "train" && !ex && !state.playing);
 }
@@ -4950,7 +5034,7 @@ function cineFrame(now) {
       c.fillStyle = "#12001F"; c.strokeStyle = "#FFE45E"; c.lineWidth = 5; c.shadowColor = "#FFE45E"; c.shadowBlur = 30;
       c.beginPath(); c.rect(-cw / 2, -ch / 2, cw, ch); c.fill(); c.stroke(); c.shadowBlur = 0;
       c.fillStyle = "#FF2E88"; c.fillRect(-cw * 0.4, -ch * 0.36, cw * 0.8, ch * 0.3);
-      c.fillStyle = "#12001F"; c.font = `${ch * 0.2}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("DO RÉ ???", 0, -ch * 0.21);
+      c.fillStyle = "#12001F"; c.font = `${ch * 0.2}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("CROONIE ?", 0, -ch * 0.21);
       [-1, 1].forEach(s => { c.save(); c.translate(s * cw * 0.2, ch * 0.18); c.rotate(t * 4); c.strokeStyle = "#FFE45E"; c.lineWidth = 4; c.setLineDash([8, 5]); c.beginPath(); c.arc(0, 0, ch * 0.14, 0, 6.28); c.stroke(); c.restore(); });
       if (t > 21.5) { c.strokeStyle = "#FFFFFF"; c.lineWidth = 2; c.shadowColor = "#fff"; c.shadowBlur = 12; const n = Math.floor((t - 21.5) * 3); const rr = rngOf(9); for (let i = 0; i < n; i++) { c.beginPath(); let px = (rr() - 0.5) * cw, py = (rr() - 0.5) * ch; c.moveTo(px, py); for (let k = 0; k < 4; k++) { px += (rr() - 0.5) * 40; py += (rr() - 0.5) * 40; c.lineTo(px, py); } c.stroke(); } }
       c.restore();
@@ -4983,9 +5067,9 @@ function cineFrame(now) {
         const fs = Math.min(130, W / 6.2);
         c.save(); c.translate(cx + jit, H * 0.36 + jit); c.scale(sc, sc); c.transform(1, 0, -0.16, 1, 0, 0); c.globalAlpha = sl;
         c.font = `${fs}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
-        [["#00F0FF", -5, -3], ["#FF2E88", 6, 4], ["#FFF2FA", 0, 0]].forEach(([col, dx, dy]) => { c.fillStyle = col; c.fillText("DO RÉ", dx, dy - fs * 0.52); c.fillText("MONSTRES", dx, dy + fs * 0.5); });
+        [["#00F0FF", -5, -3], ["#FF2E88", 6, 4], ["#FFF2FA", 0, 0]].forEach(([col, dx, dy]) => { c.fillStyle = col; c.fillText("SYNTH", dx, dy - fs * 0.52); c.fillText("VILLE", dx, dy + fs * 0.5); });
         c.restore();
-        if (k > 3.6) { c.font = `${Math.min(30, W / 22)}px 'VT323', monospace`; c.textAlign = "center"; c.fillStyle = "#FFE45E"; c.fillText("CHANTE · NOURRIS · ÉVOLUE · COMBATS", cx, H * 0.36 + fs * 1.35); }
+        if (k > 3.6) { c.font = `${Math.min(30, W / 22)}px 'VT323', monospace`; c.textAlign = "center"; c.fillStyle = "#FFE45E"; c.fillText("CHANTE · APPRIVOISE · ÉVOLUE · COMBATS", cx, H * 0.36 + fs * 1.35); }
       }
     }
   }
@@ -5433,6 +5517,8 @@ const vn = { on: false, q: [], cur: null, shown: 0, timer: 0, done: null, wait: 
 const SPEAKERS = { doc: { name: "Doc Vinyle", col: "#00F0FF", pitch: 180 }, narr: { name: "", col: "#C39BD3", pitch: 0 } };
 function speakerOf(who) {
   if (who === "me") { const m = activeMon(); return { name: m ? m.name : "???", col: "#FF2E88", pitch: 520, mon: m }; }
+  if (who.startsWith("cr:")) { const sp = CROONIES_Q1.find(q => q.id === who.slice(3)); return { name: sp.name, col: "#00F5D4", pitch: 620, mon: croonieOf(sp) }; }
+  if (who === "mus") return { name: "Le musicien", col: "#FFB347", pitch: 260, mon: { id: "mus", name: "Musicien", type: "chrome", stage: 2, dna: dnaOf(555, "chrome") } };
   if (/^r\d$/.test(who)) { const i = +who[1]; return { name: RIVALS[i].name, col: "#FF3B3B", pitch: [140, 300, 420, 70, 240, 380][i], mon: rivalMon(i) }; }
   return SPEAKERS[who] || SPEAKERS.narr;
 }
@@ -5458,7 +5544,7 @@ function vnNext() {
   $("vnName").textContent = sp.name; $("vnName").hidden = !sp.name;
   // portraits : Doc à gauche, les monstres à droite
   if (who === "doc") { $("vnL").innerHTML = docSvg(mood || "talk"); vn.left = "doc"; }
-  else if (sp.mon) { $("vnR").innerHTML = monsterSvg(sp.mon, 250, { mood: mood || (who === "me" ? "ok" : "angry"), cls: "idle" }); $("vnR").style.setProperty("--ms", [1, 1.6, 1.3, 1.1][sp.mon.stage || 1]); vn.right = who; }
+  else if (sp.mon) { $("vnR").innerHTML = monsterSvg(sp.mon, 250, { mood: mood || (/^r\d$/.test(who) ? "angry" : "ok"), cls: "idle" }); $("vnR").style.setProperty("--ms", [1, 1.6, 1.3, 1.1][sp.mon.stage || 1]); vn.right = who; }
   $("vnL").classList.toggle("speaking", who === "doc"); $("vnR").classList.toggle("speaking", who !== "doc" && who !== "narr");
   $("vnL").classList.toggle("dim", who !== "doc" && who !== "narr" && !!vn.left); $("vnR").classList.toggle("dim", who === "doc" && !!vn.right);
   if (who !== "doc" && sp.mon) { const r = $("vnR"); r.classList.remove("pop"); void r.offsetWidth; r.classList.add("pop"); }
@@ -5514,6 +5600,7 @@ function storyBackdrop(place) {
   $("world").classList.add("in-story");
 }
 function openStory(focusId) {
+  return openRpg();
   if (ex) exAbort();
   stopPlayback(); storyRun = null;
   storyBackdrop("home");
@@ -5599,6 +5686,7 @@ async function launchChapter(c, replay) {
   else if (k === "drill") { loadProg(); if (weakSpots(4).length) startDrill(); else startEcho(); }
 }
 function storyResult(run, passed) {
+  if (run.rpg) { rpgResult(run, passed); return; }
   const L = storyChapters(), c = L.find(x => x.id === run.id); storyRun = null;
   if (!c) { openStory(); return; }
   const i = chapterIndex(L, c.id), first = passed && !SP().done.includes(c.id);
@@ -5873,6 +5961,778 @@ function advUpdate(now, dt) {
   });
 }
 
+/* ════════ SYNTHVILLE · Quartier 1, la Rue des Néons ════════
+   Un RPG vu de dessus, pensé pour le téléphone : on touche où aller, un gros bouton pour agir.
+   L'héroïne, c'est la joueuse. Les Croonies se gagnent en chantant ce que chacun aime. */
+
+/* ── La carte : 16 colonnes, 34 rangées, construite par blocs ── */
+const RPG_COLS = 16, RPG_ROWS = 34;
+function buildRpgMap() {
+  const g2 = Array.from({ length: RPG_ROWS }, () => Array(RPG_COLS).fill("#"));
+  const fill = (x0, y0, x1, y1, ch) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) g2[y][x] = ch; };
+  fill(0, 0, 15, 1, "~"); fill(7, 0, 8, 1, "H");
+  fill(1, 2, 14, 2, "."); g2[2][0] = "T"; g2[2][15] = "T";
+  fill(6, 3, 9, 33, "="); fill(4, 3, 5, 33, "."); fill(10, 3, 11, 33, ".");
+  fill(6, 2, 9, 2, "=");
+  fill(1, 8, 3, 10, ".");                      // le recoin de l'arcade
+  fill(0, 15, 3, 21, "g"); g2[15][0] = "T"; g2[21][0] = "T"; g2[15][3] = "T"; g2[21][3] = "T";  // le petit parc
+  fill(12, 11, 14, 13, ".");                   // la ruelle du Studio 86
+  fill(12, 18, 14, 20, ".");                   // la placette du musicien
+  fill(12, 26, 13, 28, ".");                   // le coin du juke-box
+  fill(1, 29, 14, 33, "."); fill(6, 29, 9, 33, "=");  // la place de l'arrêt de bus
+  g2[33][0] = "T"; g2[33][15] = "T";
+  return g2;
+}
+const RPG_SOLID = new Set(["#", "~", "T"]);
+
+/* ── Les Croonies du quartier ── */
+const CROONIES_Q1 = [
+  { id: "ampli", name: "Ampli", type: "neon", seed: 101, rar: "commune", like: "note", likeTxt: "une note juste", hint: "Il s'est caché dans le juke-box cassé, au coin de la rue." },
+  { id: "gargouille", name: "Gargouille", type: "basse", seed: 202, rar: "commune", like: "hold", likeTxt: "les notes tenues longtemps", hint: "On l'entend gargouiller au fond de la fontaine du parc." },
+  { id: "dingdong", name: "Dingdong", type: "chrome", seed: 303, rar: "rare", like: "phrase", likeTxt: "la première phrase de Carol", hint: "Le musicien de la placette le connaît bien." },
+  { id: "grumble", name: "Grumble", type: "basse", seed: 404, rar: "rare", like: "low", likeTxt: "les notes graves", hint: "Il ronfle derrière les bornes d'arcade. Il n'aime que le grave." },
+];
+const croonieOf = sp => ({ id: "sp-" + sp.id, name: sp.name, type: sp.type, stage: 1, dna: dnaOf(sp.seed, sp.type), rar: sp.rar });
+
+/* ── La progression du quartier ── */
+const rpg = Object.assign({ q: 0, lamps: [false, false, false], fountain: false, door: false, minion: false, phrase: false, boss: false, notes: [], tamed: [], pos: null, done: false }, readJSON("drm.rpg"));
+const saveRpg = () => store.set("drm.rpg", JSON.stringify(rpg));
+
+/* Les notes des défis viennent de la voix chantée : toujours dans sa tessiture */
+function voiceNotes() {
+  const ms = notes().filter(n => n.midi != null).map(tgtOf).sort((a, b) => a - b);
+  const q = f => ms[Math.min(ms.length - 1, Math.floor(ms.length * f))];
+  const ph = (buildPhrases(), phrases[0]);
+  const motif = [];
+  if (ph) for (let i = ph.from; i <= ph.to && motif.length < 3; i++) { const t = tgtOf(notes()[i]); if (t != null && motif[motif.length - 1] !== t) motif.push(t); }
+  return { low: q(0.08), mid: q(0.5), lamp: [q(0.3), q(0.55), q(0.75)], hold: q(0.4), motif: motif.length === 3 ? motif : [q(0.5), q(0.6), q(0.4)] };
+}
+
+/* ── Les éléments de la carte ── */
+function rpgEntities() {
+  const L = [];
+  L.push({ id: "doc", kind: "npc", x: 4, y: 30, solid: true });
+  L.push({ id: "jukebox", kind: "jukebox", x: 13, y: 27, solid: true });
+  L.push({ id: "lamp0", kind: "lamp", i: 0, x: 5, y: 25, solid: true }, { id: "lamp1", kind: "lamp", i: 1, x: 10, y: 19, solid: true }, { id: "lamp2", kind: "lamp", i: 2, x: 5, y: 12, solid: true });
+  L.push({ id: "fountain", kind: "fountain", x: 1, y: 17, w: 2, h: 2, solid: true });
+  L.push({ id: "door", kind: "door", x: 12, y: 12, solid: !rpg.door });
+  L.push({ id: "minion", kind: "minion", x: 13, y: 12, solid: !rpg.minion });
+  L.push({ id: "cassette", kind: "cassette", x: 14, y: 12, solid: false });
+  L.push({ id: "musician", kind: "musician", x: 13, y: 19, solid: true });
+  L.push({ id: "arcade", kind: "arcade", x: 1, y: 9, solid: true });
+  L.push({ id: "wubby", kind: "wubby", x: 7, y: 2, w: 2, solid: !rpg.boss });
+  L.push({ id: "bus", kind: "bus", x: 2, y: 31, solid: true });
+  L.push({ id: "bench1", kind: "bench", x: 4, y: 20, solid: true }, { id: "bench2", kind: "bench", x: 11, y: 8, solid: true });
+  [[4, 6], [11, 15], [5, 22], [1, 20], [13, 28], [10, 30], [11, 4], [2, 9]].forEach(([x, y], i) => L.push({ id: "n" + i, kind: "note", x, y, solid: false }));
+  [[11, 23], [4, 17], [10, 10], [5, 3]].forEach(([x, y], i) => L.push({ id: "cit" + i, kind: "citizen", x, y, seed: 900 + i * 37, solid: true }));
+  return L;
+}
+const SIGNS = [
+  { x: 0, y: 26, w: 4, text: "CANTINE", col: "#FFE45E" }, { x: 12, y: 14, w: 4, text: "STUDIO 86", col: "#FF2E88" },
+  { x: 0, y: 11, w: 4, text: "ARCADE", col: "#00F0FF" }, { x: 12, y: 21, w: 4, text: "DISCO", col: "#C04BFF" },
+  { x: 12, y: 29, w: 4, text: "JUKE", col: "#FF6B2E" }, { x: 0, y: 6, w: 4, text: "HÔTEL", col: "#00F5D4" },
+];
+
+/* ── Les quêtes, une à la fois ── */
+const QUESTS = [
+  { title: "Parle à Doc Vinyle", target: "doc" },
+  { title: "Fouille le juke-box cassé", target: "jukebox" },
+  { title: "Allume les 3 lampadaires", target: () => ["lamp0", "lamp1", "lamp2"].find((_, i) => !rpg.lamps[i]), count: () => `${rpg.lamps.filter(Boolean).length}/3` },
+  { title: "Réveille la fontaine du parc", target: "fountain" },
+  { title: "Ouvre la porte du Studio 86", target: () => rpg.door ? "minion" : "door" },
+  { title: "Aide le musicien de la placette", target: "musician" },
+  { title: "Affronte Wubby sur le pont", target: "wubby" },
+  { title: "Quartier libéré ! Le Parc à Écho ouvre bientôt", target: null },
+];
+const questTarget = () => { const q = QUESTS[rpg.q]; if (!q || !q.target) return null; return typeof q.target === "function" ? q.target() : q.target; };
+
+/* ════════ Le moteur ════════ */
+const R = { on: false, cv: null, c: null, W: 0, H: 0, dpr: 1, T: 48, map: null, ents: [], bg: null, cam: { x: 0, y: 0 }, p: null, path: [], trail: [], auto: null, keys: {}, last: 0, raf: 0, near: null, bubble: null, fx: [], dark: 1, toast: null };
+function rpgSize() {
+  const r = R.cv.getBoundingClientRect(); R.W = r.width; R.H = r.height;
+  R.dpr = Math.min(2, devicePixelRatio || 1);
+  R.cv.width = Math.round(R.W * R.dpr); R.cv.height = Math.round(R.H * R.dpr);
+  R.T = Math.round(Math.max(40, Math.min(64, R.W / 8.2, R.H / 12)));
+  R.bg = rpgBackground();
+}
+const solidAt = (x, y) => {
+  if (x < 0 || y < 0 || x >= RPG_COLS || y >= RPG_ROWS) return true;
+  if (RPG_SOLID.has(R.map[y][x])) return true;
+  return R.ents.some(e => e.solid && x >= e.x && x < e.x + (e.w || 1) && y >= e.y && y < e.y + (e.h || 1));
+};
+
+/* Le décor fixe, dessiné une fois : chaussée, trottoirs, toits, parc, canal */
+function rpgBackground() {
+  const T = R.T, d = R.dpr, cv2 = document.createElement("canvas");
+  cv2.width = RPG_COLS * T * d; cv2.height = RPG_ROWS * T * d;
+  const b = cv2.getContext("2d"); b.scale(d, d);
+  const m = R.map, rnd = rngOf(86);
+  for (let y = 0; y < RPG_ROWS; y++) for (let x = 0; x < RPG_COLS; x++) {
+    const ch = m[y][x], X = x * T, Y = y * T;
+    if (ch === "=") { b.fillStyle = "#16111F"; b.fillRect(X, Y, T, T); if (x === 7) { b.fillStyle = "rgba(255,46,136,.7)"; for (let k = 0; k < 2; k++) b.fillRect(X + T - 2, Y + k * T / 2 + 4, 4, T / 4); } }
+    else if (ch === "." ) { b.fillStyle = (x + y) % 2 ? "#251C33" : "#2A2039"; b.fillRect(X, Y, T, T); b.strokeStyle = "rgba(255,255,255,.04)"; b.strokeRect(X + 0.5, Y + 0.5, T - 1, T - 1); }
+    else if (ch === "g" || ch === "T") { b.fillStyle = "#0F2A20"; b.fillRect(X, Y, T, T); b.fillStyle = "rgba(0,245,212,.18)"; for (let k = 0; k < 4; k++) b.fillRect(X + rnd() * T, Y + rnd() * T, 2, 4); }
+    else if (ch === "~") { b.fillStyle = "#061634"; b.fillRect(X, Y, T, T); }
+    else if (ch === "H") { b.fillStyle = "#3A2440"; b.fillRect(X, Y, T, T); b.fillStyle = "#2A1830"; for (let k = 0; k < 4; k++) b.fillRect(X, Y + k * T / 4, T, 2); }
+    else if (ch === "#") {
+      b.fillStyle = (x + y * 3) % 7 ? "#22103A" : "#2A1446"; b.fillRect(X, Y, T, T);
+      if (rnd() < 0.12) { b.fillStyle = "#2B1644"; b.fillRect(X + T * 0.2, Y + T * 0.25, T * 0.4, T * 0.3); }
+      if (rnd() < 0.06) { b.fillStyle = "#3A1E58"; b.beginPath(); b.arc(X + T / 2, Y + T / 2, T * 0.18, 0, 6.283); b.fill(); }
+    }
+    if (ch === "#") {
+      const edge = (nx, ny) => nx >= 0 && ny >= 0 && nx < RPG_COLS && ny < RPG_ROWS && m[ny][nx] !== "#";
+      b.fillStyle = (Math.floor(y / 5) + x) % 3 ? "rgba(255,46,136,.75)" : "rgba(0,240,255,.75)";
+      if (edge(x + 1, y)) b.fillRect(X + T - 3, Y, 3, T); if (edge(x - 1, y)) b.fillRect(X, Y, 3, T);
+      if (edge(x, y + 1)) { b.fillStyle = "#120720"; b.fillRect(X, Y + T - 10, T, 10); b.fillStyle = "rgba(255,228,94,.35)"; b.fillRect(X + 6, Y + T - 8, 6, 5); b.fillRect(X + T - 14, Y + T - 8, 6, 5); }
+    }
+    if (ch === "T") { b.fillStyle = "#06201A"; b.beginPath(); b.arc(X + T / 2, Y + T / 2, T * 0.46, 0, 6.283); b.fill(); b.fillStyle = "#0B3A2A"; b.beginPath(); b.arc(X + T * 0.42, Y + T * 0.42, T * 0.34, 0, 6.283); b.fill(); }
+  }
+  // bords de trottoir
+  b.fillStyle = "rgba(0,240,255,.5)";
+  for (let y = 3; y < RPG_ROWS; y++) { b.fillRect(6 * T - 2, y * T, 2, T); b.fillRect(10 * T, y * T, 2, T); }
+  return cv2;
+}
+
+/* ── L'avatar : une silhouette 80s, vue de trois quarts ── */
+const AV_HAIR = ["#1A0A0A", "#6B3A1E", "#E8C46A", "#FF2E88", "#00F0FF"];
+const AV_SKIN = ["#FFDBC0", "#E8B48F", "#C68A5E", "#8D5A3B", "#5A3624"];
+const AV_JACKET = ["#FF2E88", "#00F0FF", "#FFE45E", "#C04BFF", "#00F5D4"];
+const AV_STYLES = ["Courte", "Afro", "Crête", "Queue"];
+const defaultAvatar = () => ({ style: 1, hair: 3, skin: 1, jacket: 1 });
+function drawAvatar(c, x, y, s, dir = "down", ph = 0, av = prof.avatar || defaultAvatar(), walking = false) {
+  const hair = AV_HAIR[av.hair], skin = AV_SKIN[av.skin], jk = AV_JACKET[av.jacket];
+  const step = walking ? Math.sin(ph * 2) : 0, bob = walking ? Math.abs(Math.sin(ph * 2)) * s * 0.04 : 0;
+  c.save(); c.translate(x, y - bob);
+  if (dir === "left") c.scale(-1, 1);
+  c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.ellipse(0, bob, s * 0.28, s * 0.08, 0, 0, 6.283); c.fill();
+  // jambes
+  c.fillStyle = "#1B1430";
+  c.fillRect(-s * 0.14, -s * 0.28 + Math.max(0, step) * s * 0.05, s * 0.11, s * 0.28); c.fillRect(s * 0.03, -s * 0.28 + Math.max(0, -step) * s * 0.05, s * 0.11, s * 0.28);
+  c.fillStyle = "#fff"; c.fillRect(-s * 0.16, -s * 0.04, s * 0.14, s * 0.05); c.fillRect(s * 0.02, -s * 0.04, s * 0.14, s * 0.05);
+  // blouson
+  c.fillStyle = jk; c.shadowColor = jk; c.shadowBlur = s * 0.15;
+  c.beginPath(); c.moveTo(-s * 0.24, -s * 0.26); c.lineTo(-s * 0.2, -s * 0.62); c.quadraticCurveTo(0, -s * 0.7, s * 0.2, -s * 0.62); c.lineTo(s * 0.24, -s * 0.26); c.closePath(); c.fill(); c.shadowBlur = 0;
+  c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(-s * 0.02, -s * 0.62, s * 0.04, s * 0.36);
+  // bras
+  c.fillStyle = jk; c.save(); c.translate(-s * 0.22, -s * 0.58); c.rotate(step * 0.4); c.fillRect(-s * 0.05, 0, s * 0.09, s * 0.28); c.restore();
+  c.save(); c.translate(s * 0.22, -s * 0.58); c.rotate(-step * 0.4); c.fillRect(-s * 0.04, 0, s * 0.09, s * 0.28); c.restore();
+  // tête
+  const hy = -s * 0.82, hr = s * 0.2;
+  if (av.style === 1) { c.fillStyle = hair; c.beginPath(); c.arc(0, hy - s * 0.04, hr * 1.55, 0, 6.283); c.fill(); }
+  c.fillStyle = skin; c.beginPath(); c.arc(0, hy, hr, 0, 6.283); c.fill();
+  c.fillStyle = hair;
+  if (av.style === 0) { c.beginPath(); c.arc(0, hy - hr * 0.2, hr * 1.05, Math.PI * 1.05, Math.PI * 1.95); c.fill(); }
+  else if (av.style === 2) { c.beginPath(); c.moveTo(-hr * 0.25, hy - hr * 0.7); c.lineTo(0, hy - hr * 2); c.lineTo(hr * 0.25, hy - hr * 0.7); c.fill(); c.beginPath(); c.arc(0, hy - hr * 0.3, hr * 0.95, Math.PI * 1.15, Math.PI * 1.85); c.fill(); }
+  else if (av.style === 3) { c.beginPath(); c.arc(0, hy - hr * 0.25, hr * 1.05, Math.PI, Math.PI * 2); c.fill(); c.beginPath(); c.ellipse(hr * 1.05, hy + hr * 0.2, hr * 0.3, hr * 0.7, -0.4, 0, 6.283); c.fill(); }
+  if (dir === "up") { c.fillStyle = hair; c.beginPath(); c.arc(0, hy, hr * 1.02, 0, 6.283); c.fill(); }
+  else {
+    const ox = dir === "down" ? 0 : hr * 0.35;
+    c.fillStyle = "#12001F"; c.beginPath(); c.arc(ox - hr * 0.38, hy + hr * 0.05, hr * 0.13, 0, 6.283); c.arc(ox + hr * 0.38, hy + hr * 0.05, hr * 0.13, 0, 6.283); c.fill();
+    c.strokeStyle = "#12001F"; c.lineWidth = s * 0.02; c.beginPath(); c.arc(ox, hy + hr * 0.35, hr * 0.25, 0.2, Math.PI - 0.2); c.stroke();
+  }
+  // le casque du walkman
+  c.strokeStyle = "#00F0FF"; c.lineWidth = s * 0.035; c.beginPath(); c.arc(0, hy, hr * 1.15, Math.PI * 1.05, Math.PI * 1.95); c.stroke();
+  c.fillStyle = "#FFE45E"; c.fillRect(-hr * 1.25, hy - hr * 0.2, hr * 0.3, hr * 0.5); c.fillRect(hr * 0.95, hy - hr * 0.2, hr * 0.3, hr * 0.5);
+  c.restore();
+}
+
+/* ── Le créateur d'avatar ── */
+function openCreator(done) {
+  const av = Object.assign(defaultAvatar(), prof.avatar || {});
+  const el = $("rpgCreator"); el.hidden = false;
+  const row = (k, label, arr, colors) => `<div class="cr-row"><span>${label}</span><div>${arr.map((v, i) => `<button type="button" data-k="${k}" data-v="${i}" class="${av[k] === i ? "on" : ""}" ${colors ? `style="--c:${v}"` : ""}>${colors ? "" : v}</button>`).join("")}</div></div>`;
+  const render = () => {
+    el.innerHTML = `<div class="cr-in"><span class="k">Synthville · 1986</span><h2>Qui es-tu ?</h2>
+      <canvas id="crCv" width="360" height="360"></canvas>
+      <label class="cr-name"><span>Pseudo</span><input id="crName" maxlength="18" value="${esc(prof.player?.name?.startsWith("Recrue-") ? "" : prof.player?.name || "")}" placeholder="Ton pseudo"></label>
+      ${row("style", "Coupe", AV_STYLES)}${row("hair", "Cheveux", AV_HAIR, true)}${row("skin", "Peau", AV_SKIN, true)}${row("jacket", "Blouson", AV_JACKET, true)}
+      <button type="button" class="main-btn wide" id="crGo">C'est moi ▶</button></div>`;
+    const cv2 = $("crCv"), c2 = cv2.getContext("2d"); c2.clearRect(0, 0, 360, 360);
+    const gr = c2.createRadialGradient(180, 200, 10, 180, 200, 180); gr.addColorStop(0, "rgba(255,46,136,.25)"); gr.addColorStop(1, "rgba(0,0,0,0)"); c2.fillStyle = gr; c2.fillRect(0, 0, 360, 360);
+    drawAvatar(c2, 180, 330, 300, "down", 0, av);
+    el.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { av[b.dataset.k] = +b.dataset.v; if (ctx) blip(660 + +b.dataset.v * 80, ctx.currentTime, 0.04, 0.03); render(); });
+    $("crGo").onclick = () => { prof.avatar = av; ensurePlayer($("crName").value || prof.player?.name); saveProf(); el.hidden = true; flash("#FF2E88", 0.3); done && done(); };
+  };
+  ac(); render();
+}
+
+/* ════════ Ouvrir la carte ════════ */
+function openRpg() {
+  if (typeof ex !== "undefined" && ex) exAbort();
+  stopPlayback();
+  closeWorld(); closeStoryMap?.();
+  if (!prof.avatar) { openCreator(openRpg); return; }
+  $("rpg").hidden = false; R.on = true;
+  if (!R.cv) { R.cv = $("rcv"); R.c = R.cv.getContext("2d"); bindRpgInput(); }
+  R.map = buildRpgMap(); R.ents = rpgEntities(); rpgSize();
+  if (!R.p) { const pos = rpg.pos || { x: 5, y: 32 }; R.p = { x: pos.x, y: pos.y, tx: pos.x, ty: pos.y, dir: "up", ph: 0 }; R.trail = []; }
+  R.dark = rpg.lamps.every(Boolean) ? 0.1 : 0.45;
+  rpgHud();
+  if (!R.raf) { R.last = performance.now(); R.raf = requestAnimationFrame(rpgFrame); }
+  if (rpg.q === 0 && !rpg.introSeen) { rpg.introSeen = true; saveRpg(); setTimeout(() => docTalk(), 600); }
+}
+function closeRpg() { R.on = false; $("rpg").hidden = true; cancelAnimationFrame(R.raf); R.raf = 0; R.keys = {}; if (R.p) { rpg.pos = { x: Math.round(R.p.x), y: Math.round(R.p.y) }; saveRpg(); } }
+window.addEventListener("resize", () => { if (R.on) rpgSize(); });
+
+/* ── Se déplacer : toucher une case, chemin le plus court ── */
+function findPath(sx, sy, tx, ty) {
+  const key = (x, y) => y * RPG_COLS + x, prev = new Map([[key(sx, sy), null]]), q = [[sx, sy]];
+  while (q.length) {
+    const [x, y] = q.shift();
+    if (x === tx && y === ty) { const out = []; let k = key(x, y); while (k != null && k !== key(sx, sy)) { out.unshift([k % RPG_COLS, Math.floor(k / RPG_COLS)]); k = prev.get(k); } return out; }
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy, k = key(nx, ny);
+      if (prev.has(k) || solidAt(nx, ny)) continue;
+      prev.set(k, key(x, y)); q.push([nx, ny]);
+    }
+  }
+  return null;
+}
+function walkTo(tx, ty, ent) {
+  const p = R.p, sx = Math.round(p.x), sy = Math.round(p.y);
+  let goal = [tx, ty];
+  if (ent || solidAt(tx, ty)) {
+    const cands = [];
+    const ex0 = ent ? ent.x : tx, ey0 = ent ? ent.y : ty, ew = ent?.w || 1, eh = ent?.h || 1;
+    for (let y = ey0 - 1; y <= ey0 + eh; y++) for (let x = ex0 - 1; x <= ex0 + ew; x++) if (!solidAt(x, y)) cands.push([x, y]);
+    let best = null;
+    for (const c2 of cands) { const pth = findPath(sx, sy, c2[0], c2[1]); if (pth && (!best || pth.length < best.length)) best = pth; }
+    if (!best) return; R.path = best; R.auto = ent || null; return;
+  }
+  const pth = findPath(sx, sy, goal[0], goal[1]); if (pth) { R.path = pth; R.auto = null; }
+}
+function bindRpgInput() {
+  R.cv.addEventListener("pointerdown", e => {
+    if (!R.on || rpgBusy()) return;
+    const r = R.cv.getBoundingClientRect(), wx = (e.clientX - r.left + R.cam.x) / R.T, wy = (e.clientY - r.top + R.cam.y) / R.T;
+    const tx = Math.floor(wx), ty = Math.floor(wy);
+    const ent = R.ents.find(en => en.kind !== "note" && en.kind !== "bench" && en.kind !== "bus" && tx >= en.x - 0.3 && tx < en.x + (en.w || 1) + 0.3 && ty >= en.y - 1 && ty < en.y + (en.h || 1) + 0.3 && entVisible(en));
+    walkTo(tx, ty, ent);
+    R.tapFx = { x: wx * R.T, y: wy * R.T, t: 0 };
+    if (ctx) blip(880, ctx.currentTime, 0.03, 0.02);
+  });
+  document.addEventListener("keydown", e => {
+    if (!R.on || rpgBusy() || /INPUT|TEXTAREA/.test(document.activeElement?.tagName)) return;
+    const k = e.key.toLowerCase();
+    if (["arrowleft", "arrowright", "arrowup", "arrowdown", "q", "d", "z", "s", "a", "w"].includes(k)) { R.keys[k] = true; R.path = []; e.preventDefault(); }
+    if ((k === "enter" || k === " " || k === "e") && R.near) { e.preventDefault(); rpgAct(R.near); }
+  });
+  document.addEventListener("keyup", e => { R.keys[e.key.toLowerCase()] = false; });
+  $("rpgAct").onclick = () => R.near && rpgAct(R.near);
+  $("rpgHud").addEventListener("click", e => {
+    const b = e.target.closest("[data-r]"); if (!b) return;
+    const w = b.dataset.r;
+    if (w === "dex") openDex(); else if (w === "band") openBand(); else if (w === "menu") openRpgMenu();
+    else if (w === "goal") { const t = R.ents.find(en => en.id === questTarget()); if (t) walkTo(t.x, t.y, t); }
+  });
+  $("rpgPanel").addEventListener("click", rpgPanelClick);
+}
+const rpgBusy = () => vn.on || !$("rpgPanel").hidden || singW.on || !$("hatch").hidden || !$("rpgCreator").hidden || !$("accountBack").hidden || !$("sheetBack").hidden;
+function entVisible(e) {
+  if (e.kind === "minion") return !rpg.minion;
+  if (e.kind === "wubby") return !rpg.boss;
+  if (e.kind === "cassette") return rpg.minion && !rpg.cassette;
+  if (e.kind === "note") return !rpg.notes.includes(e.id);
+  if (e.kind === "door") return true;
+  return true;
+}
+
+/* ── La boucle ── */
+function rpgFrame(now) {
+  if (!R.on) { R.raf = 0; return; }
+  const dt = Math.min(50, now - R.last); R.last = now;
+  rpgUpdate(now, dt); rpgDraw(now, dt);
+  R.raf = requestAnimationFrame(rpgFrame);
+}
+function rpgUpdate(now, dt) {
+  const p = R.p, sp = 0.0048 * dt;
+  if (!rpgBusy()) {
+    let dx = 0, dy = 0;
+    if (R.keys.arrowleft || R.keys.q || R.keys.a) dx = -1; else if (R.keys.arrowright || R.keys.d) dx = 1;
+    else if (R.keys.arrowup || R.keys.z || R.keys.w) dy = -1; else if (R.keys.arrowdown || R.keys.s) dy = 1;
+    if ((dx || dy) && Math.abs(p.x - p.tx) < 0.01 && Math.abs(p.y - p.ty) < 0.01) {
+      const nx = Math.round(p.x) + dx, ny = Math.round(p.y) + dy;
+      p.dir = dx < 0 ? "left" : dx > 0 ? "right" : dy < 0 ? "up" : "down";
+      if (!solidAt(nx, ny)) { p.tx = nx; p.ty = ny; }
+    }
+    if (Math.abs(p.x - p.tx) < 0.01 && Math.abs(p.y - p.ty) < 0.01 && R.path.length) {
+      const [nx, ny] = R.path.shift();
+      p.dir = nx < p.tx ? "left" : nx > p.tx ? "right" : ny < p.ty ? "up" : "down";
+      p.tx = nx; p.ty = ny;
+      if (!R.path.length && R.auto) { const a = R.auto; R.auto = null; setTimeout(() => { if (R.near && R.near.id === a.id) rpgAct(a); }, 240); }
+    }
+  }
+  const mx = p.tx - p.x, my = p.ty - p.y, dist = Math.hypot(mx, my);
+  p.walking = dist > 0.01;
+  if (p.walking) { const k = Math.min(1, sp / dist); p.x += mx * k; p.y += my * k; p.ph += dt * 0.012; R.trail.unshift({ x: p.x, y: p.y }); if (R.trail.length > 80) R.trail.pop(); }
+  // la caméra suit, sans sortir de la carte
+  const MW = RPG_COLS * R.T, MH = RPG_ROWS * R.T;
+  const cx = Math.max(0, Math.min(MW - R.W, (p.x + 0.5) * R.T - R.W / 2)), cy = Math.max(-90, Math.min(MH - R.H + 150, (p.y + 0.5) * R.T - R.H * 0.5));
+  R.cam.x += ((MW < R.W ? (MW - R.W) / 2 : cx) - R.cam.x) * Math.min(1, dt * 0.01);
+  R.cam.y += (cy - R.cam.y) * Math.min(1, dt * 0.01);
+  // ramasser les notes
+  for (const e of R.ents) if (e.kind === "note" && entVisible(e) && Math.hypot(p.x - e.x, p.y - e.y) < 0.6) {
+    rpg.notes.push(e.id); saveRpg(); prof.tokens = (prof.tokens || 0) + 1; saveProf();
+    rpgBurst((e.x + 0.5) * R.T, (e.y + 0.5) * R.T, "#FFE45E", 16); rpgToast("+1 jeton"); rpgHud();
+    if (ctx) { const t = ctx.currentTime; blip(1568, t, 0.05, 0.04, "triangle"); blip(2093, t + 0.06, 0.08, 0.04, "triangle"); }
+  }
+  // ce qui est à portée
+  let near = null, best = 1.7;
+  for (const e of R.ents) {
+    if (!entVisible(e) || ["note", "bench", "bus", "cassette"].includes(e.kind) && !(e.kind === "cassette")) continue;
+    const ecx = e.x + ((e.w || 1) - 1) / 2, ecy = e.y + ((e.h || 1) - 1) / 2, dd = Math.hypot(p.x - ecx, p.y - ecy) - ((e.w || 1) - 1) * 0.5;
+    if (dd < best) { best = dd; near = e; }
+  }
+  if (near !== R.near) { R.near = near; rpgActBtn(); }
+  R.dark += ((rpg.lamps.every(Boolean) ? 0.1 : 0.45) - R.dark) * Math.min(1, dt * 0.002);
+}
+function rpgBurst(x, y, col, n = 14) { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s2 = 0.05 + Math.random() * 0.18; R.fx.push({ x, y, vx: Math.cos(a) * s2, vy: Math.sin(a) * s2 - 0.05, t: 0, life: 600 + Math.random() * 400, col }); } }
+function rpgToast(txt) { R.toast = { txt, t: 0 }; }
+
+/* ── Dessin ── */
+function rpgDraw(now, dt) {
+  const c = R.c, T = R.T, d = R.dpr, cam = R.cam;
+  c.setTransform(d, 0, 0, d, 0, 0);
+  c.fillStyle = "#07000F"; c.fillRect(0, 0, R.W, R.H);
+  c.save(); c.translate(-cam.x, -cam.y); c.drawImage(R.bg, 0, 0, RPG_COLS * R.T, RPG_ROWS * R.T); c.restore();
+  c.save(); c.translate(-cam.x, -cam.y);
+  const pulse = Math.pow(1 - ((now / 1000 * MENU_BPM / 60) % 1), 3);
+  // l'eau du canal qui ondule
+  c.fillStyle = "rgba(0,240,255,.12)"; for (let x = 0; x < RPG_COLS; x++) if (R.map[0][x] === "~") for (let y = 0; y < 2; y++) c.fillRect(x * T + ((now / 40 + y * 13) % T), y * T + T * 0.5, T * 0.3, 2);
+  // les enseignes
+  for (const s of SIGNS) {
+    const x = (s.x + s.w / 2) * T, y = (s.y + 0.78) * T;
+    c.save(); c.font = `${Math.round(T * 0.42)}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+    const on = rpg.lamps.every(Boolean) || s.text === "JUKE";
+    c.fillStyle = on ? "#fff" : "rgba(255,255,255,.25)"; if (on) { c.shadowColor = s.col; c.shadowBlur = 12 + pulse * 10; }
+    c.fillText(s.text, x, y); c.restore();
+  }
+  // le ruban de tape
+  if (R.tapFx) { R.tapFx.t += dt; const k = R.tapFx.t / 400; if (k >= 1) R.tapFx = null; else { c.strokeStyle = `rgba(0,240,255,${1 - k})`; c.lineWidth = 2; c.beginPath(); c.arc(R.tapFx.x, R.tapFx.y, 6 + k * 18, 0, 6.283); c.stroke(); } }
+  // les éléments, triés par profondeur
+  const list = R.ents.filter(entVisible).map(e => ({ e, y: e.y + (e.h || 1) }));
+  const followers = (zoo.list.length ? [activeMon(), ...zoo.list.filter(m => m.id !== activeMon()?.id)].slice(0, 3) : []);
+  followers.forEach((m, i) => { const tp = R.trail[Math.min(R.trail.length - 1, (i + 1) * 14)] || R.p; list.push({ mon: m, x: tp.x, y: tp.y + 0.99, i }); });
+  list.push({ me: true, y: R.p.y + 1 });
+  list.sort((a, b) => a.y - b.y);
+  for (const it of list) {
+    if (it.me) drawAvatar(c, (R.p.x + 0.5) * T, (R.p.y + 0.92) * T, T * 1.25, R.p.dir, R.p.ph, prof.avatar, R.p.walking);
+    else if (it.mon) drawMon(c, it.mon, (it.x + 0.5) * T, (it.y - 0.08) * T, T * [0, 1.25, 1.05, 0.95][it.mon.stage || 1], { lift: Math.abs(Math.sin(now / 180 + it.i)) * T * 0.08, mood: "ok", flip: false });
+    else drawEnt(c, it.e, now, pulse);
+  }
+  // le repère de quête
+  const tg = R.ents.find(e => e.id === questTarget());
+  if (tg && entVisible(tg)) {
+    const x = (tg.x + (tg.w || 1) / 2) * T, y = tg.y * T - T * 0.9 - Math.abs(Math.sin(now / 250)) * T * 0.2;
+    c.save(); c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 16; c.beginPath(); c.moveTo(x - T * 0.25, y - T * 0.3); c.lineTo(x + T * 0.25, y - T * 0.3); c.lineTo(x, y); c.fill(); c.restore();
+  }
+  R.fx = R.fx.filter(f => (f.t += dt) < f.life);
+  for (const f of R.fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 0.0003 * dt; c.globalAlpha = 1 - f.t / f.life; c.fillStyle = f.col; c.fillRect(f.x - 2, f.y - 2, 4, 4); }
+  c.globalAlpha = 1;
+  c.restore();
+  // la nuit : seuls le joueur et les lampadaires allumés éclairent
+  if (R.dark > 0.13) {
+    const o = R.darkCv || (R.darkCv = document.createElement("canvas"));
+    if (o.width !== R.cv.width || o.height !== R.cv.height) { o.width = R.cv.width; o.height = R.cv.height; }
+    const oc = o.getContext("2d"); oc.setTransform(d, 0, 0, d, 0, 0); oc.globalCompositeOperation = "source-over";
+    oc.clearRect(0, 0, R.W, R.H); oc.fillStyle = `rgba(4,0,12,${R.dark})`; oc.fillRect(0, 0, R.W, R.H);
+    oc.globalCompositeOperation = "destination-out";
+    const hole = (x, y, r) => { const gr = oc.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); oc.fillStyle = gr; oc.beginPath(); oc.arc(x, y, r, 0, 6.283); oc.fill(); };
+    hole((R.p.x + 0.5) * T - cam.x, (R.p.y + 0.4) * T - cam.y, T * 4.2);
+    R.ents.forEach(e => { if (e.kind === "lamp" && rpg.lamps[e.i]) hole((e.x + 0.5) * T - cam.x, (e.y + 0.5) * T - cam.y, T * 4); });
+    if (tg) hole((tg.x + 0.5) * T - cam.x, (tg.y + 0.5) * T - cam.y, T * 1.4);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(o, 0, 0); c.setTransform(d, 0, 0, d, 0, 0);
+  }
+  // la flèche-guide autour du joueur
+  if (tg && entVisible(tg)) {
+    const px = (R.p.x + 0.5) * T - cam.x, py = (R.p.y + 0.3) * T - cam.y, tx = (tg.x + 0.5) * T - cam.x, ty = (tg.y + 0.5) * T - cam.y;
+    const dd = Math.hypot(tx - px, ty - py);
+    if (dd > T * 3) {
+      const a = Math.atan2(ty - py, tx - px), r = T * 1.3;
+      c.save(); c.translate(px + Math.cos(a) * r, py + Math.sin(a) * r); c.rotate(a); c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 14; c.globalAlpha = 0.7 + 0.3 * Math.sin(now / 200);
+      c.beginPath(); c.moveTo(T * 0.3, 0); c.lineTo(-T * 0.15, -T * 0.22); c.lineTo(-T * 0.15, T * 0.22); c.fill(); c.restore();
+    }
+  }
+  if (R.toast) {
+    R.toast.t += dt; const k = R.toast.t / 1400; if (k >= 1) R.toast = null;
+    else { c.save(); c.globalAlpha = Math.min(1, (1 - k) * 3); c.font = `${Math.round(T * 0.5)}px 'Anton', Impact, sans-serif`; c.textAlign = "center"; c.fillStyle = "#FFE45E"; c.shadowColor = "#FF2E88"; c.shadowBlur = 12; c.fillText(R.toast.txt.toUpperCase(), (R.p.x + 0.5) * T - cam.x, (R.p.y - 1) * T - cam.y - k * T); c.restore(); }
+  }
+}
+function drawEnt(c, e, now, pulse) {
+  const T = R.T, X = e.x * T, Y = e.y * T;
+  c.save();
+  switch (e.kind) {
+    case "lamp": {
+      const on = rpg.lamps[e.i];
+      c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.ellipse(X + T / 2, Y + T * 0.9, T * 0.2, T * 0.07, 0, 0, 6.283); c.fill();
+      c.fillStyle = "#3A2A4A"; c.fillRect(X + T * 0.45, Y - T * 0.6, T * 0.1, T * 1.5);
+      c.fillStyle = on ? "#FFE45E" : "#4A3A56"; if (on) { c.shadowColor = "#FFE45E"; c.shadowBlur = 30 + pulse * 10; }
+      c.beginPath(); c.arc(X + T / 2, Y - T * 0.65, T * 0.22, 0, 6.283); c.fill();
+      break;
+    }
+    case "fountain": {
+      c.fillStyle = "#3A3450"; c.beginPath(); c.ellipse(X + T, Y + T, T * 0.95, T * 0.8, 0, 0, 6.283); c.fill();
+      c.fillStyle = rpg.fountain ? "#0B5A8A" : "#1A1428"; c.beginPath(); c.ellipse(X + T, Y + T, T * 0.75, T * 0.6, 0, 0, 6.283); c.fill();
+      if (rpg.fountain) { c.fillStyle = "rgba(0,240,255,.7)"; for (let i = 0; i < 6; i++) { const a = now / 300 + i; c.beginPath(); c.arc(X + T + Math.cos(a) * T * 0.3, Y + T * 0.7 - Math.abs(Math.sin(a * 2)) * T * 0.5, 3, 0, 6.283); c.fill(); } }
+      c.fillStyle = "#4A4460"; c.fillRect(X + T * 0.9, Y + T * 0.4, T * 0.2, T * 0.6);
+      break;
+    }
+    case "jukebox": {
+      c.fillStyle = "#3A1258"; c.beginPath(); c.moveTo(X + T * 0.1, Y + T); c.lineTo(X + T * 0.1, Y - T * 0.2); c.quadraticCurveTo(X + T / 2, Y - T * 0.7, X + T * 0.9, Y - T * 0.2); c.lineTo(X + T * 0.9, Y + T); c.fill();
+      c.strokeStyle = rpg.tamed.includes("ampli") ? "#FF6B2E" : "#6A4A7A"; c.lineWidth = 3; c.stroke();
+      if (!rpg.tamed.includes("ampli")) { c.fillStyle = "#FF6B2E"; c.globalAlpha = 0.5 + 0.5 * Math.sin(now / 150); c.font = `${T * 0.4}px sans-serif`; c.textAlign = "center"; c.fillText("?", X + T / 2, Y + T * 0.3); }
+      break;
+    }
+    case "door": {
+      if (!rpg.door) { for (let i = 0; i < 4; i++) { c.fillStyle = `rgba(255,0,51,${0.4 + 0.3 * Math.sin(now / 100 + i)})`; c.fillRect(X + T * 0.1 + i * T * 0.22, Y, T * 0.08, T); } }
+      else { c.fillStyle = "rgba(0,245,212,.25)"; c.fillRect(X, Y, T, T); }
+      break;
+    }
+    case "minion": {
+      const y = Y + T * 0.55 + Math.sin(now / 180) * 3;
+      c.translate(X + T / 2, y); c.scale(T / 30, T / 30);
+      c.fillStyle = "#0B0010"; c.strokeStyle = "#FF3B3B"; c.lineWidth = 1.5; c.shadowColor = "#FF0033"; c.shadowBlur = 10;
+      c.beginPath(); c.moveTo(-12, 10); c.quadraticCurveTo(-14, -14, 0, -15); c.quadraticCurveTo(14, -14, 12, 10); c.closePath(); c.fill(); c.stroke();
+      c.shadowBlur = 0; c.fillStyle = "#FF3B3B"; c.beginPath(); c.arc(-5, -3, 2.5, 0, 6.283); c.arc(5, -3, 2.5, 0, 6.283); c.fill();
+      break;
+    }
+    case "cassette": {
+      c.fillStyle = "#12001F"; c.strokeStyle = "#FFE45E"; c.lineWidth = 2; c.shadowColor = "#FFE45E"; c.shadowBlur = 14;
+      c.fillRect(X + T * 0.2, Y + T * 0.35 + Math.sin(now / 200) * 3, T * 0.6, T * 0.4); c.strokeRect(X + T * 0.2, Y + T * 0.35 + Math.sin(now / 200) * 3, T * 0.6, T * 0.4);
+      break;
+    }
+    case "arcade": {
+      for (let i = 0; i < 2; i++) { c.fillStyle = "#14122E"; c.fillRect(X + i * T * 0.55, Y - T * 0.4, T * 0.48, T * 1.3); c.fillStyle = `rgba(0,240,255,${0.5 + 0.3 * Math.sin(now / 90 + i)})`; c.fillRect(X + i * T * 0.55 + 4, Y - T * 0.3, T * 0.48 - 8, T * 0.4); }
+      if (!rpg.tamed.includes("grumble")) { c.fillStyle = "#C39BD3"; c.font = `${T * 0.3}px 'VT323', monospace`; c.fillText("z z z", X + T * 1.1, Y - T * 0.3 - (now / 60) % 10); }
+      break;
+    }
+    case "bus": { c.fillStyle = "#2A1D40"; c.fillRect(X, Y - T * 0.3, T * 1.8, T * 0.2); c.fillStyle = "#3A2A56"; c.fillRect(X, Y - T * 0.3, T * 0.08, T * 1.2); c.fillRect(X + T * 1.72, Y - T * 0.3, T * 0.08, T * 1.2); c.fillStyle = "#00F0FF"; c.font = `${T * 0.3}px 'VT323', monospace`; c.fillText("BUS 86", X + T * 0.4, Y - T * 0.38); break; }
+    case "bench": { c.fillStyle = "#4A2A3A"; c.fillRect(X + T * 0.1, Y + T * 0.4, T * 0.8, T * 0.25); c.fillStyle = "#2A1A24"; c.fillRect(X + T * 0.1, Y + T * 0.2, T * 0.8, T * 0.12); break; }
+    case "note": {
+      c.font = `${T * 0.55}px 'Chakra Petch', sans-serif`; c.textAlign = "center"; c.fillStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 14;
+      c.fillText("♪", X + T / 2, Y + T * 0.7 + Math.sin(now / 300 + e.x) * 4); break;
+    }
+    case "npc": {
+      const im = docSprite("talk"); if (im) c.drawImage(im, X - T * 0.25, Y - T * 0.75, T * 1.5, T * 1.65);
+      break;
+    }
+    case "musician": {
+      const m = { id: "mus", name: "Musicien", type: "chrome", stage: 2, dna: dnaOf(555, "chrome") };
+      drawMon(c, m, X + T / 2, Y + T * 0.95, T * 1.5, { mood: rpg.phrase ? "joy" : "sad", lift: rpg.phrase ? Math.abs(Math.sin(now / 200)) * 5 : 0 });
+      c.fillStyle = "#FFB347"; c.font = `${T * 0.35}px sans-serif`; c.textAlign = "center"; c.fillText(rpg.phrase ? "♫" : "♪?", X + T * 1.1, Y - T * 0.2 + Math.sin(now / 300) * 3);
+      break;
+    }
+    case "wubby": {
+      const foe = rivalMon(0);
+      drawMon(c, foe, X + T, Y + T * 1.1, T * 2.6, { mood: "angry", glow: "#FF3B3B", glowR: 24, lift: Math.abs(Math.sin(now / 500)) * 4 });
+      break;
+    }
+    case "citizen": {
+      const lit = rpg.lamps.every(Boolean), type = ["neon", "chrome", "basse"][e.seed % 3];
+      e.m = e.m || { id: "cz" + e.seed, name: nameOf(e.seed), type, stage: 1, dna: dnaOf(e.seed, type) };
+      drawMon(c, e.m, X + T / 2, Y + T * 0.95, T * 1.25, { mood: lit ? "joy" : "sad", alpha: lit ? 1 : 0.8, lift: lit ? Math.abs(Math.sin(now / 260 + e.seed)) * 5 : 0 });
+      if (R.near === e && e.say) speechBubble(c, X + T / 2, Y - T * 0.15, e.say, Math.min(220, R.W * 0.55), lit ? "#00F5D4" : "#C39BD3");
+      break;
+    }
+  }
+  c.restore();
+}
+
+/* ── Le bouton d'action et l'interface ── */
+function entLabel(e) {
+  switch (e.kind) {
+    case "npc": return "Parler à Doc";
+    case "jukebox": return rpg.tamed.includes("ampli") ? "Le juke-box" : "Fouiller le juke-box";
+    case "lamp": return rpg.lamps[e.i] ? "Lampadaire allumé" : "Chanter pour l'allumer";
+    case "fountain": return rpg.fountain ? (rpg.tamed.includes("gargouille") ? "La fontaine" : "Apprivoiser Gargouille") : "Réveiller la fontaine";
+    case "door": return rpg.door ? "La ruelle" : "Le code musical";
+    case "minion": return "Affronter le sbire";
+    case "cassette": return "Ramasser la cassette";
+    case "musician": return rpg.phrase ? "Le musicien" : "Écouter le musicien";
+    case "arcade": return rpg.tamed.includes("grumble") ? "Les bornes" : "Réveiller Grumble";
+    case "wubby": return "Affronter Wubby";
+    case "citizen": return "Parler";
+  }
+  return "";
+}
+function rpgActBtn() {
+  const b = $("rpgAct"), e = R.near;
+  b.hidden = !e; if (!e) return;
+  b.innerHTML = `<b>${esc(entLabel(e))}</b>`;
+  if (e.kind === "citizen") { const lit = rpg.lamps.every(Boolean); e.say = pick(lit ? CIT_LIT : CIT_DARK); }
+}
+function rpgHud() {
+  const q = QUESTS[rpg.q], m = activeMon(), found = CROONIES_Q1.filter(s => rpg.tamed.includes(s.id)).length;
+  $("rpgHud").innerHTML = `<div class="r-top">
+      <button type="button" class="r-quest" data-r="goal"><span class="k">Quête${q?.count ? ` · ${q.count()}` : ""}</span><b>${esc(q?.title || "")}</b>${q?.target ? "<em>Y aller ▶</em>" : ""}</button>
+      <div class="r-side"><span class="r-tok">${prof.tokens ?? 0}<small>jetons</small></span></div></div>
+    <div class="r-bottom">
+      <button type="button" class="r-btn" data-r="band">${m ? monsterSvg(m, 36, { mood: "ok" }) : ""}<span>Bande</span></button>
+      <button type="button" class="r-btn" data-r="dex"><i>◎</i><span>Carnet ${found}/${CROONIES_Q1.length}</span></button>
+      <button type="button" class="r-btn" data-r="menu"><i>☰</i><span>Menu</span></button></div>`;
+}
+
+/* ════════ Les interactions : chaque geste est un exercice de chant ════════ */
+function rpgAct(e) {
+  if (rpgBusy()) return;
+  R.path = []; R.auto = null;
+  const v = voiceNotes();
+  const need = (q, msg) => { if (rpg.q < q) { vnPlay([["doc", msg, "worried"]], null); return true; } return false; };
+  switch (e.kind) {
+    case "npc": return docTalk();
+    case "citizen": return;
+    case "jukebox":
+      if (rpg.tamed.includes("ampli")) return vnPlay([["doc", "Le juke-box remarche. Il ne passe que des slows, mais il remarche.", "smile"]], null);
+      if (need(1, "Viens d'abord me voir, que je t'explique deux trois trucs.")) return;
+      return vnPlay([["narr", "Le juke-box grésille. Quelque chose bouge à l'intérieur…"], ["cr:ampli", "Bzz ? Bzzz !", "sad"],
+        ["doc", "Un Croonie ! Ampli. Il a peur du silence des Muets. Les Croonies aiment chacun quelque chose. Lui, c'est une note juste."],
+        ["doc", `Chante-lui un ${fullName(v.mid)} et tiens-le. S'il aime, il te suit.`]],
+        () => singChallenge({ kind: "note", targets: [v.mid], title: "Apprivoise Ampli", sub: `Chante un ${fullName(v.mid)} et tiens-le`, portrait: croonieOf(CROONIES_Q1[0]) }, ok => ok ? tame("ampli", () => advanceQuest(2)) : null));
+    case "lamp": {
+      if (rpg.lamps[e.i]) return;
+      if (need(2, "Les lampadaires, ce sera pour après. D'abord le juke-box : quelqu'un s'y cache.")) return;
+      const t = v.lamp[e.i];
+      return singChallenge({ kind: "note", targets: [t], title: "Allume le lampadaire", sub: `Chante un ${fullName(t)}. La lumière monte quand tu tiens la note juste.`, portrait: null, icon: "💡" }, ok => {
+        if (!ok) return;
+        rpg.lamps[e.i] = true; saveRpg(); rpgBurst((e.x + 0.5) * R.T, (e.y - 0.6) * R.T, "#FFE45E", 30); flash("#FFE45E", 0.25);
+        if (rpg.lamps.every(Boolean)) { rpgToast("La rue se rallume !"); setTimeout(() => vnPlay([["narr", "Un à un, les néons de la Rue des Néons se rallument. Les habitants sortent sur les trottoirs."], ["doc", "Ça, c'est ma rue ! Prochaine étape : la fontaine du parc. Elle est à sec depuis des semaines.", "smile"]], () => advanceQuest(3)), 900); }
+        else rpgToast(`Lampadaire ${rpg.lamps.filter(Boolean).length}/3`);
+        rpgHud();
+      });
+    }
+    case "fountain":
+      if (need(3, "La fontaine ? On y viendra. Allume d'abord la rue.")) return;
+      if (!rpg.fountain) return vnPlay([["doc", "La fontaine chante quand quelqu'un tient une note longtemps. Les Muets l'ont fait taire."], ["doc", `Tiens un ${fullName(v.hold)} le plus droit possible. Respire par le ventre.`]],
+        () => singChallenge({ kind: "hold", targets: [v.hold], ms: 3500, title: "Réveille la fontaine", sub: `Tiens un ${fullName(v.hold)} pendant 3,5 secondes`, icon: "⛲" }, ok => {
+          if (!ok) return; rpg.fountain = true; saveRpg(); flash("#00F0FF", 0.3);
+          vnPlay([["narr", "L'eau jaillit. Et avec elle, une créature toute ronde qui gargouille de bonheur."], ["cr:gargouille", "Glouglou… encore…", "joy"], ["doc", "Gargouille ! Elle adore les notes tenues. Encore une, plus longue, et elle est à toi."]],
+            () => singChallenge({ kind: "hold", targets: [v.hold], ms: 4500, title: "Apprivoise Gargouille", sub: `Encore un ${fullName(v.hold)}, 4,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]) }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null));
+        }));
+      if (!rpg.tamed.includes("gargouille")) return singChallenge({ kind: "hold", targets: [v.hold], ms: 4500, title: "Apprivoise Gargouille", sub: `Un ${fullName(v.hold)}, 4,5 secondes`, portrait: croonieOf(CROONIES_Q1[1]) }, ok2 => ok2 ? tame("gargouille", () => advanceQuest(4)) : null);
+      return;
+    case "door":
+      if (rpg.door) return;
+      if (need(4, "Le Studio 86 ? Patience. Chaque chose en son temps.")) return;
+      return vnPlay([["doc", "La porte du Studio est verrouillée par un code musical. Trois notes, celles du début de Carol."], ["doc", "Écoute-les, puis rechante-les dans l'ordre."]],
+        () => singChallenge({ kind: "seq", targets: v.motif, title: "Le code de la porte", sub: "Rechante les 3 notes dans l'ordre", icon: "🔒" }, ok => {
+          if (!ok) return; rpg.door = true; e.solid = false; saveRpg(); flash("#00F5D4", 0.3); rpgToast("Porte ouverte !");
+          setTimeout(() => vnPlay([["narr", "La porte s'ouvre… sur un sbire des Muets qui garde la ruelle."], ["doc", "Il va te lancer des notes. Renvoie-les-lui juste, il ne le supportera pas."]], null), 600);
+        }));
+    case "minion": {
+      const fig = pickFigureN(3);
+      return singChallenge({ kind: "seq", targets: fig, title: "Duel contre le sbire", sub: "Il te lance 3 notes : renvoie-les", icon: "👾", foe: true }, ok => {
+        if (!ok) return vnPlay([["doc", "Il a gagné cette manche. Respire, écoute bien, et retente.", "worried"]], null);
+        rpg.minion = true; R.ents.find(x => x.id === "minion").solid = false; saveRpg(); rpgBurst(13.5 * R.T, 12.5 * R.T, "#FF3B3B", 40); boom(true); shake(12);
+        vnPlay([["narr", "Le sbire éclate en confettis. Il a laissé tomber une cassette."], ["doc", "Ramasse-la, on ne sait jamais."]], () => { advanceQuest(5); });
+      });
+    }
+    case "cassette":
+      rpg.cassette = true; saveRpg(); prof.tokens = (prof.tokens || 0) + 5; saveProf(); rpgToast("+5 jetons"); rpgHud();
+      return vnPlay([["doc", "Une cassette de démo du Studio. Garde les jetons pour le juke-box. Et va voir le musicien de la placette : il a un problème avec Carol."]], null);
+    case "musician":
+      if (rpg.phrase) return vnPlay([["mus", "Ding dong ding dong ! Merci encore, l'artiste.", "joy"]], null);
+      if (need(5, "Le musicien est un peu ronchon en ce moment. Repasse plus tard.")) return;
+      return vnPlay([["mus", "Ding… dong… non. Ding dong… NON. Les Muets m'ont volé la première phrase de Carol, je n'arrive plus à la chanter.", "sad"],
+        ["doc", "C'est le moment de montrer ce que tu sais faire. La première phrase, au ralenti. Montre-lui."]], () => rpgExercise("phrase"));
+    case "arcade":
+      if (rpg.tamed.includes("grumble")) return vnPlay([["cr:grumble", "Grmbl. Content.", "joy"]], null);
+      return vnPlay([["narr", "Derrière les bornes, une grosse boule ronfle. Elle entrouvre un œil."], ["cr:grumble", "Grmbl… pas aigu… grave…", "sad"],
+        ["doc", `Grumble ! Il n'aime que le grave. Va chercher tout en bas : un ${fullName(v.low)}.`]],
+        () => singChallenge({ kind: "note", targets: [v.low], ms: 1800, title: "Apprivoise Grumble", sub: `Descends jusqu'au ${fullName(v.low)} et tiens-le`, portrait: croonieOf(CROONIES_Q1[3]) }, ok => ok ? tame("grumble") : null));
+    case "wubby":
+      if (need(6, "Wubby garde le pont. Tu n'es pas encore prête… enfin, prêt·e. Termine d'abord la rue.")) return;
+      return vnPlay([["r0", "Wub wub. Le pont, c'est à moi. Personne passe."], ["doc", "Wubby. Le plus nul des Monstres Muets, mais il garde la sortie du quartier."], ["doc", "Ta bande va se battre avec ta voix. Il chante une figure, tu la rechantes juste, et ton Croonie frappe."], ["r0", "Wub. Prépare-toi à pleurer en fa dièse."]], () => rpgExercise("battle"));
+  }
+}
+function docTalk() {
+  const lines = {
+    0: [["doc", "Hé, toi ! Oui, toi, avec ton walkman. Bienvenue à Synthville. Moi c'est Doc Vinyle, ancien ingé son du Néon Club."],
+      ["doc", "Depuis que les Monstres Muets ont volé les notes justes, les Croonies se cachent. Ce sont des petites bêtes musicales, et chacune aime quelque chose."],
+      ["doc", "Les apprivoiser, c'est simple : tu leur chantes ce qu'ils aiment, juste. Ta voix est ta meilleure arme."],
+      { choice: [["Je chante comme une casserole.", [["doc", "Parfait, les casseroles c'est mon rayon. On va te récurer.", "smile"]]], ["C'est parti !", [["doc", "J'aime cette énergie. Garde-la pour le premier contre-ut.", "smile"]]]] },
+      ["doc", "J'ai entendu grésiller le juke-box cassé, au coin de la rue. Va voir. Touche l'écran pour marcher, le gros bouton pour agir."]],
+  };
+  const hint = { 1: "Le juke-box, au coin de la rue. Quelque chose s'y cache.", 2: "Allume les trois lampadaires de la rue. Chacun a sa note.", 3: "La fontaine du parc, à gauche de la rue.", 4: "La ruelle du Studio 86, sur la droite.", 5: "Le musicien de la placette a besoin de toi.", 6: "Wubby t'attend sur le pont, tout en haut.", 7: "Tu as libéré la Rue des Néons. Le Parc à Écho ouvre bientôt. En attendant, cherche les Croonies cachés !" };
+  if (rpg.q === 0) return vnPlay(lines[0], () => advanceQuest(1));
+  vnPlay([["doc", hint[rpg.q] || "Continue comme ça.", "smile"]], null);
+}
+function advanceQuest(to) {
+  if (rpg.q >= to) { rpgHud(); return; }
+  rpg.q = to; saveRpg(); rpgHud();
+  const q = QUESTS[rpg.q];
+  if (q) { $("rpgQuestPop").innerHTML = `<span>Nouvelle quête</span><b>${esc(q.title)}</b>`; $("rpgQuestPop").classList.remove("go"); void $("rpgQuestPop").offsetWidth; $("rpgQuestPop").classList.add("go"); if (ctx) { const t = ctx.currentTime; blip(523, t, 0.08, 0.05); blip(784, t + 0.1, 0.12, 0.05); } }
+}
+/* Apprivoiser : le Croonie rejoint la bande */
+function tame(id, then) {
+  const sp = CROONIES_Q1.find(s => s.id === id); if (!sp || rpg.tamed.includes(id)) { then && then(); return; }
+  const m = birth(sp.seed, sp.type, sp.rar, "Rue des Néons"); m.name = sp.name; m.species = sp.id;
+  if (!zoo.active || zoo.list.length === 1) zoo.active = m.id;
+  saveZoo(); rpg.tamed.push(id); saveRpg();
+  hatchShow(m, `${sp.name} rejoint ta bande !`);
+  $("hatch").querySelector("button").onclick = () => { $("hatch").hidden = true; rpgHud(); then && then(); };
+}
+/* Les grandes épreuves passent par le niveau de jeu, puis on revient sur la carte */
+async function rpgExercise(kind) {
+  const m = await ensureMic();
+  if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Autorise le micro dans ton navigateur.", "worried"]], null); return; }
+  closeRpg();
+  storyRun = { id: "rpg:" + kind, title: kind === "battle" ? "Wubby" : "La première phrase", act: kind === "battle" ? 2 : 1, rpg: true };
+  state.lairView = "train"; if (state.mode !== "train") setMode("train");
+  $("train").hidden = true;
+  if (kind === "phrase") startPhrase(0, 1); else startBattle(0, true);
+}
+function rpgResult(run, passed) {
+  storyRun = null;
+  openRpg();
+  if (run.id === "rpg:phrase") {
+    if (!passed) return vnPlay([["mus", "Presque ! Il faut 70 % de notes justes. Réessaie, je t'écoute.", "sad"]], null);
+    rpg.phrase = true; saveRpg();
+    return vnPlay([["mus", "C'est ça ! Ding dong ding dong ! Tu m'as rendu ma chanson.", "joy"], ["narr", "Une petite cloche argentée sort de l'étui de guitare et se met à tinter."], ["cr:dingdong", "Ding ! Dong !", "joy"], ["doc", "Dingdong ! Il adore cette phrase. Il veut te suivre."]],
+      () => tame("dingdong", () => advanceQuest(6)));
+  }
+  if (run.id === "rpg:battle") {
+    if (!passed) return vnPlay([["r0", "Wub wub wub ! Même moi je chante mieux !"], ["doc", "Ça, c'est vexant. Fais grandir ta bande et retente : il a gagné une bataille, pas la guerre.", "worried"]], null);
+    rpg.boss = true; saveRpg(); R.ents = rpgEntities();
+    return vnPlay([["r0", "Wub… c'était pas juste… enfin si, c'était juste. C'est bien ça le problème."], ["narr", "Wubby s'enfuit par le pont. La Rue des Néons est libre !"],
+      ["doc", "Tu as libéré tout le quartier. Le Parc à Écho est de l'autre côté du pont. Il ouvre très bientôt.", "smile"]], () => { advanceQuest(7); rpgBilan(); });
+  }
+}
+function rpgBilan() {
+  const found = CROONIES_Q1.filter(s => rpg.tamed.includes(s.id)).length;
+  openPanel(`<div class="rp-head"><b>Quartier libéré</b><button type="button" class="pill" data-close>Fermer</button></div>
+    <div class="bilan"><div><b>${found}/${CROONIES_Q1.length}</b><span>Croonies</span></div><div><b>${rpg.notes.length}/8</b><span>notes trouvées</span></div><div><b>${prof.tokens}</b><span>jetons</span></div></div>
+    <p class="sub">${found < CROONIES_Q1.length ? "Il reste des Croonies cachés dans la Rue des Néons. Ouvre ton carnet pour les indices." : "Tous les Croonies du quartier sont dans ta bande. Bravo !"}</p>
+    <p class="sub">À suivre : <b>le Parc à Écho</b>, de l'autre côté du pont.</p>`);
+}
+
+/* ════════ Le défi chanté : un instrument de visée, plein écran, au pouce ════════ */
+const singW = { on: false, o: null, done: null, i: 0, held: 0, raf: 0, last: 0, trail: [], listenAt: 0, result: null };
+async function singChallenge(o, done) {
+  const m = await ensureMic();
+  if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Autorise le micro dans ton navigateur.", "worried"]], null); return; }
+  Object.assign(singW, { on: true, o, done, i: 0, held: 0, trail: [], result: null, okT: 0 });
+  const el = $("singW"); el.hidden = false;
+  el.querySelector(".sw-title").textContent = o.title;
+  el.querySelector(".sw-sub").textContent = o.sub;
+  el.querySelector(".sw-portrait").innerHTML = o.portrait ? monsterSvg(o.portrait, 90, { mood: "sad", cls: "idle" }) : `<span class="sw-icon">${o.icon || "♪"}</span>`;
+  el.classList.toggle("foe", !!o.foe);
+  singW.cv = $("swCv"); singW.c = singW.cv.getContext("2d");
+  const r = singW.cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); singW.cv.width = r.width * d; singW.cv.height = r.height * d; singW.d = d; singW.W = r.width; singW.H = r.height;
+  swListen();
+  singW.last = performance.now(); cancelAnimationFrame(singW.raf); singW.raf = requestAnimationFrame(swFrame);
+}
+function swListen() {
+  const o = singW.o, c = ac(), t0 = c.currentTime + 0.15, step = 0.55;
+  const seq = o.kind === "seq" ? o.targets : [o.targets[singW.i] ?? o.targets[0]];
+  const bus = c.createGain(); bus.connect(OUT);
+  seq.forEach((m, q) => tone(m, t0 + q * step, o.kind === "seq" ? step * 0.9 : 1.2, bus));
+  singW.listenAt = performance.now() + ((seq.length - 1) * step + (o.kind === "seq" ? step : 1.2)) * 1000 + (state.headphones ? 250 : 1100);
+  singW.phase = "listen"; singW.held = 0; if (o.kind === "seq") singW.i = 0;
+  $("singW").querySelector(".sw-state").textContent = "Écoute…";
+}
+function swEnd(ok) {
+  singW.on = false; cancelAnimationFrame(singW.raf);
+  const el = $("singW");
+  if (ok) {
+    el.querySelector(".sw-state").textContent = pick(["Parfait !", "Juste !", "Magnifique !", "Bingo !"]);
+    celebrate(60); flash("#00F5D4", 0.3); if (ctx) fanfare();
+    const m = activeMon(); if (m) { const r = growMon(m, 14, 4); if (r.evolved) setTimeout(() => evolveShow(m, r.from), 1400); }
+  }
+  setTimeout(() => { el.hidden = true; const d = singW.done; singW.done = null; rpgHud(); d && d(ok); }, ok ? 1100 : 0);
+}
+$("swAgain").onclick = () => { if (singW.on) swListen(); };
+$("swQuit").onclick = () => { if (singW.on) swEnd(false); };
+function swFrame(now) {
+  if (!singW.on) return;
+  const dt = Math.min(50, now - singW.last); singW.last = now;
+  const o = singW.o, c = singW.c, W = singW.W, H = singW.H, d = singW.d;
+  const tgt = o.kind === "seq" ? o.targets[singW.i] : o.targets[0], need = o.kind === "hold" ? o.ms : o.kind === "seq" ? 450 : (o.ms || 1200), tol = 40;
+  let live = null, cents = null;
+  if (singW.phase === "sing" || now >= singW.listenAt) {
+    if (singW.phase === "listen") { singW.phase = "sing"; $("singW").querySelector(".sw-state").textContent = "À toi !"; }
+    live = smoothed(readMic());
+    if (live != null) { cents = fold((live - tgt) * 100); singW.trail.push({ t: now, c: Math.max(-700, Math.min(700, cents)) }); }
+    const ok = cents != null && Math.abs(cents) <= tol;
+    singW.held = ok ? singW.held + dt : Math.max(0, singW.held - dt * (o.kind === "hold" ? 0.25 : 0.6));
+    const st = $("singW").querySelector(".sw-state");
+    st.textContent = cents == null ? "À toi !" : ok ? "Juste ! Tiens…" : cents < 0 ? (cents < -80 ? "Plus haut ↑↑" : "Un poil plus haut ↑") : (cents > 80 ? "Plus bas ↓↓" : "Un poil plus bas ↓");
+    st.className = "sw-state " + (cents == null ? "" : ok ? "ok" : "off");
+    if (singW.held >= need) {
+      if (o.kind === "seq" && singW.i < o.targets.length - 1) { singW.i++; singW.held = 0; if (ctx) blip(1320, ctx.currentTime, 0.08, 0.05); }
+      else { swEnd(true); return; }
+    }
+  }
+  singW.trail = singW.trail.filter(p => now - p.t < 2500);
+  // dessin : la jauge verticale de hauteur, la cible au centre
+  c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, W, H);
+  const cy = H / 2, ppc = H / 1100;
+  for (let s = -5; s <= 5; s++) { const y = cy - s * 100 * ppc; c.fillStyle = s === 0 ? "rgba(255,255,255,0)" : "rgba(255,255,255,.06)"; c.fillRect(0, y, W, 1); c.fillStyle = "rgba(195,155,211,.6)"; c.font = "11px 'Chakra Petch', sans-serif"; c.textAlign = "left"; c.fillText(fullName(tgt + s), 6, y - 3); }
+  const band = c.createLinearGradient(0, cy - tol * ppc * 2, 0, cy + tol * ppc * 2);
+  band.addColorStop(0, "rgba(0,245,212,0)"); band.addColorStop(0.5, "rgba(0,245,212,.35)"); band.addColorStop(1, "rgba(0,245,212,0)");
+  c.fillStyle = band; c.fillRect(0, cy - tol * ppc * 2, W, tol * ppc * 4);
+  c.fillStyle = "#00F5D4"; c.font = "16px 'Anton', Impact, sans-serif"; c.textAlign = "right"; c.fillText(fullName(tgt).toUpperCase(), W - 8, cy - 8);
+  // la traînée de la voix, de droite à gauche
+  c.lineWidth = 4; c.lineCap = "round"; let prev = null;
+  for (const p of singW.trail) {
+    const x = W * 0.7 - (now - p.t) * W * 0.00026, y = cy - p.c * ppc;
+    if (prev && Math.abs(prev.y - y) < 60) { c.strokeStyle = Math.abs(p.c) <= tol ? "rgba(0,245,212,.9)" : "rgba(255,59,59,.7)"; c.beginPath(); c.moveTo(prev.x, prev.y); c.lineTo(x, y); c.stroke(); }
+    prev = { x, y };
+  }
+  if (cents != null) {
+    const y = cy - Math.max(-700, Math.min(700, cents)) * ppc, ok = Math.abs(cents) <= tol, col = ok ? "#00F5D4" : "#FF3B3B";
+    c.save(); c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 20; c.beginPath(); c.arc(W * 0.7, y, 11, 0, 6.283); c.fill(); c.restore();
+  }
+  // la jauge de réussite
+  const k = Math.min(1, singW.held / need);
+  c.save(); c.strokeStyle = "rgba(255,255,255,.12)"; c.lineWidth = 8; c.beginPath(); c.arc(W * 0.7, cy, 30, 0, 6.283); c.stroke();
+  c.strokeStyle = "#FFE45E"; c.shadowColor = "#FFE45E"; c.shadowBlur = 12; c.beginPath(); c.arc(W * 0.7, cy, 30, -Math.PI / 2, -Math.PI / 2 + k * 6.283); c.stroke(); c.restore();
+  if (o.kind === "seq") {
+    o.targets.forEach((m, q) => { const x = W / 2 + (q - (o.targets.length - 1) / 2) * 44; c.fillStyle = q < singW.i ? "#00F5D4" : q === singW.i ? "#FFE45E" : "rgba(255,255,255,.2)"; c.beginPath(); c.arc(x, 20, q === singW.i ? 10 : 7, 0, 6.283); c.fill(); c.fillStyle = "#12001F"; c.font = "10px 'Chakra Petch', sans-serif"; c.textAlign = "center"; c.fillText(noteName(m), x, 24); });
+  }
+  singW.raf = requestAnimationFrame(swFrame);
+}
+
+/* ════════ Le carnet, la bande, le menu ════════ */
+function openPanel(html) { const p = $("rpgPanel"); p.innerHTML = `<div class="rp-in">${html}</div>`; p.hidden = false; }
+function openDex() {
+  openPanel(`<div class="rp-head"><b>Carnet des Croonies</b><button type="button" class="pill" data-close>Fermer</button></div>
+    <p class="sub">Rue des Néons · ${CROONIES_Q1.filter(s => rpg.tamed.includes(s.id)).length}/${CROONIES_Q1.length} trouvés</p>
+    <div class="dex">${CROONIES_Q1.map(sp => { const got = rpg.tamed.includes(sp.id), m = croonieOf(sp);
+      return `<div class="dex-card${got ? " got" : ""}"><span class="dex-art">${monsterSvg(m, 92, { mood: got ? "joy" : "ok" })}</span>
+        <b>${got ? esc(sp.name) : "???"}</b><small>${TYPES[sp.type].name}${sp.rar !== "commune" ? " · rare" : ""}</small>
+        <em>${got ? `Aime ${esc(sp.likeTxt)}.` : esc(sp.hint)}</em></div>`; }).join("")}</div>`);
+}
+function openBand() {
+  const act = activeMon();
+  openPanel(`<div class="rp-head"><b>Ta bande</b><button type="button" class="pill" data-close>Fermer</button></div>
+    <p class="sub">Le Croonie en tête combat pour toi et gagne le plus d'XP. Touche-en un pour le mettre en tête.</p>
+    <div class="dex">${zoo.list.map(m => `<button type="button" class="dex-card got${m.id === act?.id ? " lead" : ""}" data-lead="${m.id}">
+      <span class="dex-art">${monsterSvg(m, 92, { mood: m.id === act?.id ? "joy" : "ok", cls: "idle" })}</span><b>${esc(m.name)}</b>
+      <small>${TYPES[m.type].name} · ${STAGES[m.stage]} · niv. ${m.lvl}</small><span class="mini-belly"><i style="width:${Math.round(bellyOf(m))}%"></i></span></button>`).join("") || `<p class="sub">Personne encore. Va fouiller le juke-box !</p>`}</div>`);
+}
+function openRpgMenu() {
+  openPanel(`<div class="rp-head"><b>Menu</b><button type="button" class="pill" data-close>Fermer</button></div>
+    <div class="rp-menu">
+      <button type="button" data-m="listen"><b>Écouter le morceau</b><small>Ta voix et les autres, au calme</small></button>
+      <button type="button" data-m="step"><b>Note par note</b><small>Viser chaque note de Carol</small></button>
+      <button type="button" data-m="sing"><b>Chanter tout le morceau</b><small>Le live, ta bande dévore</small></button>
+      <button type="button" data-m="box"><b>Juke-box</b><small>${prof.tokens} jetons · des cassettes à ouvrir</small></button>
+      <button type="button" data-m="avatar"><b>Changer de look</b><small>Coupe, couleurs, blouson</small></button>
+      <button type="button" data-m="account"><b>Mon compte</b><small>${cloud.user ? "Connecté · partie sauvegardée" : "Se connecter pour sauvegarder"}</small></button>
+      <button type="button" data-m="title"><b>Écran titre</b><small>Musique, intro</small></button>
+    </div>`);
+}
+function rpgPanelClick(e) {
+  if (e.target.closest("[data-close]")) { $("rpgPanel").hidden = true; return; }
+  const l = e.target.closest("[data-lead]"); if (l) { zoo.active = l.dataset.lead; saveZoo(); openBand(); rpgHud(); return; }
+  const mm = e.target.closest("[data-m]"); if (!mm) return;
+  const w = mm.dataset.m; $("rpgPanel").hidden = true;
+  if (w === "avatar") openCreator(() => { $("rpg").hidden = false; });
+  else if (w === "account") openAccount();
+  else if (w === "title") openTitle();
+  else { closeRpg(); if (w === "box") { state.lairView = "box"; if (state.mode !== "train") setMode("train"); else renderTrain(); } else setMode(w); }
+}
+
 $("toWorld").onclick = () => { const st = ex?.story; if (st) { exAbort(); openStory(); } else goWorld(); };
 
 /* ══ Écran titre ══ */
@@ -5890,7 +6750,7 @@ $("titleScreen").addEventListener("click", e => {
   $("titleScreen").classList.add("gone");
   flash("#FF2E88", 0.35); shake(10);
   const m = b.dataset.start;
-  const begin = () => { const nx = nextChapter(); if (!SP().done.length && nx) playChapter(nx); else backToRoad(); };
+  const begin = () => openRpg();
   if (m === "intro" || !store.get("drm.intro")) playIntro(begin);
   else begin();
 });
