@@ -255,7 +255,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
-        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.3" aria-pressed="false">Douces</button><button type="button" data-others="0.7" aria-pressed="false">Fortes</button></div>
+        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.55" aria-pressed="false">Douces</button><button type="button" data-others="1" aria-pressed="false">Fortes</button></div>
       </div>
     </div>
 
@@ -281,7 +281,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
-        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.3" aria-pressed="false">Douces</button><button type="button" data-others="0.7" aria-pressed="false">Fortes</button></div>
+        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.55" aria-pressed="false">Douces</button><button type="button" data-others="1" aria-pressed="false">Fortes</button></div>
       </div>
       <span class="pill filebtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
@@ -608,6 +608,12 @@ function choirNote(midi, t, dur, out, vel) {
   for (const o of [...oscs, lfo]) { o.start(t); o.stop(end + 0.9); }
 }
 
+/* Les autres voix prennent le timbre opposé au sien, pour qu'elle distingue sa ligne du reste du chœur */
+function otherTone(midi, t, dur, out, vel) {
+  if (instrument === "piano") choirNote(midi, t, dur, out, vel * 1.9);
+  else if (piano) pianoNote(midi, t, dur, out, vel * 0.8);
+  else choirNote(midi, t, dur, out, vel * 1.4);
+}
 function tone(midi, t, dur, out, vel = 1) {
   if (instrument === "piano" && piano) pianoNote(midi, t, dur, out, vel);
   else choirNote(midi, t, dur, out, vel);
@@ -656,16 +662,21 @@ async function startPlayback({ from, guide = 1, countIn = false, mode = "listen"
   const bus = c.createGain(); bus.connect(OUT);
   const gBus = c.createGain(); gBus.gain.value = guide; gBus.connect(bus);
   const oBus = c.createGain(); oBus.gain.value = state.others; oBus.connect(bus);
+  const pans = state.score.parts.map((p, k) => {
+    const pan = c.createStereoPanner ? c.createStereoPanner() : c.createGain();
+    if (pan.pan) { const others = state.score.parts.length - 1, rank = k < state.voice ? k : k - 1; pan.pan.value = others > 1 ? -0.55 + 1.1 * rank / (others - 1) : 0.4; }
+    pan.connect(oBus); return pan;
+  });
   if (countIn) for (let k = 0; k < bpb; k++) bell(t0 - lead + k * spb, k === 0, bus);
   const accent = n => Math.abs(n.start / bpb - Math.round(n.start / bpb)) < 1e-6 ? 1 : 0.84;
   const queue = [];
   if (guide > 0) for (let i = from; i < ns.length; i++) { const n = ns[i]; if (n.midi != null) queue.push({ beat: n.start, midi: tgtOf(n), beats: n.beats, vel: accent(n), other: false }); }
   if (state.others > 0) state.score.parts.forEach((p, k) => {
     if (k === state.voice) return;
-    for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.75, other: true });
+    for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.9, other: k });
   });
   queue.sort((a, b) => a.beat - b.beat);
-  state.playing = { t0, startBeat, endBeat: state.score.total, bus, gBus, oBus, queue, qi: 0, mode, from, countIn, lastIdx: -1 };
+  state.playing = { t0, startBeat, endBeat: state.score.total, bus, gBus, oBus, pans, queue, qi: 0, mode, from, countIn, lastIdx: -1 };
   pump(state.playing);
   updateButtons();
 }
@@ -674,7 +685,11 @@ function pump(p) {
   while (p.qi < p.queue.length) {
     const e = p.queue[p.qi], t = p.t0 + (e.beat - p.startBeat) * spb;
     if (t > horizon) break;
-    if (t > ctx.currentTime - 0.05) tone(e.midi, Math.max(t, ctx.currentTime + 0.005), e.beats * spb, e.other ? p.oBus : p.gBus, e.vel);
+    if (t > ctx.currentTime - 0.05) {
+      const at = Math.max(t, ctx.currentTime + 0.005), d = e.beats * spb;
+      if (e.other === false) tone(e.midi, at, d, p.gBus, e.vel);
+      else otherTone(e.midi, at, d, p.pans[e.other], e.vel);
+    }
     p.qi++;
   }
 }
