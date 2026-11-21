@@ -71,6 +71,10 @@ h1 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 
 #cv { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
 #cv.dragging { cursor: grabbing; }
 .where { position: absolute; top: 14px; left: 16px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); pointer-events: none; }
+.micLevel { position: absolute; top: 32px; left: 16px; display: flex; align-items: center; gap: 6px; color: var(--muted); pointer-events: none; }
+.micLevel svg { width: 12px; height: 12px; }
+.micLevel b { display: block; width: 72px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.micLevel i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--ok); transition: width .08s linear; }
 .zoom { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; }
 .zoom button { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 17px; line-height: 1; color: var(--muted); }
 .hint-drag { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); font-size: 12px; color: var(--muted); pointer-events: none; transition: opacity .6s; white-space: nowrap; }
@@ -211,6 +215,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
   <section class="stage" id="stage" aria-label="Partition animée">
     <canvas id="cv"></canvas>
     <div class="where" id="where"></div>
+    <div class="micLevel" id="micLevel" hidden title="Niveau du micro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><b><i id="micBar"></i></b></div>
     <div class="hint-drag" id="hintDrag">Faites glisser la partition pour choisir où commencer</div>
     <div class="zoom">
       <button type="button" id="zoomOut" aria-label="Voir plus de mesures">−</button>
@@ -292,6 +297,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <input type="file" id="audioFile" accept="audio/*,video/*" aria-label="Importer un enregistrement">
       </span>
       <span class="status" id="fileStatus" hidden></span>
+      <span class="status" style="flex-basis:100%">Sans casque, mettez la mélodie guide sur Muette : sinon le micro entend le piano au lieu de sa voix.</span>
     </div>
   </nav>
 </div>
@@ -740,18 +746,22 @@ function currentBeat() { const p = state.playing; return p && ctx ? p.startBeat 
 
 /* ════════ Hauteur de la voix (YIN) ════════ */
 
-function detectPitch(buf, sr) {
+function detectPitch(buf, sr, gate = 0.006) {
   const n = buf.length; let rms = 0;
   for (let i = 0; i < n; i++) rms += buf[i] * buf[i];
-  if (Math.sqrt(rms / n) < 0.01) return null;
+  if (Math.sqrt(rms / n) < gate) return null;
   const W = Math.floor(n / 2), minT = Math.max(2, Math.floor(sr / 1100)), maxT = Math.min(W - 1, Math.floor(sr / 65));
   const d = new Float32Array(maxT + 2);
   for (let t = 1; t <= maxT + 1; t++) { let s = 0; for (let i = 0; i < W; i++) { const v = buf[i] - buf[i + t]; s += v * v; } d[t] = s; }
   d[0] = 1; let run = 0;
   for (let t = 1; t <= maxT + 1; t++) { run += d[t]; d[t] = run ? d[t] * t / run : 1; }
   let tau = -1;
-  for (let t = minT; t <= maxT; t++) if (d[t] < 0.15) { while (t + 1 <= maxT && d[t + 1] < d[t]) t++; tau = t; break; }
-  if (tau < 0) return null;
+  for (let t = minT; t <= maxT; t++) if (d[t] < 0.2) { while (t + 1 <= maxT && d[t + 1] < d[t]) t++; tau = t; break; }
+  if (tau < 0) {
+    let best = minT;
+    for (let t = minT + 1; t <= maxT; t++) if (d[t] < d[best]) best = t;
+    if (d[best] < 0.38) tau = best; else return null;
+  }
   const a = d[tau - 1], b = d[tau], c = d[tau + 1], den = a + c - 2 * b;
   const f = sr / (tau + (den ? Math.max(-1, Math.min(1, (a - c) / (2 * den))) : 0));
   return f < 65 || f > 1100 ? null : 69 + 12 * Math.log2(f / 440);
@@ -771,17 +781,38 @@ async function ensureMic() {
   if (micState === "denied") { showMicToast(); return null; }
   try {
     if (!navigator.mediaDevices?.getUserMedia) throw 0;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } });
     const c = ac(), src = c.createMediaStreamSource(stream), an = c.createAnalyser();
-    an.fftSize = 2048; src.connect(an);
+    an.fftSize = 4096; src.connect(an);
     const k = Math.max(1, Math.round(c.sampleRate / 16000));
-    mic = { an, buf: new Float32Array(2048), k, sr: c.sampleRate / k };
+    mic = { an, buf: new Float32Array(4096), k, sr: c.sampleRate / k, level: 0 };
+    $("micLevel").hidden = false;
     micState = "on";
   } catch { micState = "denied"; showMicToast(); }
   updateButtons();
   return mic;
 }
-function readMic() { if (!mic) return null; mic.an.getFloatTimeDomainData(mic.buf); return detectPitch(decimate(mic.buf, mic.k), mic.sr); }
+/* Écoute du micro : seuil qui s'adapte au bruit de la pièce, médiane anti-sauts d'octave, et maintien bref des trous */
+const listen = { floor: 0.004, hist: [], last: null, lastAt: 0 };
+function readMic() {
+  if (!mic) return null;
+  mic.an.getFloatTimeDomainData(mic.buf);
+  const x = decimate(mic.buf, mic.k);
+  let rms = 0; for (let i = 0; i < x.length; i++) rms += x[i] * x[i];
+  rms = Math.sqrt(rms / x.length);
+  mic.level = rms;
+  listen.floor = rms < listen.floor ? rms : listen.floor + (rms - listen.floor) * 0.002;
+  const p = detectPitch(x, mic.sr, Math.max(0.0025, listen.floor * 2.5));
+  const now = performance.now();
+  if (p != null) {
+    listen.hist.push(p); if (listen.hist.length > 5) listen.hist.shift();
+    listen.last = median(listen.hist); listen.lastAt = now;
+    return listen.last;
+  }
+  if (now - listen.lastAt < 160) return listen.last;
+  listen.hist = []; listen.last = null;
+  return null;
+}
 let smooth = null;
 function smoothed(p) {
   if (p == null) return (smooth = null);
@@ -1056,6 +1087,7 @@ function frame(now) {
     if (state.mode === "sing" && mic) setLive(smoothed(readMic()), tgtOf(notes()[noteIndexAt(view.beat)]));
   }
   if (state.mode === "step") stepTick(dt);
+  if (mic) $("micBar").style.width = Math.min(100, Math.sqrt(mic.level) * 260) + "%";
   $("where").textContent = `MESURE ${Math.min(barOf(Math.max(0, view.beat)), Math.ceil(state.score.total / state.score.beatsPerBar))} / ${Math.ceil(state.score.total / state.score.beatsPerBar - 1e-6)}`;
   draw(now, dt);
   requestAnimationFrame(frame);
@@ -1292,15 +1324,15 @@ $("audioFile").onchange = async e => {
     st.textContent = "Calage sur la partition…"; await new Promise(r => setTimeout(r, 20));
     const assign = align(sungF, fps), ns = notes(), per = ns.map(() => []);
     assign.forEach((ni, j) => { if (ni >= 0) per[ni].push(j); });
-    const trace = [];
+    const trace = [], hit = assign.filter(v => v >= 0), lo = Math.min(...hit), hi = Math.max(...hit);
     state.results = ns.map((n, i) => {
       const js = per[i];
       js.forEach((j, q) => trace.push({ beat: n.start + (q / Math.max(1, js.length)) * n.beats, midi: sungF[j] }));
-      if (n.midi == null) return null;
+      if (n.midi == null || i < lo || i > hi) return null;
       return rate(js.slice(Math.floor(js.length * 0.2), Math.ceil(js.length * 0.92)).map(j => sungF[j]), tgtOf(n));
     });
     state.trace = trace.sort((p, q) => p.beat - q.beat);
-    st.hidden = true; view.target = 0;
+    st.hidden = true; view.target = ns[lo].start;
     renderResults("file");
   } catch (err) {
     st.textContent = err?.long ? "L'enregistrement dépasse 10 minutes. Coupez-le au morceau travaillé." : "Ce fichier n'a pas pu être lu. Essayez un enregistrement du dictaphone (m4a, mp3 ou wav).";
@@ -1310,21 +1342,22 @@ function align(X, fps) {
   const S = [];
   notes().forEach((n, i) => { const k = Math.max(1, Math.round(n.beats * 60 / state.bpm * fps)); for (let q = 0; q < k; q++) S.push({ i, m: tgtOf(n) }); });
   const N = S.length, M = X.length;
-  const cost = (s, x) => s.m == null ? (x == null ? 0 : 0.8) : x == null ? 0.5 : Math.min(Math.abs(fold((x - s.m) * 100)) / 100, 4) / 2;
+  const cost = (s, x) => s.m == null ? (x == null ? 0 : 0.8) : x == null ? 0.2 : Math.min(Math.abs(fold((x - s.m) * 100)) / 100, 4) / 2;
   const D = new Float32Array(N * M), P = new Uint8Array(N * M);
-  for (let j = 0; j < M; j++) D[j] = cost(S[0], X[j]);
+  // Le passage chanté peut commencer et finir n'importe où dans la partition
+  for (let i = 0; i < N; i++) { D[i * M] = cost(S[i], X[0]); P[i * M] = 0; }
+  for (let j = 1; j < M; j++) { D[j] = D[j - 1] + cost(S[0], X[j]); P[j] = 2; }
   for (let i = 1; i < N; i++) {
     const r = i * M, pr = (i - 1) * M, si = S[i];
-    D[r] = D[pr] + cost(si, X[0]); P[r] = 1;
     for (let j = 1; j < M; j++) {
       const c = cost(si, X[j]), dg = D[pr + j - 1], up = D[pr + j], lf = D[r + j - 1];
       if (dg <= up && dg <= lf) { D[r + j] = dg + c; P[r + j] = 3; } else if (up <= lf) { D[r + j] = up + c * 1.2; P[r + j] = 1; } else { D[r + j] = lf + c; P[r + j] = 2; }
     }
   }
-  let jEnd = 0, best = Infinity; const last = (N - 1) * M;
-  for (let j = 0; j < M; j++) if (D[last + j] < best) { best = D[last + j]; jEnd = j; }
+  let iEnd = 0, best = Infinity;
+  for (let i = 0; i < N; i++) if (D[i * M + M - 1] < best) { best = D[i * M + M - 1]; iEnd = i; }
   const assign = new Array(M).fill(-1);
-  let i = N - 1, j = jEnd;
+  let i = iEnd, j = M - 1;
   while (i >= 0 && j >= 0) {
     if (assign[j] < 0) assign[j] = S[i].i;
     const pp = P[i * M + j]; if (pp === 0) break;
