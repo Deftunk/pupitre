@@ -43,7 +43,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 .app {
-  height: 100%; min-height: 600px; max-width: 1320px; margin: 0 auto;
+  height: 100%; min-height: 600px; max-width: 2560px; margin: 0 auto;
   display: grid; grid-template-rows: auto minmax(320px, 1fr) auto; gap: 12px;
   padding-block: 14px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -177,6 +177,11 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
   .res-head { grid-template-columns: auto 1fr; }
   .res-head .closeBtn { grid-column: 2; grid-row: 1; justify-self: end; }
   .ring { width: 70px; height: 70px; }
+}
+@media (min-width: 1700px) {
+  h1 { font-size: 54px; }
+  .dock { padding: 14px 20px; }
+  .stage { border-radius: 30px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
@@ -351,15 +356,15 @@ ré3:dong | sol3:1:One sol3:0.5:seems sol3:to sol3:1:hear | sol3:words sol3:0.5:
 sol3:fill sol3:0.5:ing sol3:the sol3:1:air | sib3:O la3:0.5:how sib3:they sol3:1:pound | sib3:rais la3:0.5:ing sib3:their sol3:1:sound | sib3:o'er la3:0.5:hill sib3:and sol3:1:dale |
 sib3:tell la3:0.5:ing sib3:their sol3:1:tale | sol3:Gai sol3:0.5:ly sol3:they sol3:ring sol3:_ | sol3:1:while sol3:0.5:peo sol3:ple sol3:1:sing | sol3:songs sol3:0.5:of sol3:good sol3:cheer sol3:_ |
 sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here | ré3:3:Ding | mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding |
-mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | do3:dong | ré3:ding |
-ré3:ding | ré3:9:dong | -:3 | sol3:Ding |
+mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | do3:dong | fa3:ding |
+mib3:ding | ré3:9:dong | -:3 | sol3:Ding |
 fa3:dong | mib3:ding | ré3:dong | sol3:Ding |
 fa3:dong | mib3:ding | ré3:dong | sol3:1:One sol3:0.5:seems sol3:to sol3:1:hear |
 sol3:words sol3:0.5:of sol3:good sol3:1:cheer | sol3:from sol3:0.5:ev' sol3:ry sol3:1:where | sol3:fill sol3:0.5:ing sol3:the sol3:1:air | sib3:O la3:0.5:how sib3:they sol3:1:pound |
 sib3:rais la3:0.5:ing sib3:their sol3:1:sound | sib3:o'er la3:0.5:hill sib3:and sol3:1:dale | sib3:tell la3:0.5:ing sib3:their sol3:1:tale | sol3:Gai sol3:0.5:ly sol3:they sol3:ring sol3:_ |
 sol3:1:while sol3:0.5:peo sol3:ple sol3:1:sing | sol3:songs sol3:0.5:of sol3:good sol3:cheer sol3:_ | sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here | ré3:3:Ding |
 mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding |
-do3:dong | ré3:ding | ré3:ding | ré3:12:dong |
+do3:dong | fa3:ding | mib3:ding | ré3:12:dong |
 sib3:1 la3:0.5:_ sib3:_ sol3:4:_ |`;
 
 /* ════════ Partition ════════ */
@@ -451,7 +456,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch {} },
 };
 const state = {
-  text: store.get("pupitre.score.v3") || EXAMPLE,
+  text: store.get("pupitre.score.v4") || EXAMPLE,
   score: null, voice: 0, others: 0, bpm: 140,
   transpose: parseInt(store.get("pupitre.transpose") || "0", 10) || 0,
   loop: false, mode: "listen", playing: null,
@@ -682,7 +687,7 @@ function makeBackdrop(dpr) {
 }
 new ResizeObserver(resize).observe(stage);
 
-const nowX = () => Math.max(LEFT + 70, W * 0.3);
+const nowX = () => Math.max(LEFT + 70, Math.min(W * 0.3, 260 + W * 0.12));
 const ppb = () => Math.max(26, Math.min(170, W / (state.score.beatsPerBar * 4.6) * state.zoom));
 const xOf = b => nowX() + (b - view.beat) * ppb();
 const yOf = m => TOP + (lanes.hi - m + 0.5) * lanes.h;
@@ -850,7 +855,7 @@ function drawLyrics(curIdx, bot) {
   const a = phrase * 4 * bpb, b = a + 4 * bpb;
   const words = [];
   for (let i = 0; i < ns.length; i++) { const n = ns[i]; if (n.start >= b) break; if (n.start >= a && n.syl) words.push({ i, s: n.syl }); }
-  const size = Math.max(18, Math.min(32, W / 30));
+  const size = Math.max(18, Math.min(44, W / 30));
   const y = bot + (H - bot) / 2 + 4;
   g.textBaseline = "middle"; g.textAlign = "left";
   g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(LEFT, bot, W - LEFT * 2, 1);
@@ -1247,7 +1252,7 @@ function applyText(text) {
   stopPlayback();
   const r = loadScore(text), err = $("parseErr");
   if (!r.ok) { err.hidden = false; err.textContent = "Aucune note reconnue. Vérifiez l'écriture, par exemple sol3:1:joie."; return false; }
-  store.set("pupitre.score.v3", text);
+  store.set("pupitre.score.v4", text);
   if (r.errors.length) { err.hidden = false; err.textContent = `Ignoré, non reconnu : ${r.errors.slice(0, 12).join("  ")}${r.errors.length > 12 ? " …" : ""}`; } else err.hidden = true;
   refreshAll();
   return true;
