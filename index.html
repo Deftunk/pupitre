@@ -281,6 +281,28 @@ button.ex-card:active { transform: scale(.99); }
 .exend .line { font-family: var(--f-display); font-style: italic; font-size: 20px; color: var(--text); margin: -4px 0 0; }
 .levelup { padding: 7px 16px; border-radius: 999px; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); color: #1A1306; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; box-shadow: 0 0 24px rgba(243, 200, 112, .5); animation: starPop .7s cubic-bezier(.2, 1.6, .4, 1) both .3s; }
 
+/* Coach */
+.music { width: 100%; display: grid; gap: 7px; padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, .035); border: 1px solid var(--line); text-align: left; }
+.mus-head { display: flex; justify-content: space-between; align-items: baseline; }
+.mus-head b { font-family: var(--f-display); font-size: 28px; font-weight: 600; font-variant-numeric: lining-nums; }
+.mus-head b small { font-size: 14px; color: var(--muted); }
+.mus-row { display: grid; grid-template-columns: 96px 1fr 30px; align-items: center; gap: 10px; font-size: 12.5px; }
+.mus-row b { display: block; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.mus-row b i { display: block; height: 100%; border-radius: 4px; }
+.mus-row em { font-style: normal; font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-align: right; }
+.mus-tip { margin: 4px 0 0; font-size: 13px; color: var(--text); line-height: 1.45; }
+.mus-tip b { color: var(--gold); }
+.heat { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; height: 26px; margin-bottom: 6px; }
+.heat i { display: block; border-radius: 3px; }
+.heat-cap { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.heat-cap i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin: 0 4px 0 8px; vertical-align: -1px; }
+.spots { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 8px; margin-bottom: 12px; }
+.spot { display: grid; gap: 2px; padding: 11px 13px; border-radius: 14px; border: 1px solid rgba(255, 138, 102, .35); background: rgba(255, 138, 102, .06); min-width: 0; }
+.spot b { font-size: 13px; }
+.spot i { font-family: var(--f-display); font-size: 17px; overflow-wrap: anywhere; }
+.spot span { font-size: 11.5px; color: var(--high); }
+.results .music { margin-top: 2px; }
+
 @media (max-width: 760px) {
   .app { padding-block: 10px; gap: 10px; grid-template-rows: auto minmax(340px, 1fr) auto; }
   .dock { grid-template-columns: 1fr; padding: 10px; border-radius: 20px; }
@@ -637,7 +659,7 @@ const state = {
   live: null,
 };
 const view = { beat: 0, target: 0 };
-state.hidePiece = false; state.exBand = null;
+state.hidePiece = false; state.exBand = null; state.focusIdx = null;
 
 function loadScore(text) {
   const { score, errors } = parseScore(text);
@@ -1095,6 +1117,10 @@ function draw(now, dt) {
     gr.addColorStop(0, rgba(col, (glowing ? 1 : 0.82) * alpha)); gr.addColorStop(1, rgba(col, (glowing ? 0.75 : 0.5) * alpha));
     capsule(x + 1.5, y, Math.max(6, w - 3), hh); g.fillStyle = gr; g.fill();
     g.restore();
+    if (i === state.focusIdx) {
+      g.save(); g.strokeStyle = rgba(COL.gold, 0.55 + 0.45 * Math.sin(now / 170)); g.lineWidth = 2.5;
+      capsule(x - 3, y - 5, Math.max(14, w + 3), hh + 10); g.stroke(); g.restore();
+    }
     if (glowing && state.playing) {
       const fillW = Math.max(0, Math.min(w - 3, NX - x - 1.5));
       g.save(); capsule(x + 1.5, y, Math.max(6, w - 3), hh); g.clip();
@@ -1239,7 +1265,7 @@ function frame(now) {
     if (state.mode === "sing" && mic) setLive(smoothed(readMic()), tgtOf(notes()[noteIndexAt(view.beat)]));
   }
   if (state.mode === "step") stepTick(dt);
-  if (state.mode === "train" && ex && ctx) { if (ex.type === "hold") holdTick(dt); else if (ex.type === "echo") echoTick(dt); }
+  if (state.mode === "train" && ex && ctx) { if (ex.type === "hold") holdTick(dt); else if (ex.type === "echo") echoTick(dt); else if (ex.type === "attack") attackTick(dt); }
   if (mic) $("micBar").style.width = Math.min(100, Math.sqrt(mic.level) * 260) + "%";
   $("where").textContent = `MESURE ${Math.min(barOf(Math.max(0, view.beat)), Math.ceil(state.score.total / state.score.beatsPerBar))} / ${Math.ceil(state.score.total / state.score.beatsPerBar - 1e-6)}`;
   draw(now, dt);
@@ -1260,8 +1286,8 @@ function finishPlayback() {
   state.live = null;
   view.target = p ? p.startBeat : 0;
   if (p?.mode === "listen" && state.loop) { startPlayback({ from: p.from, mode: "listen" }); return; }
-  if (p?.mode === "sing") { state.results = evaluateTrace(state.trace, p.from); renderResults("live"); }
-  if (p?.mode === "preview" && ex) { ex.phase = "Préparez-vous"; renderHud(); setTimeout(() => { if (ex && (ex.type === "phrase" || ex.type === "full")) singNow(); }, state.headphones ? 500 : 1400); }
+  if (p?.mode === "sing") { state.results = analyzeRange(state.trace, p.from, notes().length - 1, p.bpm, state.tol); recordNotes(state.results); renderResults("live"); }
+  if (p?.mode === "preview" && ex) { ex.phase = "Préparez-vous"; renderHud(); setTimeout(() => { if (ex && (ex.type === "phrase" || ex.type === "full" || ex.type === "drill")) singNow(); }, state.headphones ? 500 : 1400); }
   if (p?.mode === "ex" && ex) finishSung();
 }
 
@@ -1465,9 +1491,11 @@ function renderResults(source) {
       const lab = r.status === "miss" ? "pas entendu" : r.status === "ok" ? "juste" : (r.cents > 0 ? "+" : "−") + Math.round(Math.abs(r.cents)) + " ¢";
       return `<button type="button" class="chip ${r.status}" data-i="${r.i}" title="${fullName(m)}, mesure ${barOf(n.start)}"><i>${n.syl ? esc(n.syl) : noteName(m)}</i><small>${lab}</small></button>`;
     }).join("")}</div>
-    <div class="status">Touchez une note pour la retravailler en mode Note par note.</div>`;
+    ${musicBlock(musicSummary(res))}
+    <div class="row"><button type="button" class="pill primary" id="goDrill">Travailler mes passages difficiles</button><span class="status">Ou touchez une note pour la retravailler en mode Note par note.</span></div>`;
   box.hidden = false;
   $("closeRes").onclick = () => { box.hidden = true; };
+  $("goDrill").onclick = () => { box.hidden = true; setMode("train"); setTimeout(startDrill, 300); };
   box.querySelectorAll(".chip").forEach(c => c.onclick = () => { box.hidden = true; setMode("step"); stepGo(+c.dataset.i); });
 }
 
@@ -1493,13 +1521,11 @@ $("audioFile").onchange = async e => {
     const assign = align(sungF, fps), ns = notes(), per = ns.map(() => []);
     assign.forEach((ni, j) => { if (ni >= 0) per[ni].push(j); });
     const trace = [], hit = assign.filter(v => v >= 0), lo = Math.min(...hit), hi = Math.max(...hit);
-    state.results = ns.map((n, i) => {
-      const js = per[i];
-      js.forEach((j, q) => trace.push({ beat: n.start + (q / Math.max(1, js.length)) * n.beats, midi: sungF[j] }));
-      if (n.midi == null || i < lo || i > hi) return null;
-      return rate(js.slice(Math.floor(js.length * 0.2), Math.ceil(js.length * 0.92)).map(j => sungF[j]), tgtOf(n));
-    });
+    ns.forEach((n, i) => { const js = per[i]; js.forEach((j, q) => trace.push({ beat: n.start + (q / Math.max(1, js.length)) * n.beats, midi: sungF[j] })); });
     state.trace = trace.sort((p, q) => p.beat - q.beat);
+    // le calage étire le temps : le rythme ne se juge pas sur un enregistrement
+    state.results = analyzeRange(state.trace, lo, hi, state.bpm, state.tol).map(r => r && Object.assign(r, { onset: null }));
+    recordNotes(state.results);
     st.hidden = true; view.target = ns[lo].start;
     renderResults("file");
   } catch (err) {
@@ -1782,6 +1808,9 @@ const BADGES = [
   { id: "sans-filet", g: "∅", name: "Sans filet", desc: "Réussir une phrase au niveau 3" },
   { id: "moitie", g: "½", name: "À mi-chemin", desc: "La moitié des étoiles du morceau" },
   { id: "filage", g: "♫", name: "Le grand filage", desc: "Réussir le morceau entier" },
+  { id: "atelier", g: "⚒", name: "Bien réparé", desc: "Réparer tous les passages d'un atelier" },
+  { id: "attaque-nette", g: "!", name: "Attaque de cloche", desc: "Trois étoiles aux attaques nettes" },
+  { id: "chanter-beau", g: "~", name: "Chanter beau", desc: "Musicalité de 85 sur une phrase juste" },
   { id: "3-jours", g: "3", name: "Régulière", desc: "3 jours d'entraînement d'affilée" },
   { id: "7-jours", g: "7", name: "Une semaine pleine", desc: "7 jours d'affilée" },
 ];
@@ -1823,6 +1852,8 @@ const fullOpen = () => phrases.every(p => (prog.ph[p.k] || 0) >= 1);
 
 function recommendation() {
   if (prof.today.d !== dayStr() || prof.today.n === 0) return { kind: "hold", label: "Échauffement · la note tenue", why: "On commence toujours par réveiller la voix." };
+  const weak = weakSpots(4);
+  if (weak.length && (prog.lastDrill || 0) < Date.now() - 20 * 60e3) return { kind: "drill", label: "Atelier ciblé", why: `${weak.length} passage${weak.length > 1 ? "s" : ""} difficile${weak.length > 1 ? "s" : ""} repéré${weak.length > 1 ? "s" : ""}, dont mesure ${weak[0].bars[0]} : on les répare.` };
   const open = phrases.filter(p => phraseOpen(p.k) && (prog.ph[p.k] || 0) < 3);
   if (open.length) {
     const p = open.reduce((a, b) => ((prog.ph[b.k] || 0) < (prog.ph[a.k] || 0) ? b : a));
@@ -1858,7 +1889,7 @@ function renderTrain() {
       <line x1="10" x2="290" y1="${62 - 70 * 0.54}" y2="${62 - 70 * 0.54}" stroke="rgba(110,240,194,.35)" stroke-dasharray="3 4"/>
       <polyline fill="none" stroke="${COL.gold}" stroke-width="2" stroke-linejoin="round" points="${pts.map(p => p.join(",")).join(" ")}"/>
       ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === pts.length - 1 ? 4 : 2.5}" fill="${i === pts.length - 1 ? COL.gold : "rgba(243,200,112,.6)"}"/>`).join("")}
-    </svg><div class="spark-cap"><span>Il y a ${hist.length} exercices</span><span>Ligne pointillée : 70 %, le seuil d'une étoile</span><span>Dernier : ${hist[hist.length - 1].acc} %</span></div>`;
+    </svg><div class="spark-cap"><span>Il y a ${hist.length} exercices</span><span>Ligne pointillée : 70 %, le seuil d'une étoile</span><span>Dernier : ${hist[hist.length - 1].acc} %${(() => { const m = [...hist].reverse().find(x => x.mus != null); return m ? ` · musicalité ${m.mus}/100` : ""; })()}</span></div>`;
   }
   let tend = "";
   if (prof.lowN + prof.highN >= 8) {
@@ -1914,6 +1945,20 @@ function renderTrain() {
         </div>
       </div></section>
 
+    <section class="t-sec"><h3>Vos passages difficiles</h3><p class="sub">Chaque note chantée, en mode Chanter, en enregistrement ou en exercice, alimente cette carte. L'atelier reprend les passages rouges jusqu'à ce qu'ils tiennent.</p>
+      ${heatStrip()}
+      ${(() => { const sp = weakSpots(4); return sp.length ? `<div class="spots">${sp.map(s => `<div class="spot"><b>Mesure ${s.bars[0]}${s.bars[1] !== s.bars[0] ? `-${s.bars[1]}` : ""}</b><i>${esc(s.words || "…")}</i><span>${s.why} · ${fullName(tgtOf(notes()[s.focus]))}</span></div>`).join("")}</div>
+        <div class="row"><button type="button" class="main-btn wide" data-go="drill">${ICON.play}Lancer l'atelier ciblé</button></div>`
+        : `<p class="sub">Rien de rouge pour l'instant. Chantez le morceau en entier dans le mode Chanter : l'appli repérera ce qui coince.</p>`; })()}
+    </section>
+
+    <section class="t-sec"><h3>Chanter beau</h3><p class="sub">Juste ne suffit pas : une note qui glisse, tremble ou s'éteint trop tôt sonne faux à l'oreille. Ces exercices travaillent la ligne.</p>
+      <div class="ex-grid">
+        <button type="button" class="ex-card" data-go="attack"><span class="ex-k">Chanter beau</span><b>Attaques nettes</b><span class="ex-d">Six notes à attaquer pile dessus, sans glisser vers elles. Le chrono mesure le temps pour se poser.</span><span class="stars">${starRow(prog.warm.attack || 0)}</span></button>
+        <div class="ex-card ph"><span class="ex-k">Chanter beau</span><b>La phrase liée</b><span class="ex-d">Une phrase notée sur la musicalité : attaque, note droite, tenue et rythme. Ouverte dès qu'une phrase a une étoile.</span>
+          <span class="lvl-btns">${phrases.map(p => `<button type="button" data-go="melody" data-k="${p.k}" ${(prog.ph[p.k] || 0) >= 1 ? "" : "disabled"} class="${(prog.mus?.[p.k] || 0) >= 1 ? "done" : ""}" title="Mesures ${p.bars[0]}-${p.bars[1]}">${p.k + 1}${(prog.mus?.[p.k] || 0) ? " " + "★".repeat(prog.mus[p.k]) : ""}</button>`).join("")}</span></div>
+      </div></section>
+
     <section class="t-sec"><h3>Votre justesse</h3>${spark}${tend ? `<p class="tend">${tend}</p>` : ""}</section>
 
     <section class="t-sec"><h3>Badges</h3><p class="sub">${prof.badges.length} sur ${BADGES.length}</p>
@@ -1926,6 +1971,9 @@ $("train").addEventListener("click", e => {
   else if (go === "echo") startEcho();
   else if (go === "phrase") startPhrase(+b.dataset.k, +b.dataset.l);
   else if (go === "full") startFull();
+  else if (go === "drill") startDrill();
+  else if (go === "attack") startAttack();
+  else if (go === "melody") startMelody(+b.dataset.k);
 });
 
 /* ── Moteur commun des exercices ── */
@@ -1940,7 +1988,7 @@ function exBegin(o) {
 }
 function exAbort() {
   stopPlayback();
-  ex = null; state.hidePiece = false; state.exBand = null; state.live = null; state.results = null; state.trace = [];
+  ex = null; state.hidePiece = false; state.exBand = null; state.focusIdx = null; state.live = null; state.results = null; state.trace = [];
   exHud.hidden = true; $("exEnd").hidden = true;
   if (state.mode === "train") { $("train").hidden = false; renderTrain(); }
   $("trainBack").hidden = true;
@@ -1956,6 +2004,7 @@ function renderHud() {
   if (!ex) { exHud.hidden = true; return; }
   let mid = "";
   if (ex.type === "echo") mid = `<span class="fig">${(ex.fig || []).map((m, q) => `<span class="${q < ex.j ? "got" : q === ex.j && ex.phase === "À vous" ? "cur" : ""}">${noteName(m)}</span>`).join("")}</span><span class="sc">Écho ${Math.max(1, ex.k + 1)}/${ex.rounds}</span>`;
+  else if (ex.type === "attack") mid = `<span class="sc">${ex.tgt != null ? fullName(ex.tgt) : ""}</span><span class="sc">Attaque ${Math.max(1, ex.k + 1)}/${ex.seq.length}</span>`;
   else if (ex.type === "hold") mid = `<span class="sc">${ex.tgt != null ? fullName(ex.tgt) : ""} · <b id="holdT">${((ex.on || 0) / 1000).toFixed(1)}</b> / ${ex.goal / 1000} s</span><span class="sc">Note ${Math.max(1, ex.k + 1)}/${ex.targets.length}</span>`;
   else mid = `<span class="sc">${ex.okN} juste${ex.okN > 1 ? "s" : ""} / ${ex.rated}</span>${ex.combo >= 3 ? `<span class="combo${ex.combo >= 5 ? " hot" : ""}">Série ${ex.combo}${ex.combo >= 5 ? ` · ×${Math.min(4, 1 + Math.floor(ex.combo / 5))}` : ""}</span>` : ""}`;
   exHud.innerHTML = `${bellSvg(ex.mood || "happy", 38)}<span class="t">${esc(ex.title)}</span><span class="ph">${ex.phase || ""}</span>${mid}<span class="xp">+${ex.xp} XP</span>`;
@@ -1983,7 +2032,7 @@ async function startFull() {
   setTimeout(() => { if (ex?.type === "full") singNow(); }, state.headphones ? 1800 : 2600);
 }
 function singNow() {
-  ex.phase = "À vous"; ex.evalAt = ex.ph.from; renderHud();
+  ex.phase = "À vous"; ex.evalAt = ex.ph.from; ex.prevT = null; renderHud();
   state.trace = []; state.results = [];
   const guide = ex.type === "phrase" && ex.L === 1 && state.headphones ? 0.3 : 0;
   startPlayback({ from: ex.ph.from, mode: "ex", until: ex.ph.until, bpm: ex.bpm, guide, countIn: true });
@@ -1998,10 +2047,10 @@ function exOnBeat(b) {
   const ns = notes();
   while (ex.evalAt <= ex.ph.to) {
     const n = ns[ex.evalAt];
-    if (n.midi == null) { ex.evalAt++; continue; }
+    if (n.midi == null) { ex.evalAt++; ex.prevT = null; continue; }
     if (b < n.start + n.beats + 0.08) break;
-    const a = n.start + Math.min(0.25, n.beats * 0.3), e = n.start + n.beats * 0.92;
-    const r = rateTol(state.trace.filter(p => p.beat >= a && p.beat < e).map(p => p.midi), tgtOf(n), TOL_EX);
+    const r = analyzeNote(n, state.trace, ex.bpm, TOL_EX, ex.prevT);
+    ex.prevT = tgtOf(n);
     state.results[ex.evalAt] = r;
     judge(r, Math.max(LEFT + 30, Math.min(W - 30, xOf(n.start + n.beats / 2))), yOf(tgtOf(n)));
     ex.evalAt++;
@@ -2036,7 +2085,20 @@ function judge(r, x, y) {
 }
 function finishSung() {
   exOnBeat(Infinity);
+  if (ex.type === "drill") { drillResult(); return; }
   const pct = ex.rated ? ex.okN / ex.rated : 0;
+  ex.music = musicSummary(state.results);
+  recordNotes(state.results);
+  if (ex.type === "phrase" && ex.musical) {
+    const m = ex.music ? ex.music.score : 0;
+    const s = pct < 0.6 ? 0 : m >= 0.88 ? 3 : m >= 0.75 ? 2 : m >= 0.6 ? 1 : 0;
+    prog.mus = prog.mus || {};
+    const prev = prog.mus[ex.k] || 0, fresh = Math.max(0, s - prev);
+    if (fresh) { prog.mus[ex.k] = s; addXp(40 * fresh); }
+    if (m >= 0.85 && pct >= 0.7) award("chanter-beau");
+    complete(pct, { stars: Math.max(s, prev), fresh, passed: s >= 1 });
+    return;
+  }
   if (ex.type === "phrase") {
     const prev = prog.ph[ex.k] || 0, passed = pct >= 0.7;
     let fresh = 0;
@@ -2179,7 +2241,7 @@ function complete(pct, info) {
   prof.today.n++;
   const goalHit = prof.today.n === DAY_GOAL;
   if (goalHit) addXp(50);
-  prof.hist.push({ t: Date.now(), acc: Math.round(pct * 100), kind: ex.type });
+  prof.hist.push({ t: Date.now(), acc: Math.round(pct * 100), kind: ex.type, mus: ex.music ? Math.round(ex.music.score * 100) : undefined });
   prof.hist = prof.hist.slice(-40);
   saveProf(); saveProg();
   showEnd(pct, info, goalHit);
@@ -2191,9 +2253,18 @@ function showEnd(pct, info, goalHit) {
   const next = LEVELS[L1 + 1], cur = LEVELS[L1];
   const lvPct = next ? (prof.xp - cur[0]) / (next[0] - cur[0]) : 1;
   let title, sub;
-  if (ex.type === "phrase") {
+  if (ex.type === "phrase" && ex.musical) {
+    title = info.passed ? "Belle ligne" : pct < 0.6 ? "D'abord la justesse" : "Pas encore assez lié";
+    sub = pct < 0.6 ? `${Math.round(pct * 100)} % de notes justes : il en faut 60 % avant de juger la musicalité.` : `Musicalité ${Math.round((ex.music?.score || 0) * 100)}/100, justesse ${Math.round(pct * 100)} %.`;
+  } else if (ex.type === "phrase") {
     title = info.passed ? (info.fresh ? `Niveau ${ex.L} réussi` : "Réussi, encore") : "Pas encore";
     sub = info.passed ? `${Math.round(pct * 100)} % de notes justes sur la phrase ${ex.k + 1}.` : `${Math.round(pct * 100)} % de notes justes. Il en faut 70 % pour l'étoile : vous y êtes presque, recommencez.`;
+  } else if (ex.type === "drill") {
+    title = ex.cleared === ex.spots.length ? "Tous les passages réparés" : ex.cleared ? "Atelier bien avancé" : "Ces passages résistent";
+    sub = `${ex.cleared} passage${ex.cleared > 1 ? "s" : ""} réparé${ex.cleared > 1 ? "s" : ""} sur ${ex.spots.length}, en ${ex.attempts} essais. L'appli les repropose tant qu'ils restent fragiles.`;
+  } else if (ex.type === "attack") {
+    title = info.passed ? "Attaques réussies" : "Attaques à travailler";
+    sub = `${Math.round(pct * 100)} % de netteté sur les attaques${ex.scoops ? `, dont ${ex.scoops} glissée${ex.scoops > 1 ? "s" : ""} par en dessous` : ""}.`;
   } else if (ex.type === "full") {
     title = info.passed ? "Filage réussi" : "Le filage résiste";
     sub = `${Math.round(pct * 100)} % de notes justes sur tout le morceau.`;
@@ -2217,6 +2288,8 @@ function showEnd(pct, info, goalHit) {
       <div class="gain"><b id="xpCount">+0 XP</b>${goalHit ? "<span>Objectif du jour atteint, +50 XP compris</span>" : ""}</div>
       <div class="lvl-line"><span>${up ? `Nouveau titre : <b>${cur[1]}</b>` : `Niveau ${L1 + 1} · ${cur[1]}`}</span><span class="xpbar"><i style="width:${Math.round(lvPct * 100)}%"></i></span></div>
       ${ex.newBadges.length ? `<div class="badges mini">${ex.newBadges.map(id => { const b = BADGES.find(x => x.id === id); return `<div class="medal on fresh"><i>${b.g}</i><div><b>${b.name}</b><small>${b.desc}</small></div></div>`; }).join("")}</div>` : ""}
+      ${ex.music ? musicBlock(ex.music) : ""}
+      ${!ex.music && ex.musicTip ? `<p class="tip">${ex.musicTip}</p>` : ""}
       ${tip ? `<p class="tip">${tip}</p>` : ""}
       <div class="row center">
         <button type="button" class="pill" data-end="again">Recommencer</button>
@@ -2237,11 +2310,292 @@ $("exEnd").addEventListener("click", e => {
   exAbort();
   if (act === "back") return;
   $("train").hidden = true;
-  if (act === "again") { if (done.type === "phrase") startPhrase(done.k, done.L); else if (done.type === "full") startFull(); else if (done.type === "hold") startHold(); else startEcho(); }
+  if (act === "again") {
+    if (done.type === "phrase" && done.musical) startMelody(done.k); else if (done.type === "phrase") startPhrase(done.k, done.L);
+    else if (done.type === "full") startFull(); else if (done.type === "hold") startHold(); else if (done.type === "drill") startDrill();
+    else if (done.type === "attack") startAttack(); else startEcho();
+  }
   else if (act === "next") startPhrase(done.k, done.L + 1);
   else if (act === "nextph") startPhrase(done.k + 1, 1);
 });
 $("trainBack").onclick = () => exAbort();
+
+/* ════════ Coach : musicalité de chaque note et mémoire des passages difficiles ════════ */
+
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const MUSIC_LABELS = { attaque: "Attaque", stabilite: "Note droite", tenue: "Tenue", rythme: "Rythme" };
+const MUSIC_HELP = {
+  attaque: "Arriver directement sur la note, sans glisser vers elle.",
+  stabilite: "Une note qui ne tremble pas et ne dérive pas.",
+  tenue: "Tenir chaque note jusqu'à la suivante, sans la lâcher.",
+  rythme: "Changer de note pile avec le temps, toujours de la même façon.",
+};
+const MUSIC_TIPS = {
+  attaque: "Vous glissez vers la note, souvent par en dessous : c'est ce qui donne l'effet « casserole ». Entendez la note dans votre tête juste avant, puis attaquez-la d'un coup, comme une cloche qu'on frappe.",
+  stabilite: "La note bouge une fois posée. Gardez un souffle régulier, appuyé sur le ventre, et la bouche dans la même position jusqu'au bout.",
+  tenue: "Vous lâchez les notes trop tôt, la voix s'éteint avant la suivante. Pensez « ligne continue » : chaque note se prolonge jusqu'à la prochaine.",
+  rythme: "Les changements de note arrivent tantôt en avance, tantôt en retard. Écoutez la pulsation et changez de note avec elle, pas après.",
+};
+
+/* Une note chantée, décortiquée : justesse, attaque, stabilité, tenue, moment d'arrivée */
+function analyzeNote(n, pts, bpm, tol, prevTarget) {
+  const T = tgtOf(n), spb = 60 / bpm, len = n.beats;
+  const win = pts.filter(p => p.beat >= n.start - 0.1 && p.beat < n.start + len);
+  const voiced = win.filter(p => p.midi != null);
+  if (voiced.length < 3) return { status: "miss", cents: null };
+  const c = p => fold((p.midi - T) * 100);
+  const a = n.start + Math.min(0.25, len * 0.3), e = n.start + len * 0.92;
+  const sus = voiced.filter(p => p.beat >= a && p.beat < e).map(c);
+  const cents = sus.length >= 2 ? median(sus) : median(voiced.map(c));
+  const status = Math.abs(cents) <= tol ? "ok" : cents > 0 ? "high" : "low";
+  const own = voiced.filter(p => p.beat >= n.start - 0.05);
+  const first = own[0] || voiced[0];
+  const land = own.find(p => Math.abs(c(p) - cents) <= 35);
+  const landSec = land ? Math.max(0, (land.beat - Math.max(first.beat, n.start)) * spb) : len * spb;
+  const scoop = prevTarget !== T && c(first) < -60 && landSec > 0.1;
+  const attack = prevTarget === T ? null : clamp01(1 - (landSec - 0.1) / 0.35) * (scoop ? 0.75 : 1);
+  const after = land ? voiced.filter(p => p.beat >= land.beat && p.beat < e).map(c) : sus;
+  const sd = after.length >= 4 ? Math.sqrt(after.reduce((s, x) => s + (x - cents) ** 2, 0) / after.length) : null;
+  const stab = sd == null ? null : clamp01(1 - (sd - 12) / 35);
+  const inside = win.filter(p => p.beat >= n.start && p.beat < n.start + len * 0.9);
+  const heldFrac = inside.length ? inside.filter(p => p.midi != null).length / inside.length : 0;
+  const hold = clamp01((heldFrac - 0.5) / 0.4);
+  const onset = prevTarget !== T && land ? (land.beat - n.start) * spb : null;
+  return { status, cents, attack, scoop, stab, sd, hold, onset, landSec };
+}
+function analyzeRange(pts, from, to, bpm, tol) {
+  const ns = notes(), out = [];
+  let prev = null;
+  for (let i = from; i <= to; i++) {
+    const n = ns[i];
+    if (n.midi == null) { prev = null; out[i] = null; continue; }
+    out[i] = analyzeNote(n, pts, bpm, tol, prev);
+    prev = tgtOf(n);
+  }
+  return out;
+}
+function musicSummary(list) {
+  const sung = list.filter(r => r && r.status !== "miss");
+  if (sung.length < 3) return null;
+  const avg = k => { const v = sung.map(r => r[k]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const on = sung.map(r => r.onset).filter(x => x != null && Math.abs(x) < 0.7);
+  const med = on.length ? median(on) : 0;
+  const dev = on.length ? on.reduce((s, x) => s + Math.abs(x - med), 0) / on.length : 0;
+  const crit = { attaque: avg("attack"), stabilite: avg("stab"), tenue: avg("hold"), rythme: on.length >= 3 ? clamp01(1 - (dev - 0.05) / 0.22) : null };
+  const vals = Object.values(crit).filter(v => v != null);
+  if (!vals.length) return null;
+  const score = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const worst = Object.entries(crit).filter(([, v]) => v != null).sort((a, b) => a[1] - b[1])[0];
+  return { crit, score, scoops: sung.filter(r => r.scoop).length, worst: worst && worst[1] < 0.75 ? worst[0] : null };
+}
+function musicBlock(m) {
+  if (!m) return "";
+  const bar = (k, v) => v == null ? "" : `<div class="mus-row" title="${MUSIC_HELP[k]}"><span>${MUSIC_LABELS[k]}</span><b><i style="width:${Math.round(v * 100)}%;background:${v >= 0.75 ? COL.ok : v >= 0.5 ? COL.gold : COL.high}"></i></b><em>${Math.round(v * 100)}</em></div>`;
+  return `<div class="music"><div class="mus-head"><span class="k">Musicalité</span><b>${Math.round(m.score * 100)}<small>/100</small></b></div>
+    ${Object.entries(m.crit).map(([k, v]) => bar(k, v)).join("")}
+    ${m.worst ? `<p class="mus-tip"><b>${MUSIC_LABELS[m.worst]} :</b> ${MUSIC_TIPS[m.worst]}</p>` : `<p class="mus-tip">Une ligne propre : attaques nettes, notes droites et tenues. C'est ça, chanter beau.</p>`}</div>`;
+}
+
+/* Mémoire des notes : chaque note retrouve sa jumelle de la reprise, pour cumuler les essais */
+let canon = [];
+function buildCanon() {
+  const ns = notes(), span = 4 * state.score.beatsPerBar, first = new Map();
+  canon = ns.map((_, i) => i);
+  for (let w = 0; w * span < state.score.total - 1e-6; w++) {
+    const a = w * span, b = a + span, sung = [];
+    ns.forEach((n, i) => { if (n.midi != null && n.start >= a - 1e-6 && n.start < b - 1e-6) sung.push(i); });
+    if (!sung.length) continue;
+    const sig = sung.map(i => `${ns[i].midi}:${ns[i].beats}:${ns[i].start - a}:${ns[i].syl}`).join("|");
+    if (first.has(sig)) { const f = first.get(sig); sung.forEach((i, q) => { canon[i] = f[q]; }); }
+    else first.set(sig, sung);
+  }
+}
+function recordNotes(results) {
+  if (!results) return;
+  loadProg(); buildCanon();
+  prog.weak = prog.weak || {};
+  results.forEach((r, i) => {
+    if (!r || r.status === "miss") return;
+    const k = canon[i] ?? i, w = prog.weak[k] || (prog.weak[k] = { n: 0, s: null, c: 0 });
+    const ok = r.status === "ok" ? 1 : 0;
+    w.n++; w.s = w.s == null ? ok : w.s * 0.55 + ok * 0.45;
+    if (r.cents != null) w.c = Math.round(w.c * 0.5 + r.cents * 0.5);
+    w.t = Date.now();
+  });
+  saveProg();
+}
+function weakSpots(max = 4) {
+  const ns = notes(), list = [];
+  for (const [k, w] of Object.entries(prog.weak || {})) {
+    const i = +k;
+    if (!ns[i] || ns[i].midi == null || w.s == null || w.s >= 0.6) continue;
+    list.push({ i, w, pri: (1 - w.s) * Math.min(1, w.n / 2) });
+  }
+  list.sort((a, b) => b.pri - a.pri);
+  const spots = [];
+  for (const it of list) {
+    const sp = passageAround(it.i, it.w);
+    if (spots.some(s => sp.from <= s.to + 1 && sp.to >= s.from - 1)) continue;
+    spots.push(sp);
+    if (spots.length >= max) break;
+  }
+  return spots;
+}
+function passageAround(i, w) {
+  const ns = notes();
+  let from = i, before = 0;
+  while (from > 0 && before < 2) { from--; if (ns[from].midi == null) { from++; break; } before++; }
+  let to = i, after = 0;
+  while (to < ns.length - 1 && after < 1) { if (ns[to + 1].midi == null) break; to++; after++; }
+  return { focus: i, from, to, a: ns[from].start, until: ns[to].start + ns[to].beats, bars: [barOf(ns[from].start), barOf(ns[to].start)],
+    words: ns.slice(from, to + 1).map(n => n.syl).filter(Boolean).join(" "), w,
+    why: w && w.c <= -30 ? "souvent trop bas" : w && w.c >= 30 ? "souvent trop haut" : "souvent manqué" };
+}
+function heatStrip() {
+  const ns = notes(), bpb = state.score.beatsPerBar, bars = Math.ceil(state.score.total / bpb - 1e-6), cells = [];
+  buildCanon();
+  for (let b = 0; b < bars; b++) {
+    let sum = 0, cnt = 0, sung = false;
+    ns.forEach((n, i) => {
+      if (n.midi == null || n.start < b * bpb - 1e-6 || n.start >= (b + 1) * bpb - 1e-6) return;
+      sung = true;
+      const w = prog.weak?.[canon[i] ?? i];
+      if (w && w.s != null) { sum += w.s; cnt++; }
+    });
+    const v = cnt ? sum / cnt : null;
+    const col = !sung ? "rgba(255,255,255,.03)" : v == null ? "rgba(255,255,255,.1)" : v >= 0.75 ? COL.ok : v >= 0.5 ? COL.gold : COL.high;
+    cells.push(`<i style="background:${col}" title="Mesure ${b + 1}${v == null ? (sung ? " · pas encore chantée" : " · silence") : ` · ${Math.round(v * 100)} % de réussite`}"></i>`);
+  }
+  return `<div class="heat">${cells.join("")}</div><div class="heat-cap"><span>Mesure 1</span><span><i style="background:${COL.ok}"></i>acquis <i style="background:${COL.gold}"></i>fragile <i style="background:${COL.high}"></i>difficile <i style="background:rgba(255,255,255,.1)"></i>pas encore chanté</span><span>Mesure ${bars}</span></div>`;
+}
+
+/* ── Atelier ciblé : les passages difficiles, repris jusqu'à ce qu'ils tiennent ── */
+async function startDrill() {
+  if (!(await needMic())) return;
+  loadProg();
+  const spots = weakSpots(4);
+  if (!spots.length) { renderTrain(); return; }
+  exBegin({ type: "drill", title: "Atelier ciblé", spots, si: -1, cleared: 0, attempts: 0 });
+  nextSpot();
+}
+function nextSpot() {
+  if (!ex) return;
+  ex.si++; ex.wins = 0; ex.tries = 0;
+  if (ex.si >= ex.spots.length) return finishDrill();
+  drillAttempt(true);
+}
+function drillAttempt(preview) {
+  const sp = ex.spots[ex.si];
+  ex.ph = sp; state.focusIdx = sp.focus;
+  ex.bpm = Math.round(state.bpm * (ex.tries >= 2 ? 0.7 : 0.85));
+  ex.title = `Atelier ciblé · passage ${ex.si + 1}/${ex.spots.length}`;
+  view.target = view.beat = sp.a;
+  ex.okN = 0; ex.rated = 0; ex.combo = ex.combo || 0;
+  if (preview) { ex.phase = "Écoutez"; renderHud(); startPlayback({ from: sp.from, mode: "preview", until: sp.until, bpm: ex.bpm }); }
+  else { ex.phase = "Encore une fois"; renderHud(); setTimeout(() => { if (ex?.type === "drill") singNow(); }, 900); }
+}
+function drillResult() {
+  const sp = ex.spots[ex.si], r = state.results[sp.focus];
+  const ok = r && r.status === "ok";
+  ex.attempts++;
+  recordNotes(state.results);
+  if (ok) {
+    ex.wins++;
+    if (ex.wins >= 2) {
+      ex.cleared++; addXp(30, nowX(), H * 0.3);
+      fx.text(W / 2, H * 0.28, "Passage réparé !", "gold", 40); celebrate(40, stageOrigin(W / 2, H * 0.28)); ex.mood = "wow";
+      ex.phase = "Réparé"; renderHud(); bellReact("wow");
+      setTimeout(() => { if (ex?.type === "drill") nextSpot(); }, 1600);
+      return;
+    }
+    ex.phase = "Bien ! Une fois de plus pour l'ancrer"; renderHud();
+    setTimeout(() => { if (ex?.type === "drill") drillAttempt(false); }, 1300);
+  } else {
+    ex.tries++;
+    if (ex.tries >= 4) { ex.phase = "On y reviendra"; renderHud(); setTimeout(() => { if (ex?.type === "drill") nextSpot(); }, 1400); return; }
+    const hint = r && r.status === "low" ? "Visez plus haut sur la note entourée" : r && r.status === "high" ? "Visez plus bas sur la note entourée" : "Chantez bien la note entourée";
+    ex.phase = hint; renderHud();
+    setTimeout(() => { if (ex?.type === "drill") drillAttempt(ex.tries >= 2); }, 1600);
+  }
+}
+function finishDrill() {
+  state.focusIdx = null; prog.lastDrill = Date.now();
+  const pct = ex.spots.length ? ex.cleared / ex.spots.length : 0;
+  if (ex.cleared === ex.spots.length && ex.spots.length) award("atelier");
+  complete(pct, { stars: pct >= 1 ? 3 : pct >= 0.5 ? 2 : pct > 0 ? 1 : 0, fresh: 0, passed: ex.cleared > 0 });
+}
+
+/* ── Chanter beau : les attaques nettes ── */
+async function startAttack() {
+  if (!(await needMic())) return;
+  const ns = notes(), idx = ns.map((n, i) => n.midi != null ? i : -1).filter(i => i >= 0);
+  const pitches = [...new Set(idx.map(i => tgtOf(ns[i])))].sort((a, b) => a - b);
+  const seq = [];
+  for (let k = 0; k < 6; k++) { let m; do { m = pick(pitches); } while (seq.length && m === seq[seq.length - 1] && pitches.length > 1); seq.push(m); }
+  exBegin({ type: "attack", title: "Attaques nettes", seq, k: -1, scores: [], scoops: 0 });
+  state.hidePiece = true;
+  nextAttack();
+}
+function nextAttack() {
+  if (!ex) return;
+  ex.k++;
+  if (ex.k >= ex.seq.length) return finishAttack();
+  ex.tgt = ex.seq[ex.k]; ex.frames = []; ex.t = 0; ex.phase = "Écoutez";
+  state.exBand = ex.tgt; state.live = null;
+  playRef(ex.tgt, 0.9);
+  renderHud();
+}
+function attackTick(dt) {
+  if (ex.phase === "Écoutez") { if (ctx.currentTime >= refUntil) { ex.phase = "Attaquez !"; ex.t = 0; renderHud(); } return; }
+  if (ex.phase !== "Attaquez !") return;
+  ex.t += dt;
+  const m = readMic();
+  setLive(smoothed(m), ex.tgt);
+  ex.frames.push({ t: ex.t, c: m == null ? null : fold((m - ex.tgt) * 100) });
+  const v = ex.frames.filter(f => f.c != null);
+  if (v.length) {
+    const t0 = v[0].t;
+    let run = 0, landT = null;
+    for (const f of ex.frames) {
+      if (f.t < t0) continue;
+      if (f.c != null && Math.abs(f.c) <= TOL_EX) { run++; if (run === 1) landT = f.t; } else { run = 0; landT = null; }
+      if (run >= 30) break;
+    }
+    if (run >= 30) {
+      const land = (landT - t0) / 1000, scoop = v[0].c < -60 && land > 0.1;
+      const s = land <= 0.12 ? 1 : land <= 0.25 ? 0.75 : land <= 0.45 ? 0.45 : 0.2;
+      ex.scores.push(scoop ? s * 0.8 : s); if (scoop) ex.scoops++;
+      const word = s >= 1 && !scoop ? pick(["Net !", "Comme une cloche", "Pile dessus"]) : scoop ? "Glissé par en dessous" : s >= 0.75 ? "Presque net" : "Un peu lent";
+      fx.text(nowX(), yOf(ex.tgt) - 40, `${word} · ${land.toFixed(2).replace(".", ",")} s`, s >= 0.75 && !scoop ? "ok" : "gold");
+      if (s >= 1 && !scoop) { fx.burst(nowX(), yOf(ex.tgt), "ok", 16); addXp(12); ex.mood = "happy"; bellReact("ok"); } else { addXp(4); ex.mood = "sad"; bellReact("sad"); }
+      ex.phase = "…"; state.live = null; renderHud();
+      setTimeout(() => { if (ex?.type === "attack") nextAttack(); }, 1100);
+      return;
+    }
+  }
+  if (ex.t >= 4500) { ex.scores.push(0); ex.phase = "…"; fx.text(nowX(), yOf(ex.tgt) - 40, "Pas trouvée", "muted"); renderHud(); setTimeout(() => { if (ex?.type === "attack") nextAttack(); }, 1000); }
+}
+function finishAttack() {
+  const pct = ex.scores.reduce((a, b) => a + b, 0) / ex.scores.length;
+  const s = pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.45 ? 1 : 0, prev = prog.warm.attack || 0;
+  if (s > prev) { prog.warm.attack = s; addXp(20 * (s - prev)); }
+  if (s >= 3) award("attaque-nette");
+  ex.low = 0; ex.high = 0;
+  ex.musicTip = ex.scoops >= 2 ? MUSIC_TIPS.attaque : null;
+  state.exBand = null;
+  complete(pct, { stars: Math.max(s, prev), fresh: Math.max(0, s - prev), passed: s >= 1 });
+}
+
+/* ── Chanter beau : la phrase liée, notée sur la musicalité ── */
+async function startMelody(k) {
+  if (!(await needMic())) return;
+  buildPhrases();
+  const ph = phrases[k];
+  exBegin({ type: "phrase", musical: true, k, L: 2, ph, lv: PHRASE_LEVELS[1], bpm: state.bpm, title: `Phrase liée · phrase ${k + 1}` });
+  view.target = view.beat = ph.a;
+  ex.phase = "Écoutez"; renderHud();
+  startPlayback({ from: ph.from, mode: "preview", until: ph.until, bpm: ex.bpm });
+}
 
 /* ════════ Démarrage ════════ */
 
