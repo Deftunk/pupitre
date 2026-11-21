@@ -489,6 +489,94 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
   .meta { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) { h1, .t-logo, .t-foot, .t-rays, .t-menu button { animation: none !important; } }
+
+/* Monstres */
+.monster { display: block; overflow: visible; filter: drop-shadow(0 0 7px var(--glow)); }
+.monster.idle { animation: bob 1.8s ease-in-out infinite; }
+.monster.happy { animation: hop .5s ease-out 3; }
+.monster.evolving { animation: evo 1.4s ease-out; }
+.monster.born { animation: born .8s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes bob { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-5px) scaleY(1.03); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-12px) rotate(-4deg); } }
+@keyframes evo { 0% { filter: brightness(4) drop-shadow(0 0 30px #fff); transform: scale(.6); } 60% { filter: brightness(2) drop-shadow(0 0 20px var(--glow)); transform: scale(1.15); } 100% { transform: none; } }
+@keyframes born { 0% { transform: scale(0) rotate(-30deg); } 100% { transform: none; } }
+.tape { display: block; }
+.tape .reel { transform-box: fill-box; transform-origin: center; }
+.h-tape .reel, .tape-btn:hover .reel { animation: spin .6s linear infinite; }
+.starter { justify-items: start; }
+.zoo { display: grid; gap: 14px; }
+.zoo-main { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; padding: 16px; border: 2px solid rgba(0, 240, 255, .4); background: rgba(0, 240, 255, .04); box-shadow: 5px 5px 0 rgba(255, 46, 136, .35); }
+.mon-stage { width: 200px; height: 200px; display: grid; place-items: center; background: radial-gradient(circle at 50% 60%, rgba(255, 46, 136, .25), transparent 65%); }
+.mon-stage.type-neon { background: radial-gradient(circle at 50% 60%, rgba(255, 46, 136, .3), transparent 65%); }
+.mon-stage.type-chrome { background: radial-gradient(circle at 50% 60%, rgba(160, 90, 255, .3), transparent 65%); }
+.mon-stage.type-basse { background: radial-gradient(circle at 50% 60%, rgba(0, 180, 255, .28), transparent 65%); }
+.zoo-info { display: grid; gap: 6px; min-width: 0; }
+.mon-name { font-family: var(--f-display); font-size: 34px; text-transform: uppercase; color: #fff; background: transparent; border: 0; border-bottom: 2px dashed rgba(255, 46, 136, .4); padding: 0; width: 100%; transform: skewX(-8deg); text-shadow: 3px 3px 0 var(--gold); }
+.mon-name:focus { outline: none; border-bottom-color: var(--cyan); }
+.lv-line { font-family: var(--f-mono); font-size: 20px; color: var(--yellow); }
+.mood { font-family: var(--f-mono); font-size: 17px; }
+.mood.ok { color: var(--ok); } .mood.faim { color: var(--yellow); } .mood.sad { color: var(--high); }
+.zoo-list { display: flex; gap: 8px; flex-wrap: wrap; }
+.zoo-pick { display: grid; justify-items: center; gap: 0; padding: 6px 10px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 46, 136, .3); color: var(--text); min-width: 84px; }
+.zoo-pick span { font-family: var(--f-display); text-transform: uppercase; font-size: 13px; }
+.zoo-pick small { font-family: var(--f-mono); font-size: 14px; color: var(--muted); }
+.zoo-pick.on { border-color: var(--yellow); box-shadow: 3px 3px 0 var(--yellow); }
+.tapes { display: grid; gap: 8px; }
+.tape-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.tape-btn { display: grid; justify-items: center; gap: 4px; background: transparent; border: 0; color: var(--yellow); font-family: var(--f-display); text-transform: uppercase; font-size: 14px; letter-spacing: .06em; }
+.tape-btn:hover { transform: translateY(-3px) rotate(-3deg); }
+.ladder { display: grid; gap: 8px; }
+.rival { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 8px 14px; background: rgba(255, 36, 64, .05); border: 1px solid rgba(255, 36, 64, .35); }
+.rival b { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: 22px; letter-spacing: .03em; display: block; transform: skewX(-6deg); transform-origin: left; }
+.rival i { display: block; font-size: 13px; color: var(--muted); }
+.rival.beaten { border-color: rgba(0, 245, 212, .4); background: rgba(0, 245, 212, .04); }
+.rival.beaten b::after { content: " · battu"; color: var(--ok); font-size: 15px; }
+.rival.locked { opacity: .4; filter: grayscale(.6); }
+.arena { position: absolute; left: 0; right: 0; top: 56px; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 22px; pointer-events: none; z-index: 1; }
+.fighter { display: grid; gap: 6px; justify-items: center; width: 170px; }
+.hp { width: 100%; display: grid; gap: 3px; }
+.hp b { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: 16px; letter-spacing: .04em; }
+.hp b small { font-family: var(--f-mono); font-size: 15px; color: var(--muted); }
+.hp i { display: block; height: 10px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .3); transform: skewX(-12deg); }
+.hp s { display: block; height: 100%; background: linear-gradient(90deg, var(--ok), var(--yellow)); box-shadow: 0 0 10px var(--ok); transition: width .35s steps(6); text-decoration: none; }
+.foe .hp s { background: linear-gradient(90deg, #FF2440, var(--gold)); box-shadow: 0 0 10px #FF2440; margin-left: auto; }
+.foe .hp { text-align: right; }
+.foe .monster { transform: scaleX(-1); }
+.foe .monster.idle { animation: bobFlip 1.6s ease-in-out infinite; }
+@keyframes bobFlip { 0%, 100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-6px); } }
+.mon-slot.hit { animation: hitShake .4s; }
+@keyframes hitShake { 0%, 100% { transform: none; filter: none; } 20% { transform: translateX(-10px); filter: brightness(3) hue-rotate(90deg); } 60% { transform: translateX(8px); } }
+.vs { font-family: var(--f-display); font-size: 46px; color: var(--yellow); text-shadow: 4px 4px 0 var(--gold), -2px -2px 0 var(--cyan); transform: skewX(-10deg); margin-top: 40px; }
+.shot { position: absolute; top: 110px; font-size: 40px; color: var(--yellow); text-shadow: 0 0 12px var(--gold); pointer-events: none; }
+.shot.to-foe { left: 150px; animation: toFoe .5s ease-in forwards; }
+.shot.to-me { right: 150px; animation: toMe .5s ease-in forwards; color: #FF2440; }
+@keyframes toFoe { to { left: calc(100% - 150px); transform: rotate(360deg) scale(1.4); } }
+@keyframes toMe { to { right: calc(100% - 150px); transform: rotate(-360deg) scale(1.4); } }
+.hatch { position: fixed; inset: 0; z-index: 66; display: grid; place-items: center; background: rgba(6, 0, 14, .9); }
+.h-inner { display: grid; justify-items: center; gap: 12px; text-align: center; padding: 20px; }
+.h-tape { animation: tapeShake .25s linear infinite; }
+@keyframes tapeShake { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) scale(1.04); } }
+.h-inner h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 7vw, 64px); text-transform: uppercase; color: #fff; text-shadow: 5px 5px 0 var(--gold), -3px -2px 0 var(--cyan); transform: skewX(-8deg); }
+.h-inner p { margin: 0; font-family: var(--f-mono); font-size: 24px; color: var(--yellow); }
+.h-inner p b { font-family: var(--f-display); font-weight: 400; color: #fff; font-size: 28px; text-transform: uppercase; }
+.mon-reward { display: flex; gap: 12px; align-items: center; width: 100%; padding: 8px 12px; border: 1px dashed rgba(0, 240, 255, .4); text-align: left; }
+.mon-reward > div { display: grid; gap: 2px; }
+.mon-reward span { font-family: var(--f-mono); font-size: 19px; color: var(--text); }
+.mon-reward b { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; }
+.mon-reward .evo { color: var(--cyan); font-family: var(--f-display); text-transform: uppercase; font-size: 22px; text-shadow: 0 0 10px var(--cyan); }
+.mon-reward .loot, .loot { color: var(--yellow); font-family: var(--f-display); text-transform: uppercase; letter-spacing: .04em; }
+@media (max-width: 760px) {
+  .zoo-main { grid-template-columns: 1fr; justify-items: center; }
+  .mon-stage { width: 160px; height: 160px; }
+  .rival { grid-template-columns: auto minmax(0, 1fr); }
+  .rival .pill { grid-column: 1 / -1; justify-self: start; }
+  .fighter { width: 110px; }
+  .fighter .monster { width: 80px; height: 80px; }
+  .vs { font-size: 30px; }
+  .arena { padding: 0 10px; top: 96px; }
+  .shot.to-foe { left: 80px; } .shot.to-me { right: 80px; }
+  @keyframes toFoe { to { left: calc(100% - 80px); } }
+}
 </style>
 
 <div class="app">
@@ -537,6 +625,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <div class="train" id="train" hidden></div>
     <div class="exhud" id="exHud" hidden></div>
     <div class="exend" id="exEnd" hidden></div>
+    <div class="arena" id="arena" hidden></div>
   </section>
 
   <nav class="dock" aria-label="Commandes">
@@ -662,6 +751,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <span class="t-foot">CASQUE RECOMMANDÉ · LES FAUSSES NOTES SERONT PUNIES</span>
   </div>
 </div>
+<div class="hatch" id="hatch" hidden></div>
 <div id="flash" aria-hidden="true"></div>
 <div id="scan" aria-hidden="true"></div>
 <canvas id="fun" aria-hidden="true"></canvas>
@@ -1475,7 +1565,7 @@ function shake(a) { if (!reduced) shakeAmt = Math.max(shakeAmt, a); }
 function flash(col, a = 0.35) {
   if (reduced) return;
   const f = $("flash"); f.style.transition = "none"; f.style.background = col; f.style.opacity = a;
-  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transition = "opacity .4s ease-out"; f.style.opacity = 0; }));
+  setTimeout(() => { f.style.transition = "opacity .4s ease-out"; f.style.opacity = 0; }, 40);
 }
 function blip(freqHz, t, dur = 0.07, amp = 0.05, type = "square") {
   if (!ctx) return;
@@ -1509,7 +1599,7 @@ function frame(now) {
     if (state.mode === "sing" && mic) setLive(smoothed(readMic()), tgtOf(notes()[noteIndexAt(view.beat)]));
   }
   if (state.mode === "step") stepTick(dt);
-  if (state.mode === "train" && ex && ctx) { if (ex.type === "hold") holdTick(dt); else if (ex.type === "echo") echoTick(dt); else if (ex.type === "attack") attackTick(dt); }
+  if (state.mode === "train" && ex && ctx) { if (ex.type === "hold") holdTick(dt); else if (ex.type === "echo") echoTick(dt); else if (ex.type === "attack") attackTick(dt); else if (ex.type === "battle") battleTick(dt); }
   if (mic) $("micBar").style.width = Math.min(100, Math.sqrt(mic.level) * 260) + "%";
   $("where").textContent = `MESURE ${Math.min(barOf(Math.max(0, view.beat)), Math.ceil(state.score.total / state.score.beatsPerBar))} / ${Math.ceil(state.score.total / state.score.beatsPerBar - 1e-6)}`;
   if (shakeAmt > 0.3) {
@@ -1819,7 +1909,7 @@ function setMode(mode) {
   if (ex) exAbort();
   $("train").hidden = mode !== "train";
   $("results").hidden = true;
-  if (mode === "train") { renderTrain(); if (micState === "idle") ensureMic().then(() => { if (state.mode === "train" && !ex) renderTrain(); }); }
+  if (mode === "train") { hideHint(); renderTrain(); if (micState === "idle") ensureMic().then(() => { if (state.mode === "train" && !ex) renderTrain(); }); }
   $("micToast").hidden = true;
   if (mode === "step") { renderStep(); if (micState === "idle") ensureMic(); }
   if (mode === "sing" && micState === "idle") ensureMic();
@@ -2069,6 +2159,8 @@ const BADGES = [
   { id: "atelier", g: "⚒", name: "Bien réparé", desc: "Réparer tous les passages d'un atelier" },
   { id: "attaque-nette", g: "!", name: "Attaque de cloche", desc: "Trois étoiles aux attaques nettes" },
   { id: "chanter-beau", g: "~", name: "Chanter beau", desc: "Musicalité de 85 sur une phrase juste" },
+  { id: "arene", g: "⚔", name: "Première victoire", desc: "Gagner un combat dans l'arène" },
+  { id: "reine", g: "♛", name: "Régicide", desc: "Battre la Reine du Fausset" },
   { id: "3-jours", g: "3", name: "Régulière", desc: "3 jours d'entraînement d'affilée" },
   { id: "7-jours", g: "7", name: "Une semaine pleine", desc: "7 jours d'affilée" },
 ];
@@ -2118,6 +2210,8 @@ function recommendation() {
     const L = (prog.ph[p.k] || 0) + 1;
     return { kind: "phrase", k: p.k, L, label: `Phrase ${p.k + 1} · ${PHRASE_LEVELS[L - 1].name}`, why: `Mesures ${p.bars[0]} à ${p.bars[1]} : la phrase la moins avancée.` };
   }
+  if (zoo.list.length && zoo.league < RIVALS.length && activeMon().lvl >= RIVALS[zoo.league].lvl - 1)
+    return { kind: "battle", k: zoo.league, label: `Arène · ${RIVALS[zoo.league].name}`, why: `${activeMon().name} est prêt. Va lui casser les oreilles.` };
   if (fullOpen() && prog.full < 3) return { kind: "full", label: "Le grand filage", why: "Toutes les phrases sont acquises : place au morceau entier." };
   return { kind: "echo", label: "Échauffement · l'écho", why: "Tout est acquis. L'écho garde l'oreille en forme." };
 }
@@ -2187,6 +2281,8 @@ function renderTrain() {
     <div class="reco"><div><span class="k">Mission</span><b>${reco.label}</b><span>${reco.why}</span></div>
       <button type="button" class="main-btn wide" data-go="${reco.kind}" ${reco.k != null ? `data-k="${reco.k}" data-l="${reco.L}"` : ""}>${ICON.play}Go</button></div>
 
+    ${monsterSections()}
+
     <section class="t-sec"><h3>Échauffement</h3><p class="sub">Cinq minutes pour décrasser la voix. Sans ça, c'est la casse.</p>
       <div class="ex-grid">
         ${warm("hold", "La note tenue", "Trois notes de votre voix à tenir 5 secondes, bien droites.", prog.warm.hold)}
@@ -2232,6 +2328,15 @@ $("train").addEventListener("click", e => {
   else if (go === "drill") startDrill();
   else if (go === "attack") startAttack();
   else if (go === "melody") startMelody(+b.dataset.k);
+  else if (go === "starter") { const m = birth(+b.dataset.seed, b.dataset.type); hatchShow(m, "Ton premier monstre !"); }
+  else if (go === "hatch") hatchTape(+b.dataset.i);
+  else if (go === "active") { zoo.active = b.dataset.id; saveZoo(); renderTrain(); }
+  else if (go === "battle") startBattle(+(b.dataset.r ?? b.dataset.k));
+});
+$("train").addEventListener("change", e => {
+  if (e.target.id !== "monName") return;
+  const m = activeMon(); if (!m) return;
+  m.name = e.target.value.trim().slice(0, 16) || m.name; saveZoo();
 });
 
 /* ── Moteur commun des exercices ── */
@@ -2247,7 +2352,7 @@ function exBegin(o) {
 function exAbort() {
   stopPlayback();
   ex = null; state.hidePiece = false; state.exBand = null; state.focusIdx = null; state.live = null; state.results = null; state.trace = [];
-  exHud.hidden = true; $("exEnd").hidden = true;
+  exHud.hidden = true; $("exEnd").hidden = true; $("arena").hidden = true;
   if (state.mode === "train") { $("train").hidden = false; renderTrain(); }
   $("trainBack").hidden = true;
 }
@@ -2262,6 +2367,7 @@ function renderHud() {
   if (!ex) { exHud.hidden = true; return; }
   let mid = "";
   if (ex.type === "echo") mid = `<span class="fig">${(ex.fig || []).map((m, q) => `<span class="${q < ex.j ? "got" : q === ex.j && ex.phase === "À toi" ? "cur" : ""}">${noteName(m)}</span>`).join("")}</span><span class="sc">Écho ${Math.max(1, ex.k + 1)}/${ex.rounds}</span>`;
+  else if (ex.type === "battle") mid = `<span class="fig">${(ex.fig || []).map((m, q) => `<span class="${q < ex.j ? "got" : q === ex.j && /^(Chante|Répète)/.test(ex.phase) ? "cur" : ""}">${noteName(m)}</span>`).join("")}</span><span class="sc">Round ${Math.max(1, ex.round)}</span>`;
   else if (ex.type === "attack") mid = `<span class="sc">${ex.tgt != null ? fullName(ex.tgt) : ""}</span><span class="sc">Attaque ${Math.max(1, ex.k + 1)}/${ex.seq.length}</span>`;
   else if (ex.type === "hold") mid = `<span class="sc">${ex.tgt != null ? fullName(ex.tgt) : ""} · <b id="holdT">${((ex.on || 0) / 1000).toFixed(1)}</b> / ${ex.goal / 1000} s</span><span class="sc">Note ${Math.max(1, ex.k + 1)}/${ex.targets.length}</span>`;
   else mid = `<span class="sc">${ex.okN} juste${ex.okN > 1 ? "s" : ""} / ${ex.rated}</span>${ex.combo >= 3 ? `<span class="combo${ex.combo >= 5 ? " hot" : ""}">Série ${ex.combo}${ex.combo >= 5 ? ` · ×${Math.min(4, 1 + Math.floor(ex.combo / 5))}` : ""}</span>` : ""}`;
@@ -2505,6 +2611,7 @@ function complete(pct, info) {
   prof.hist.push({ t: Date.now(), acc: Math.round(pct * 100), kind: ex.type, mus: ex.music ? Math.round(ex.music.score * 100) : undefined });
   prof.hist = prof.hist.slice(-40);
   saveProf(); saveProg();
+  info.mon = monsterReward(pct) + (ex.loot ? `<div class="mon-reward">${ex.loot}</div>` : "");
   showEnd(pct, info, goalHit);
 }
 function showEnd(pct, info, goalHit) {
@@ -2514,7 +2621,10 @@ function showEnd(pct, info, goalHit) {
   const next = LEVELS[L1 + 1], cur = LEVELS[L1];
   const lvPct = next ? (prof.xp - cur[0]) / (next[0] - cur[0]) : 1;
   let title, sub;
-  if (ex.type === "phrase" && ex.musical) {
+  if (ex.type === "battle") {
+    title = ex.win ? "Victoire" : "K.O.";
+    sub = ex.win ? `${ex.R.name} est au tapis. ${esc(ex.me.name)} danse sur sa cassette.` : `${esc(ex.me.name)} a mordu la poussière. ${ex.R.name} rigole encore.`;
+  } else if (ex.type === "phrase" && ex.musical) {
     title = info.passed ? "Belle ligne" : pct < 0.6 ? "D'abord la justesse" : "Pas encore assez lié";
     sub = pct < 0.6 ? `${Math.round(pct * 100)} % de notes justes : il en faut 60 % avant de juger la musicalité.` : `Musicalité ${Math.round((ex.music?.score || 0) * 100)}/100, justesse ${Math.round(pct * 100)} %.`;
   } else if (ex.type === "phrase") {
@@ -2548,6 +2658,11 @@ function showEnd(pct, info, goalHit) {
     const misses = ex.rated - ex.okN; if (misses) rows.push(["Fausses notes", `×${misses}`, -misses * 40]);
     if (ex.type === "phrase" && ex.L === 3 && !ex.musical) rows.push(["Sans filet", "bonus", 500]);
     if (ex.type === "drill") rows.push(["Passages réparés", `${ex.cleared}/${ex.spots.length}`, ex.cleared * 400]);
+  } else if (ex.type === "battle") {
+    rows.push(["Dégâts infligés", `${ex.dealt}`, ex.dealt * 10]);
+    rows.push(["Coups parés", `×${ex.blocked}`, ex.blocked * 150]);
+    rows.push(["PV restants", `${Math.max(0, Math.round(ex.myHp))}`, Math.max(0, Math.round(ex.myHp)) * 15]);
+    if (ex.win) rows.push(["Victoire", "", 1500]);
   } else if (ex.type === "hold") rows.push(["Tenue", `${Math.round(pct * 100)} %`, Math.round(pct * 2000)]);
   else if (ex.type === "echo") rows.push(["Échos retrouvés", `${ex.got}/${ex.total}`, ex.got * 150]);
   else if (ex.type === "attack") { rows.push(["Attaques", `${Math.round(pct * 100)} %`, Math.round(pct * 1500)]); if (ex.scoops) rows.push(["Glissades", `×${ex.scoops}`, -ex.scoops * 100]); }
@@ -2558,8 +2673,9 @@ function showEnd(pct, info, goalHit) {
         <div class="row total" style="--d:${rows.length * 0.32}s"><span>TOTAL</span><b>${totalPts}</b></div></div>
       <div class="grade-wrap"><span class="grade ${grade}" style="--d:${gd}s">${grade}</span></div>
       <p class="roast" style="--d:${gd + 0.35}s">${pick(GRADE_LINES[grade])}</p>
+      ${info.mon || ""}
       ${up ? `<span class="levelup">Niveau ${L1 + 1} !</span>` : ""}
-      <span class="stars big">${starRow(info.stars, 3, info.fresh)}</span>
+      ${ex.type === "battle" ? "" : `<span class="stars big">${starRow(info.stars, 3, info.fresh)}</span>`}
       <h3>${title}</h3><p>${sub}</p>
       <div class="gain"><b id="xpCount">+0 XP</b>${goalHit ? "<span>Objectif du jour atteint, +50 XP compris</span>" : ""}</div>
       <div class="lvl-line"><span>${up ? `Nouveau titre : <b>${cur[1]}</b>` : `Niveau ${L1 + 1} · ${cur[1]}`}</span><span class="xpbar"><i style="width:${Math.round(lvPct * 100)}%"></i></span></div>
@@ -2584,6 +2700,7 @@ function showEnd(pct, info, goalHit) {
       if (grade === "S" || grade === "A") celebrate(grade === "S" ? 140 : 70);
       if (info.fresh) starDings(info.fresh);
       if (up) fanfare();
+      if (ex && ex.evolved) { fanfare(); celebrate(110); flash("#00F0FF", 0.35); }
     }
   }, gd * 1000 + 120);
 }
@@ -2596,7 +2713,7 @@ $("exEnd").addEventListener("click", e => {
   if (act === "again") {
     if (done.type === "phrase" && done.musical) startMelody(done.k); else if (done.type === "phrase") startPhrase(done.k, done.L);
     else if (done.type === "full") startFull(); else if (done.type === "hold") startHold(); else if (done.type === "drill") startDrill();
-    else if (done.type === "attack") startAttack(); else startEcho();
+    else if (done.type === "attack") startAttack(); else if (done.type === "battle") startBattle(done.ri); else startEcho();
   }
   else if (act === "next") startPhrase(done.k, done.L + 1);
   else if (act === "nextph") startPhrase(done.k + 1, 1);
@@ -2878,6 +2995,341 @@ async function startMelody(k) {
   view.target = view.beat = ph.a;
   ex.phase = "Écoute"; renderHud();
   startPlayback({ from: ph.from, mode: "preview", until: ph.until, bpm: ex.bpm });
+}
+
+/* ════════ Les monstres : nés des cassettes, nourris par la voix, élevés pour l'arène ════════ */
+
+const TYPES = {
+  neon: { name: "Néon", desc: "Aigu, rapide, frappe fort", hues: [318, 188], beats: "basse" },
+  chrome: { name: "Chrome", desc: "Médium, équilibré, rusé", hues: [272, 300], beats: "neon" },
+  basse: { name: "Basse", desc: "Grave, costaud, encaisse tout", hues: [214, 152], beats: "chrome" },
+};
+const STAGES = ["", "Bébé", "Ado", "Ultime"];
+const STAT_LABELS = { pui: "Puissance", prec: "Précision", souf: "Souffle", ryt: "Rythme", style: "Style" };
+const RARITY = { commune: { mult: 1, col: "#C39BD3" }, rare: { mult: 1.25, col: "#00F0FF" }, legendaire: { mult: 1.6, col: "#FFE45E" } };
+const RIVALS = [
+  { name: "Wubby", seed: 1101, type: "basse", lvl: 2, notes: 3, tol: 42, bio: "Le plus nul de la ligue. Même lui va te chambrer." },
+  { name: "Croc-Synthé", seed: 2207, type: "chrome", lvl: 4, notes: 3, tol: 38, bio: "Mord dans les fausses notes. Littéralement." },
+  { name: "Madame Vibrato", seed: 3313, type: "neon", lvl: 6, notes: 4, tol: 34, bio: "Trémole depuis 1983. N'a jamais tenu une note droite." },
+  { name: "Basso Profundo", seed: 4421, type: "basse", lvl: 9, notes: 4, tol: 31, bio: "Fait vibrer les vitres. Et ton estomac." },
+  { name: "Vocodor", seed: 5531, type: "chrome", lvl: 12, notes: 5, tol: 28, bio: "Moitié chanteur, moitié robot. Totalement insupportable." },
+  { name: "La Reine du Fausset", seed: 6661, type: "neon", lvl: 15, notes: 5, tol: 25, bio: "Boss final. Personne ne l'a jamais entendue chanter faux." },
+];
+
+/* Hasard reproductible : une même cassette donne toujours le même monstre */
+function rngOf(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const hashStr = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+function dnaOf(seed, type) {
+  const r = rngOf(seed), [h1, h2] = TYPES[type].hues;
+  return {
+    hue: (h1 + Math.round((r() - 0.5) * 40) + 360) % 360, hue2: (h2 + Math.round((r() - 0.5) * 50) + 360) % 360,
+    body: Math.floor(r() * 4), eyes: 1 + Math.floor(r() * 3), horn: Math.floor(r() * 4), mouth: Math.floor(r() * 3),
+    limbs: Math.floor(r() * 3), pattern: Math.floor(r() * 3), tail: r() < 0.5, lean: (r() - 0.5) * 6,
+  };
+}
+const SYL_A = ["Glo", "Zap", "Vox", "Bzz", "Kra", "Nyo", "Fuz", "Wub", "Trem", "Riff", "Dio", "Mix", "Tek", "Lo", "Fi", "Synth", "Beat", "Glam"];
+const SYL_B = ["ox", "ix", "on", "ette", "or", "uz", "ka", "bo", "zilla", "tron", "ito", "y", "ax", "ouille"];
+const nameOf = seed => { const a = rngOf(hashStr("nom-a" + seed)), b = rngOf(hashStr("nom-b" + seed)); return SYL_A[Math.floor(a() * SYL_A.length)] + SYL_B[Math.floor(b() * SYL_B.length)]; };
+
+/* Le monstre en SVG néon : la forme vient de son ADN, les détails de son stade, la tête de son humeur */
+function monsterSvg(m, size = 120, opts = {}) {
+  const d = m.dna, st = m.stage || 1, mood = opts.mood || m.mood || "ok";
+  const s = st === 1 ? 26 : st === 2 ? 34 : 40, cx = 60, cy = 66;
+  const line = `hsl(${d.hue}, 100%, 64%)`, line2 = `hsl(${d.hue2}, 100%, 62%)`, uid = "m" + Math.random().toString(36).slice(2, 8);
+  const top = cy - s * 1.15;
+  let body;
+  if (d.body === 0) body = `<path d="M${cx - s},${cy} C${cx - s},${cy - s * 1.35} ${cx + s},${cy - s * 1.35} ${cx + s},${cy} C${cx + s},${cy + s * 0.95} ${cx - s},${cy + s * 0.95} ${cx - s},${cy} Z"/>`;
+  else if (d.body === 1) body = `<rect x="${cx - s}" y="${cy - s * 1.05}" width="${2 * s}" height="${2 * s}" rx="${s * 0.35}"/>`;
+  else if (d.body === 2) body = `<path d="M${cx},${cy - s * 1.2} C${cx + s * 0.6},${cy - s * 1.2} ${cx + s * 1.15},${cy + s * 0.3} ${cx + s},${cy + s * 0.85} L${cx - s},${cy + s * 0.85} C${cx - s * 1.15},${cy + s * 0.3} ${cx - s * 0.6},${cy - s * 1.2} ${cx},${cy - s * 1.2} Z"/>`;
+  else body = `<rect x="${cx - s * 0.78}" y="${cy - s * 1.25}" width="${s * 1.56}" height="${s * 2.15}" rx="${s * 0.78}"/>`;
+  const parts = [];
+  if (st >= 3 || m.rar === "legendaire") parts.push(`<circle cx="${cx}" cy="${cy}" r="${s * 1.75}" fill="none" stroke="${line2}" stroke-width="1.5" stroke-dasharray="4 6" opacity=".7"><animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="9s" repeatCount="indefinite"/></circle>`);
+  if (st >= 2 && d.tail) parts.push(`<path d="M${cx + s * 0.8},${cy + s * 0.5} q${s * 0.9},${-s * 0.1} ${s * 0.8},${-s * 0.9} l${s * 0.25},${s * 0.1} l${-s * 0.05},${-s * 0.35}" fill="none" stroke="${line2}" stroke-width="3" stroke-linecap="round"/>`);
+  if (st >= 2) {
+    if (d.limbs === 0) parts.push(`<ellipse cx="${cx - s * 0.5}" cy="${cy + s * 0.95}" rx="${s * 0.3}" ry="${s * 0.16}" fill="#12001F" stroke="${line}" stroke-width="2.5"/><ellipse cx="${cx + s * 0.5}" cy="${cy + s * 0.95}" rx="${s * 0.3}" ry="${s * 0.16}" fill="#12001F" stroke="${line}" stroke-width="2.5"/>`);
+    else if (d.limbs === 1) parts.push([-0.6, -0.2, 0.2, 0.6].map(k => `<path d="M${cx + k * s},${cy + s * 0.8} q${s * 0.12},${s * 0.35} 0,${s * 0.5}" fill="none" stroke="${line}" stroke-width="2.5" stroke-linecap="round"/>`).join(""));
+    else parts.push(`<path d="M${cx - s * 0.95},${cy} l${-s * 0.45},${-s * 0.3}" stroke="${line}" stroke-width="3" stroke-linecap="round"/><path d="M${cx + s * 0.95},${cy} l${s * 0.45},${-s * 0.3}" stroke="${line}" stroke-width="3" stroke-linecap="round"/>`);
+  }
+  const hornL = st === 1 ? 0 : s * (st === 3 ? 0.75 : 0.5);
+  if (hornL) {
+    if (d.horn === 0) parts.push(`<path d="M${cx - s * 0.55},${top + s * 0.25} l${-s * 0.15},${-hornL} l${s * 0.4},${hornL * 0.8} Z M${cx + s * 0.55},${top + s * 0.25} l${s * 0.15},${-hornL} l${-s * 0.4},${hornL * 0.8} Z" fill="${line2}"/>`);
+    else if (d.horn === 1) parts.push(`<path d="M${cx},${top + s * 0.1} q${s * 0.1},${-hornL} ${s * 0.45},${-hornL * 1.1}" fill="none" stroke="${line2}" stroke-width="2.5"/><circle cx="${cx + s * 0.45}" cy="${top + s * 0.1 - hornL * 1.1}" r="${s * 0.13}" fill="${line2}"/>`);
+    else if (d.horn === 2) parts.push(`<path d="M${cx - s * 0.75},${top + s * 0.45} l${s * 0.05},${-hornL} l${s * 0.45},${hornL * 0.7} Z M${cx + s * 0.75},${top + s * 0.45} l${-s * 0.05},${-hornL} l${-s * 0.45},${hornL * 0.7} Z" fill="#12001F" stroke="${line}" stroke-width="2.5"/>`);
+    else parts.push([-0.5, 0, 0.5].map(k => `<path d="M${cx + k * s - s * 0.14},${top + s * 0.2} l${s * 0.14},${-hornL * (k ? 0.8 : 1.1)} l${s * 0.14},${hornL * (k ? 0.8 : 1.1)}" fill="${line2}"/>`).join(""));
+  }
+  const pat = d.pattern === 1 && st >= 2 ? [-0.4, 0, 0.4].map(k => `<path d="M${cx - s},${cy + k * s} q${s},${-s * 0.25} ${2 * s},0" fill="none" stroke="${line2}" stroke-width="2" opacity=".5"/>`).join("")
+    : d.pattern === 2 && st >= 2 ? [[-0.5, 0.45], [0.55, 0.3], [0.1, 0.7], [-0.15, -0.6]].map(([a, b]) => `<circle cx="${cx + a * s}" cy="${cy + b * s}" r="${s * 0.12}" fill="${line2}" opacity=".55"/>`).join("") : "";
+  const eyeY = cy - s * 0.32, eyeR = st === 1 ? s * 0.3 : s * 0.22, n = Math.min(d.eyes + (st === 3 ? 1 : 0), 4);
+  const eyes = Array.from({ length: n }, (_, i) => {
+    const ex2 = cx + (n === 1 ? 0 : (i - (n - 1) / 2) * s * (n > 2 ? 0.5 : 0.62));
+    const inward = ex2 <= cx ? 1 : -1;
+    const brow = mood === "sad" ? `<path d="M${ex2 - eyeR * inward},${eyeY - eyeR * 1.1} L${ex2 + eyeR * inward},${eyeY - eyeR * 1.6}" stroke="${line}" stroke-width="2" stroke-linecap="round"/>`
+      : mood === "angry" ? `<path d="M${ex2 - eyeR * inward},${eyeY - eyeR * 1.7} L${ex2 + eyeR * inward},${eyeY - eyeR * 1.05}" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>` : "";
+    return `<circle cx="${ex2}" cy="${eyeY}" r="${eyeR}" fill="#fff"/><circle cx="${ex2 + eyeR * 0.15}" cy="${eyeY + eyeR * 0.1}" r="${eyeR * 0.5}" fill="${line}"/><circle cx="${ex2 + eyeR * 0.3}" cy="${eyeY - eyeR * 0.2}" r="${eyeR * 0.16}" fill="#fff"/>${brow}`;
+  }).join("");
+  const my = cy + s * 0.32;
+  const mouth = mood === "sad" ? `<path d="M${cx - s * 0.3},${my + s * 0.12} q${s * 0.3},${-s * 0.25} ${s * 0.6},0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`
+    : d.mouth === 0 ? `<path d="M${cx - s * 0.38},${my} q${s * 0.38},${s * 0.42} ${s * 0.76},0 Z" fill="#12001F" stroke="#fff" stroke-width="2"/>`
+    : d.mouth === 1 ? `<path d="M${cx - s * 0.42},${my} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18} l${s * 0.14},${s * 0.18} l${s * 0.14},${-s * 0.18}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>`
+    : `<ellipse cx="${cx}" cy="${my + s * 0.06}" rx="${s * 0.17}" ry="${s * 0.22}" fill="#12001F" stroke="#fff" stroke-width="2"/>`;
+  const crown = st === 3 ? `<path d="M${cx - s * 0.35},${top - s * 0.05} l${s * 0.12},${-s * 0.3} l${s * 0.11},${s * 0.18} l${s * 0.12},${-s * 0.3} l${s * 0.12},${s * 0.3} l${s * 0.11},${-s * 0.18} l${s * 0.12},${s * 0.3} Z" fill="#FFE45E"/>` : "";
+  return `<svg class="monster ${opts.cls || ""}" width="${size}" height="${size}" viewBox="0 0 120 120" aria-hidden="true" style="--glow:${line}">
+    <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${d.hue}, 75%, 30%)"/><stop offset="1" stop-color="hsl(${d.hue2}, 80%, 12%)"/></linearGradient>
+    <clipPath id="${uid}c">${body}</clipPath></defs>
+    <g transform="rotate(${d.lean} 60 66)">${parts.join("")}
+      <g fill="url(#${uid})" stroke="${line}" stroke-width="3" stroke-linejoin="round">${body}</g>
+      <g clip-path="url(#${uid}c)">${pat}</g>${crown}${eyes}${mouth}</g></svg>`;
+}
+const cassetteSvg = (c, size = 64) => {
+  const col = RARITY[c.rar]?.col || "#C39BD3", tc = `hsl(${TYPES[c.type].hues[0]}, 100%, 62%)`;
+  return `<svg class="tape" width="${size}" height="${size * 0.66}" viewBox="0 0 90 60" aria-hidden="true"><rect x="2" y="2" width="86" height="56" rx="4" fill="#12001F" stroke="${col}" stroke-width="3"/>
+    <rect x="10" y="9" width="70" height="18" fill="${tc}" opacity=".85"/><text x="45" y="22" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="11" fill="#12001F">${TYPES[c.type].name.toUpperCase()}</text>
+    <circle class="reel" cx="28" cy="40" r="8" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="5 3"/><circle class="reel" cx="62" cy="40" r="8" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="5 3"/>
+    <rect x="36" y="36" width="18" height="8" fill="none" stroke="${col}" stroke-width="1.5"/></svg>`;
+};
+
+/* ── Données ── */
+const zoo = Object.assign({ list: [], active: null, tapes: [], league: 0, starterSeed: (Math.random() * 1e9) >>> 0 }, readJSON("pupitre.monsters"));
+const saveZoo = () => store.set("pupitre.monsters", JSON.stringify(zoo));
+if (!readJSON("pupitre.monsters").starterSeed) saveZoo();
+const activeMon = () => zoo.list.find(m => m.id === zoo.active) || zoo.list[0] || null;
+const xpNeed = l => 60 + l * 40;
+const stageOf = l => l >= 12 ? 3 : l >= 5 ? 2 : 1;
+const moodOf = m => { const h = (Date.now() - (m.fed || m.born)) / 36e5; return h < 30 ? "ok" : h < 80 ? "faim" : "sad"; };
+const MOOD_TXT = { ok: "En forme", faim: "Affamé · entraîne-toi pour le nourrir", sad: "Déprimé · ça fait des jours…" };
+function birth(seed, type, rar = "commune", from = "") {
+  const r = rngOf(seed ^ 0x51ed), mult = RARITY[rar].mult, base = () => Math.round((4 + r() * 6) * mult);
+  const st = { pui: base(), prec: base(), souf: base(), ryt: base(), style: base() };
+  if (type === "neon") st.prec += 3; if (type === "chrome") st.style += 3; if (type === "basse") st.souf += 3;
+  const m = { id: "m" + seed.toString(36) + Date.now().toString(36).slice(-3), seed, type, rar, from, dna: dnaOf(seed, type), name: nameOf(seed), lvl: rar === "legendaire" ? 3 : 1, xp: 0, stage: 1, stats: st, born: Date.now(), fed: Date.now(), wins: 0 };
+  m.stage = stageOf(m.lvl);
+  zoo.list.push(m); if (!zoo.active) zoo.active = m.id; saveZoo();
+  return m;
+}
+function typeFromRange() {
+  if (!ex || !ex.ph) return pick(Object.keys(TYPES));
+  const ns = notes(), all = ns.filter(n => n.midi != null).map(n => n.midi), lo = Math.min(...all), hi = Math.max(...all);
+  const seg = ns.slice(ex.ph.from, ex.ph.to + 1).filter(n => n.midi != null).map(n => n.midi);
+  const mean = seg.reduce((a, b) => a + b, 0) / seg.length, k = (mean - lo) / Math.max(1, hi - lo);
+  return k > 0.62 ? "neon" : k < 0.38 ? "basse" : "chrome";
+}
+
+/* ── Récompense de chaque exercice : le monstre actif mange, la bonne note donne une cassette ── */
+function monsterReward(pct) {
+  const lines = [], m = activeMon();
+  let svg = "";
+  if (m) {
+    const before = m.stage, gain = Math.round(12 + pct * 45 + (ex.score || 0) / 250);
+    m.xp += gain; m.fed = Date.now();
+    const mc = ex.music?.crit || {}, inc = (k, v) => { m.stats[k] = Math.round((m.stats[k] + Math.max(0, v)) * 10) / 10; };
+    inc("pui", pct * 3); inc("prec", (mc.attaque ?? pct * 0.6) * 2); inc("souf", (mc.tenue ?? (ex.type === "hold" ? pct * 1.5 : pct * 0.5)) * 2);
+    inc("ryt", (mc.rythme ?? pct * 0.5) * 2); inc("style", (mc.stabilite ?? pct * 0.5) * 2);
+    let lv = 0; while (m.xp >= xpNeed(m.lvl)) { m.xp -= xpNeed(m.lvl); m.lvl++; lv++; }
+    m.stage = stageOf(m.lvl);
+    lines.push(`<b>${esc(m.name)}</b> +${gain} XP`);
+    if (lv) lines.push(`Niveau ${m.lvl} !`);
+    if (m.stage > before) { lines.push(`<span class="evo">Évolution : ${STAGES[m.stage]} !</span>`); ex.evolved = m; }
+    svg = monsterSvg(m, 76, { cls: m.stage > before ? "evolving" : "happy" });
+  }
+  const gr = gradeOf(pct);
+  if ("SABC".includes(gr) && ex.type !== "battle") {
+    const rar = gr === "S" ? "legendaire" : gr === "A" ? "rare" : "commune";
+    const c = { seed: hashStr(`${ex.type}|${ex.k ?? ""}|${Date.now()}|${ex.score}`), type: typeFromRange(), rar, from: ex.title };
+    zoo.tapes.push(c);
+    lines.push(`<span class="loot" style="color:${RARITY[rar].col}">Cassette ${rar === "legendaire" ? "légendaire" : rar} obtenue</span>`);
+  }
+  saveZoo();
+  return lines.length ? `<div class="mon-reward">${svg}<div>${lines.map(l => `<span>${l}</span>`).join("")}</div></div>` : "";
+}
+
+/* ── Ménagerie et arène dans la Carrière ── */
+function statBars(st) {
+  return Object.entries(STAT_LABELS).map(([k, lab]) => `<div class="mus-row"><span>${lab}</span><b><i style="width:${Math.min(100, st[k] * 2)}%;background:var(--cyan)"></i></b><em>${Math.round(st[k])}</em></div>`).join("");
+}
+function monsterSections() {
+  if (!zoo.list.length) {
+    const seeds = ["neon", "chrome", "basse"].map((t, i) => ({ t, seed: (zoo.starterSeed + i * 7919) >>> 0 }));
+    return `<section class="t-sec"><h3>Choisis ton premier monstre</h3><p class="sub">Trois cassettes, trois bestioles. Chacune grandira avec ta voix. Choisis bien, elle va t'entendre chanter faux.</p>
+      <div class="ex-grid">${seeds.map(s => `<button type="button" class="ex-card starter" data-go="starter" data-type="${s.t}" data-seed="${s.seed}">
+        ${cassetteSvg({ type: s.t, rar: "commune" }, 96)}<b>${TYPES[s.t].name}</b><span class="ex-d">${TYPES[s.t].desc}. Fort contre ${TYPES[TYPES[s.t].beats].name}.</span></button>`).join("")}</div></section>`;
+  }
+  const m = activeMon(), mood = moodOf(m), need = xpNeed(m.lvl), nextEvo = m.lvl < 5 ? 5 : m.lvl < 12 ? 12 : null;
+  return `<section class="t-sec"><h3>Ta ménagerie</h3><p class="sub">Ton monstre mange quand tu t'entraînes. Bien chanter le rend plus fort. Ne pas chanter le rend triste.</p>
+    <div class="zoo">
+      <div class="zoo-main">
+        <div class="mon-stage type-${m.type}">${monsterSvg(m, 180, { mood: mood === "sad" ? "sad" : "ok", cls: "idle" })}</div>
+        <div class="zoo-info">
+          <span class="k">${TYPES[m.type].name} · ${STAGES[m.stage]}${m.rar !== "commune" ? ` · ${m.rar === "legendaire" ? "légendaire" : "rare"}` : ""}</span>
+          <input class="mon-name" id="monName" value="${esc(m.name)}" maxlength="16" aria-label="Nom du monstre">
+          <span class="lv-line">Niveau ${m.lvl} · ${m.wins || 0} victoire${(m.wins || 0) > 1 ? "s" : ""}</span>
+          <span class="xpbar"><i style="width:${Math.round(m.xp / need * 100)}%"></i></span>
+          <span class="xp-cap">${m.xp}/${need} XP${nextEvo ? ` · évolue au niveau ${nextEvo}` : " · forme ultime"}</span>
+          <span class="mood ${mood}">${MOOD_TXT[mood]}</span>
+          <div class="music">${statBars(m.stats)}</div>
+        </div>
+      </div>
+      ${zoo.list.length > 1 ? `<div class="zoo-list">${zoo.list.map(x => `<button type="button" class="zoo-pick${x.id === m.id ? " on" : ""}" data-go="active" data-id="${x.id}" title="${esc(x.name)}">${monsterSvg(x, 64, { mood: moodOf(x) === "sad" ? "sad" : "ok" })}<span>${esc(x.name)}</span><small>niv. ${x.lvl}</small></button>`).join("")}</div>` : ""}
+      ${zoo.tapes.length ? `<div class="tapes"><span class="k">Cassettes à éclore</span><div class="tape-row">${zoo.tapes.map((c, i) => `<button type="button" class="tape-btn" data-go="hatch" data-i="${i}">${cassetteSvg(c, 74)}<span>Éclore</span></button>`).join("")}</div></div>` : `<p class="sub">Pas de cassette en stock. Note C ou mieux à un exercice pour en gagner une.</p>`}
+    </div></section>
+    <section class="t-sec"><h3>L'arène</h3><p class="sub">Duel musical. Ton tour : chante la figure, chaque note juste frappe. Son tour : répète sa figure pour parer, sinon tu encaisses. Type fort : dégâts ×1,4.</p>
+      <div class="ladder">${RIVALS.map((R, i) => {
+        const beaten = zoo.league > i, open = zoo.league >= i, foe = rivalMon(i);
+        return `<div class="rival${beaten ? " beaten" : ""}${open ? "" : " locked"}">${monsterSvg(foe, 74, { mood: "angry" })}
+          <div><b>${R.name}</b><span class="k">${TYPES[R.type].name} · niv. ${R.lvl} · ${R.notes} notes</span><i>${R.bio}</i></div>
+          <button type="button" class="pill${open && !beaten ? " primary" : ""}" data-go="battle" data-r="${i}" ${open ? "" : "disabled"}>${beaten ? "Revanche" : open ? "Combattre" : "Verrouillé"}</button></div>`;
+      }).join("")}</div></section>`;
+}
+function rivalMon(i) {
+  const R = RIVALS[i];
+  return { name: R.name, type: R.type, dna: dnaOf(R.seed, R.type), lvl: R.lvl, stage: stageOf(R.lvl), rar: i === RIVALS.length - 1 ? "legendaire" : "commune" };
+}
+
+/* ── Éclosion ── */
+function hatchShow(m, title) {
+  const hz = $("hatch");
+  hz.innerHTML = `<div class="h-inner"><div class="h-tape">${cassetteSvg({ type: m.type, rar: m.rar }, 160)}</div>
+    <div class="h-mon" hidden>${monsterSvg(m, 200, { cls: "born" })}</div>
+    <h3 hidden>${title}</h3><p hidden><b>${esc(m.name)}</b> · ${TYPES[m.type].name}${m.rar !== "commune" ? ` · ${m.rar === "legendaire" ? "légendaire" : "rare"}` : ""}</p>
+    <button type="button" class="main-btn wide" hidden>Trop stylé</button></div>`;
+  hz.hidden = false;
+  ac(); if (ctx) { const t = ctx.currentTime; for (let i = 0; i < 8; i++) blip(300 + i * 60, t + i * 0.13, 0.06, 0.04); }
+  setTimeout(() => {
+    hz.querySelector(".h-tape").hidden = true;
+    hz.querySelectorAll(".h-mon, h3, p, button").forEach(el => el.hidden = false);
+    flash("#FFFFFF", 0.5); shake(14); celebrate(m.rar === "legendaire" ? 160 : 80);
+    if (ctx) fanfare();
+  }, 1250);
+  hz.querySelector("button").onclick = () => { hz.hidden = true; renderTrain(); };
+}
+function hatchTape(i) {
+  const c = zoo.tapes.splice(i, 1)[0]; if (!c) return;
+  const m = birth(c.seed, c.type, c.rar, c.from);
+  hatchShow(m, "Nouveau monstre !");
+}
+
+/* ── L'arène : duel en figures chantées ── */
+function pickFigureN(nn) {
+  const ns = notes(), idx = ns.map((n, i) => n.midi != null ? i : -1).filter(i => i >= 0);
+  for (let tries = 0; tries < 60; tries++) {
+    const s = Math.floor(Math.random() * (idx.length - nn + 1));
+    const fig = idx.slice(s, s + nn).map(i => tgtOf(ns[i]));
+    if (new Set(fig).size >= 2) return fig;
+  }
+  return idx.slice(0, nn).map(i => tgtOf(ns[i]));
+}
+async function startBattle(ri) {
+  if (!(await needMic())) return;
+  const me = activeMon(); if (!me) return;
+  const R = RIVALS[ri], foe = rivalMon(ri);
+  const myMax = Math.round(60 + me.lvl * 7 + me.stats.souf * 0.8), foeMax = Math.round(45 + R.lvl * 11);
+  exBegin({ type: "battle", title: `Arène · ${R.name}`, ri, R, me, foe, myHp: myMax, myMax, foeHp: foeMax, foeMax, round: 0, dealt: 0, blocked: 0, taken: 0 });
+  state.hidePiece = true;
+  const ar = $("arena");
+  ar.innerHTML = `<div class="fighter me"><div class="hp"><b>${esc(me.name)} <small>niv. ${me.lvl}</small></b><i><s id="meHp"></s></i></div><div class="mon-slot" id="meMon">${monsterSvg(me, 120, { cls: "idle" })}</div></div>
+    <div class="vs">VS</div>
+    <div class="fighter foe"><div class="hp"><b>${R.name} <small>niv. ${R.lvl}</small></b><i><s id="foeHp"></s></i></div><div class="mon-slot" id="foeMon">${monsterSvg(foe, 120, { cls: "idle", mood: "angry" })}</div></div>`;
+  ar.hidden = false; updateHp();
+  fx.text(W / 2, H * 0.45, "Fight !", "yellow", 80); shake(14); flash("#FF2E88", 0.35);
+  if (ctx) blip(110, ctx.currentTime, 0.3, 0.12, "sawtooth");
+  setTimeout(nextTurn, 1400);
+}
+function updateHp() {
+  if (!ex || ex.type !== "battle") return;
+  $("meHp").style.width = Math.max(0, ex.myHp / ex.myMax * 100) + "%";
+  $("foeHp").style.width = Math.max(0, ex.foeHp / ex.foeMax * 100) + "%";
+}
+function hitAnim(id) { const el = $(id); if (!el) return; el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
+function shot(toFoe) {
+  const ar = $("arena"), s = document.createElement("span");
+  s.className = "shot " + (toFoe ? "to-foe" : "to-me"); s.textContent = pick(["♪", "♫", "♬"]);
+  ar.appendChild(s); setTimeout(() => s.remove(), 520);
+}
+function nextTurn() {
+  if (!ex || ex.type !== "battle") return;
+  if (ex.foeHp <= 0 || ex.myHp <= 0 || ex.round >= 8) return endBattle();
+  ex.round++; ex.atk = ex.round % 2 === 1;
+  ex.fig = pickFigureN(ex.R.notes); ex.j = 0; ex.run = []; ex.noteT = 0; ex.runStart = null;
+  ex.phase = ex.atk ? "Ton attaque · écoute" : `${ex.R.name} attaque · écoute`;
+  state.exBand = null; state.live = null;
+  const c = ac();
+  if (refBus) { const old = refBus; old.gain.setTargetAtTime(0, c.currentTime, 0.03); setTimeout(() => old.disconnect(), 600); }
+  refBus = c.createGain(); refBus.connect(OUT);
+  const step = ex.atk ? 0.6 : Math.max(0.4, 0.62 - ex.R.lvl * 0.012);
+  ex.fig.forEach((m, q) => {
+    const at = c.currentTime + 0.25 + q * step;
+    if (ex.atk) tone(m, at, step * 0.9, refBus); else choirNote(m, at, step * 0.9, refBus, 1.6);
+    setTimeout(() => { if (ex?.type === "battle") { state.exBand = m; fx.ripple(nowX(), yOf(m), ex.atk ? "cyan" : "high"); if (!ex.atk) hitAnim("foeMon"); } }, (at - c.currentTime) * 1000);
+  });
+  refUntil = c.currentTime + 0.25 + ex.fig.length * step + (state.headphones ? 0.3 : 1.2);
+  renderHud();
+}
+function battleTick(dt) {
+  if (!ex.phase) return;
+  if (ex.phase.endsWith("écoute")) {
+    if (ctx.currentTime >= refUntil) { ex.phase = ex.atk ? "Chante pour frapper !" : "Répète pour parer !"; ex.noteT = 0; state.exBand = ex.fig[0]; renderHud(); }
+    return;
+  }
+  if (!ex.phase.startsWith("Chante") && !ex.phase.startsWith("Répète")) return;
+  ex.noteT += dt;
+  const tgt = ex.fig[ex.j], m = smoothed(readMic());
+  setLive(m, tgt);
+  const c = m == null ? null : fold((m - tgt) * 100);
+  if (c != null && Math.abs(c) <= ex.R.tol) { if (!ex.run.length) ex.runStart = ex.noteT; ex.run.push(c); } else ex.run = [];
+  let resolved = false;
+  if (ex.run.length >= 7) {
+    resolved = true;
+    if (ex.atk) {
+      const me = ex.me, mult = TYPES[me.type].beats === ex.foe.type ? 1.4 : TYPES[ex.foe.type].beats === me.type ? 0.75 : 1;
+      const crit = ex.runStart < 650;
+      const dmg = Math.round((7 + me.stats.pui * 0.35 + me.lvl * 1.3) * mult * (crit ? 1.5 : 1));
+      ex.foeHp -= dmg; ex.dealt += dmg; shot(true);
+      setTimeout(() => hitAnim("foeMon"), 260);
+      fx.text(W * 0.78, H * 0.3, `−${dmg}${crit ? " critique" : ""}`, crit ? "yellow" : "cyan", crit ? 46 : 34);
+      shake(crit ? 12 : 6); if (crit) flash("#FFFFFF", 0.2);
+      addXp(6); ex.score += dmg * 10;
+    } else {
+      ex.blocked++; fx.text(W * 0.22, H * 0.3, pick(["Paré !", "Bloqué", "Nope"]), "ok", 36); shake(4);
+      addXp(5); ex.score += 150;
+    }
+  } else if (ex.noteT > 2400) {
+    resolved = true;
+    if (ex.atk) fx.text(W * 0.78, H * 0.3, pick(["Raté", "À côté", "Pfff"]), "muted", 32);
+    else {
+      const dmg = Math.round(6 + ex.R.lvl * 1.6);
+      ex.myHp -= dmg; ex.taken += dmg; shot(false);
+      setTimeout(() => hitAnim("meMon"), 260);
+      fx.text(W * 0.22, H * 0.3, `−${dmg}`, "high", 40); shake(13); flash("#FF0033", 0.32);
+    }
+  }
+  if (resolved) {
+    updateHp(); ex.j++; ex.run = []; ex.noteT = 0;
+    if (ex.foeHp <= 0 || ex.myHp <= 0 || ex.j >= ex.fig.length) {
+      ex.phase = "…"; state.exBand = null; state.live = null; renderHud();
+      setTimeout(nextTurn, 1100);
+    } else { state.exBand = ex.fig[ex.j]; renderHud(); }
+  }
+}
+function endBattle() {
+  $("arena").hidden = true; state.exBand = null;
+  const win = ex.foeHp <= 0 || (ex.myHp > 0 && ex.myHp / ex.myMax > ex.foeHp / ex.foeMax);
+  ex.win = win;
+  const pct = win ? 0.66 + 0.34 * Math.max(0, ex.myHp) / ex.myMax : 0.45 * (1 - Math.max(0, ex.foeHp) / ex.foeMax);
+  if (win) {
+    ex.me.wins = (ex.me.wins || 0) + 1;
+    const first = zoo.league <= ex.ri;
+    if (first) {
+      zoo.league = ex.ri + 1;
+      zoo.tapes.push({ seed: RIVALS[ex.ri].seed, type: ex.R.type, rar: ex.ri >= 4 ? "legendaire" : ex.ri >= 2 ? "rare" : "commune", from: ex.R.name });
+      ex.loot = `<span class="loot">Tu récupères la cassette de ${ex.R.name} !</span>`;
+      if (ex.ri === RIVALS.length - 1) award("reine");
+    }
+    award("arene");
+  }
+  saveZoo();
+  complete(pct, { stars: 0, fresh: 0, passed: win });
 }
 
 /* ══ Écran titre ══ */
