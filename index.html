@@ -146,6 +146,9 @@ h1 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 
 .pill[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: rgba(243, 200, 112, .1); }
 .filebtn { position: relative; overflow: hidden; }
 .filebtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.mix { display: flex; align-items: center; gap: 10px; height: 30px; }
+.mix input { width: 130px; accent-color: var(--gold); }
+.mix output { font-family: var(--f-mono); font-size: 12px; color: var(--muted); min-width: 64px; }
 .status { font-size: 12.5px; color: var(--muted); }
 
 /* Tiroir partition */
@@ -255,7 +258,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
-        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.55" aria-pressed="false">Douces</button><button type="button" data-others="1" aria-pressed="false">Fortes</button></div>
+        <div class="mix"><input type="range" class="othersRange" min="0" max="100" step="5" value="0" aria-label="Volume des autres voix"><output class="othersOut">muettes</output></div>
       </div>
     </div>
 
@@ -281,7 +284,7 @@ select { border-radius: 999px; border: 1px solid var(--line); background: #15182
         <div class="seg small soundSeg"><button type="button" data-sound="piano" aria-pressed="true">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Chœur</button></div>
       </div>
       <div class="field othersField"><span>Autres voix</span>
-        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.55" aria-pressed="false">Douces</button><button type="button" data-others="1" aria-pressed="false">Fortes</button></div>
+        <div class="mix"><input type="range" class="othersRange" min="0" max="100" step="5" value="0" aria-label="Volume des autres voix"><output class="othersOut">muettes</output></div>
       </div>
       <span class="pill filebtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
@@ -373,7 +376,38 @@ sib3:rais la3:0.5:ing sib3:their sol3:1:sound | sib3:o'er la3:0.5:hill sib3:and 
 sol3:1:while sol3:0.5:peo sol3:ple sol3:1:sing | sol3:songs sol3:0.5:of sol3:good sol3:cheer sol3:_ | sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here | ré3:3:Ding |
 mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding |
 do3:dong | fa3:ding | mib3:ding | ré3:12:dong |
-sib3:1 la3:0.5:_ sib3:_ sol3:4:_ |`;
+sib3:1 la3:0.5:_ sib3:_ sol3:4:_ |
+
+voix: Ténor
+-:24 | mib3:3:Ding | ré3:dong | do3:ding |
+sol2:dong | do3:1:One do3:0.5:seems do3:to do3:1:hear | ré3:words ré3:0.5:of ré3:good ré3:1:cheer | mib3:from mib3:0.5:ev' mib3:ry mib3:1:where |
+ré3:fill ré3:0.5:ing ré3:the ré3:1:air | ré3:3:O | mi3:how | fa3:1:hap mib3:_ ré3:py |
+sol3:0.5:are fa3:_ mib3:1:their ré3:tones | ré3:Gai mib3:0.5:ly mib3:they ré3:ring do3:_ | ré3:1:while ré3:0.5:peo ré3:ple ré3:1:sing | mib3:songs mib3:0.5:of mib3:good fa3:cheer mib3:_ |
+ré3:1:Christ ré3:0.5:mas ré3:is ré3:1:here | sib2:Ding la2:0.5:dong sib2:ding sol2:1:dong | sib2:that la2:0.5:is sib2:their sol2:1:song | sib2:with la2:0.5:joy sib2:ful sol2:1:ring |
+sib2:all la2:0.5:car sib2:ol sol2:1:ing | sol2:3:Ding | sol2:dong | sol2:ding |
+sol2:ding | sol2:9:dong | -:3 | -:12 |
+mib3:3:Ding | ré3:dong | do3:ding | sol2:dong |
+do3:1:One do3:0.5:seems do3:to do3:1:hear | ré3:words ré3:0.5:of ré3:good ré3:1:cheer | mib3:from mib3:0.5:ev' mib3:ry mib3:1:where | ré3:fill ré3:0.5:ing ré3:the ré3:1:air |
+ré3:3:O | mi3:how | fa3:1:hap mib3:_ ré3:py | sol3:0.5:are fa3:_ mib3:1:their ré3:tones |
+ré3:Gai mib3:0.5:ly mib3:they ré3:ring do3:_ | ré3:1:while ré3:0.5:peo ré3:ple ré3:1:sing | mib3:songs mib3:0.5:of mib3:good fa3:cheer mib3:_ | ré3:1:Christ ré3:0.5:mas ré3:is ré3:1:here |
+sib2:Ding la2:0.5:dong sib2:ding sol2:1:dong | sib2:that la2:0.5:is sib2:their sol2:1:song | sib2:with la2:0.5:joy sib2:ful sol2:1:ring | sib2:all la2:0.5:car sib2:ol sol2:1:ing |
+sol2:3:Ding | sol2:dong | sol2:ding | sol2:ding |
+sib2:1:On la2:0.5:on sib2:they sol2:1:send | sib2:on la2:0.5:with sib2:out sol2:1:end | sib2:their la2:0.5:joy sib2:ful sol2:1:tone | sib2:to la2:0.5:ev' sib2:ry sol2:1:home |
+-:6 |
+
+voix: Basse
+-:36 | mib2:1:One mib2:0.5:seems mib2:to mib2:1:hear | sol2:words sol2:0.5:of sol2:good sol2:1:cheer | do3:from do3:0.5:ev' do3:ry do3:1:where |
+sol2:fill sol2:0.5:ing sol2:the sol2:1:air | sol2:O sol2:0.5:how sol2:they sol2:1:pound | sol2:rais sol2:0.5:ing sol2:their sol2:1:sound | sol2:o'er sol2:0.5:hill sol2:and sol2:1:dale |
+sol2:tell sol2:0.5:ing sol2:their sol2:1:tale | sib2:Gai la2:0.5:ly sib2:they sol2:ring sol2:_ | sib2:1:while la2:0.5:peo sib2:ple sol2:1:sing | sib2:songs la2:0.5:of sib2:good sol2:cheer sol2:_ |
+sib2:1:Christ la2:0.5:mas sib2:is sol2:1:here | ré2:3:Ding | ré2:dong | ré2:ding |
+ré2:2:dong mi2:1:_ | fa2:3:Ding | mib2:dong | ré2:ding |
+do2:ding | sol1:9:dong | -:3 | -:24 |
+mib2:1:One mib2:0.5:seems mib2:to mib2:1:hear | sol2:words sol2:0.5:of sol2:good sol2:1:cheer | do3:from do3:0.5:ev' do3:ry do3:1:where | sol2:fill sol2:0.5:ing sol2:the sol2:1:air |
+sol2:O sol2:0.5:how sol2:they sol2:1:pound | sol2:rais sol2:0.5:ing sol2:their sol2:1:sound | sol2:o'er sol2:0.5:hill sol2:and sol2:1:dale | sol2:tell sol2:0.5:ing sol2:their sol2:1:tale |
+sib2:Gai la2:0.5:ly sib2:they sol2:ring sol2:_ | sib2:1:while la2:0.5:peo sib2:ple sol2:1:sing | sib2:songs la2:0.5:of sib2:good sol2:cheer sol2:_ | sib2:1:Christ la2:0.5:mas sib2:is sol2:1:here |
+ré2:3:Ding | ré2:dong | ré2:ding | ré2:2:dong mi2:1:_ |
+fa2:3:Ding | mib2:dong | ré2:ding | do2:ding |
+sol1:12:dong | -:3 | sol1 |`;
 
 /* ════════ Partition ════════ */
 
@@ -464,7 +498,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch {} },
 };
 const state = {
-  text: store.get("pupitre.score.v4") || EXAMPLE,
+  text: store.get("pupitre.score.v5") || EXAMPLE,
   score: null, voice: 0, others: 0, bpm: 140,
   transpose: parseInt(store.get("pupitre.transpose") || "0", 10) || 0,
   loop: false, mode: "listen", playing: null,
@@ -676,7 +710,7 @@ async function startPlayback({ from, guide = 1, countIn = false, mode = "listen"
     for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6) queue.push({ beat: n.start, midi: n.midi + state.transpose, beats: n.beats, vel: accent(n) * 0.9, other: k });
   });
   queue.sort((a, b) => a.beat - b.beat);
-  state.playing = { t0, startBeat, endBeat: state.score.total, bus, gBus, oBus, pans, queue, qi: 0, mode, from, countIn, lastIdx: -1 };
+  state.playing = { t0, startBeat, endBeat: state.score.total, bus, gBus, oBus, pans, queue, hasOthers: state.others > 0, qi: 0, mode, from, countIn, lastIdx: -1 };
   pump(state.playing);
   updateButtons();
 }
@@ -1088,11 +1122,19 @@ function setTranspose(v) {
   layout(); renderMeta(); if (state.mode === "step") renderStep();
 }
 document.querySelectorAll("[data-tr]").forEach(b => b.onclick = e => { e.preventDefault(); setTranspose(state.transpose + +b.dataset.tr); });
-document.querySelectorAll(".othersSeg button").forEach(b => b.onclick = () => {
-  state.others = +b.dataset.others;
-  document.querySelectorAll(".othersSeg button").forEach(x => x.setAttribute("aria-pressed", +x.dataset.others === state.others));
-  if (state.playing?.mode === "listen") { const bt = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(bt), mode: "listen" }); }
-});
+/* Équilibre : sa voix reste à plein volume, les autres montent progressivement (courbe douce) */
+function setOthers(v, save = true) {
+  const p = state.playing, was = state.othersPct || 0;
+  state.othersPct = v; state.others = Math.pow(v / 100, 2);
+  if (save) store.set("pupitre.others", String(v));
+  document.querySelectorAll(".othersRange").forEach(x => x.value = v);
+  document.querySelectorAll(".othersOut").forEach(o => o.textContent = v === 0 ? "muettes" : v + " %");
+  if (!p) return;
+  if (p.hasOthers) p.oBus.gain.setTargetAtTime(state.others, ctx.currentTime, 0.06);
+  else if (v > 0 && was === 0 && p.mode === "listen") { const bt = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(bt), mode: "listen" }); }
+}
+document.querySelectorAll(".othersRange").forEach(r => r.oninput = () => setOthers(+r.value));
+setOthers(parseInt(store.get("pupitre.others") || "0", 10) || 0, false);
 
 
 document.querySelectorAll(".soundSeg button").forEach(b => b.onclick = () => {
@@ -1381,7 +1423,7 @@ function applyText(text) {
   stopPlayback();
   const r = loadScore(text), err = $("parseErr");
   if (!r.ok) { err.hidden = false; err.textContent = "Aucune note reconnue. Vérifiez l'écriture, par exemple sol3:1:joie."; return false; }
-  store.set("pupitre.score.v4", text);
+  store.set("pupitre.score.v5", text);
   if (r.errors.length) { err.hidden = false; err.textContent = `Ignoré, non reconnu : ${r.errors.slice(0, 12).join("  ")}${r.errors.length > 12 ? " …" : ""}`; } else err.hidden = true;
   refreshAll();
   return true;
