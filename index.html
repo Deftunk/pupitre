@@ -776,6 +776,79 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 .acc-pick span, .acc-pick small { color: var(--muted); font-size: 13px; }
 .acc-pick .pill { justify-self: start; margin-top: 6px; }
 #wHud .dot { width: 7px; height: 7px; margin-right: 5px; }
+
+/* ══ Mode histoire : la carte ══ */
+.world.in-story .w-hud, .world.in-story .w-prompt { display: none !important; }
+.world.in-story canvas { pointer-events: none; }
+.story-map { position: fixed; inset: 0; z-index: 27; overflow-y: auto; padding: max(18px, env(safe-area-inset-top)) clamp(14px, 4vw, 48px) 60px; background: linear-gradient(180deg, rgba(7, 0, 15, .88), rgba(7, 0, 15, .7) 40%, rgba(7, 0, 15, .92)); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.story-map > * { max-width: 860px; margin-left: auto; margin-right: auto; }
+.st-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.st-top .k { font-family: var(--f-mono); color: var(--cyan); font-size: 18px; letter-spacing: .25em; text-transform: uppercase; }
+.st-top h2 { margin: 2px 0 8px; font-family: var(--f-display); font-weight: 400; font-size: clamp(28px, 5vw, 46px); text-transform: uppercase; color: #fff; line-height: 1; transform: skewX(-8deg); text-shadow: 3px 3px 0 var(--gold), -2px -1px 0 rgba(0, 240, 255, .7); }
+.st-top small { color: var(--muted); font-size: 13px; }
+.st-prog { display: block; width: min(340px, 70vw); height: 8px; background: rgba(255, 255, 255, .08); margin-bottom: 4px; }
+.st-prog i { display: block; height: 100%; background: linear-gradient(90deg, #FF2E88, #FFE45E); box-shadow: 0 0 12px #FF2E88; }
+.st-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-next { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; width: 100%; margin: 22px auto 10px; padding: 14px 22px 14px 14px; border: 0; text-align: left; color: #fff; background: linear-gradient(100deg, rgba(255, 46, 136, .28), rgba(12, 0, 28, .9) 60%); box-shadow: inset 0 0 0 2px #FF2E88, 6px 6px 0 rgba(255, 46, 136, .5); transform: skewX(-4deg); animation: stPulse 1.6s ease-in-out infinite alternate; }
+.st-next.boss { background: linear-gradient(100deg, rgba(255, 59, 59, .32), rgba(12, 0, 28, .9) 60%); box-shadow: inset 0 0 0 2px #FF3B3B, 6px 6px 0 rgba(255, 59, 59, .5); }
+.st-next > * { transform: skewX(4deg); }
+.st-next small { font-family: var(--f-mono); font-size: 17px; color: var(--yellow); letter-spacing: .15em; text-transform: uppercase; }
+.st-next b { display: block; font-family: var(--f-display); font-weight: 400; font-size: clamp(24px, 4vw, 38px); text-transform: uppercase; line-height: 1.05; }
+.st-next em { font-style: normal; color: var(--muted); font-size: 14px; }
+.st-go { font-size: 40px; color: var(--yellow); text-shadow: 0 0 14px var(--yellow); }
+@keyframes stPulse { to { box-shadow: inset 0 0 0 2px #FF2E88, 6px 6px 0 rgba(255, 46, 136, .5), 0 0 40px rgba(255, 46, 136, .45); } }
+.st-path { display: grid; gap: 8px; margin-top: 12px; }
+.st-act { margin: 20px 0 4px; font-family: var(--f-mono); font-weight: 400; color: var(--cyan); font-size: 20px; letter-spacing: .2em; text-transform: uppercase; }
+.st-node { display: flex; align-items: center; gap: 12px; width: min(100%, 520px); margin-left: calc(var(--x) * min(12%, 90px)); padding: 8px 14px 8px 8px; border: 0; text-align: left; color: #fff; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 46, 136, .3); transform: skewX(-6deg); }
+.st-node > * { transform: skewX(6deg); }
+.st-node i { display: grid; place-items: center; width: 40px; height: 40px; flex: none; font-style: normal; font-size: 18px; background: rgba(255, 46, 136, .15); color: #FF2E88; }
+.st-node b { display: block; font-family: var(--f-display); font-weight: 400; font-size: 19px; text-transform: uppercase; line-height: 1.1; }
+.st-node small { font-family: var(--f-mono); color: var(--muted); font-size: 14px; letter-spacing: .1em; }
+.st-node.done i { background: rgba(0, 245, 212, .16); color: #00F5D4; }
+.st-node.done { box-shadow: inset 0 0 0 1px rgba(0, 245, 212, .35); }
+.st-node.now { box-shadow: inset 0 0 0 2px #FFE45E, 0 0 24px rgba(255, 228, 94, .35); }
+.st-node.now i { background: #FFE45E; color: #12001F; }
+.st-node.boss i { color: #FF3B3B; background: rgba(255, 59, 59, .16); }
+.st-node.boss.done i { color: #00F5D4; background: rgba(0, 245, 212, .16); }
+.st-node.locked { opacity: .38; }
+.st-node:not(.locked):hover { background: rgba(255, 46, 136, .12); }
+@media (max-width: 640px) { .st-next { grid-template-columns: auto 1fr; padding: 10px 12px 10px 8px; gap: 10px; } .st-next .st-go { display: none; } .st-next .st-art svg { width: 80px; height: 80px; } .st-node { margin-left: calc(var(--x) * 6%); } }
+/* ══ Mode histoire : le roman visuel ══ */
+.vn { position: fixed; inset: 0; z-index: 64; display: grid; grid-template-rows: 1fr auto; background: linear-gradient(180deg, rgba(7, 0, 15, .1), rgba(7, 0, 15, .55) 55%, rgba(7, 0, 15, .9)); cursor: pointer; user-select: none; -webkit-user-select: none; }
+.vn.boss { background: linear-gradient(180deg, rgba(60, 0, 10, .25), rgba(30, 0, 8, .6) 55%, rgba(10, 0, 4, .92)); }
+.vn-stage { position: relative; min-height: 0; }
+.vn-l, .vn-r { position: absolute; bottom: -10px; transition: opacity .25s, transform .25s, filter .25s; filter: drop-shadow(0 0 18px rgba(0, 240, 255, .35)); }
+.vn-l { left: max(2vw, 10px); } .vn-r { right: max(3vw, 10px); filter: drop-shadow(0 0 18px rgba(255, 46, 136, .4)); }
+.vn-l.dim, .vn-r.dim { opacity: .45; transform: scale(.92); filter: grayscale(.4) brightness(.7); }
+.vn-l.speaking, .vn-r.speaking { transform: translateY(-6px); }
+.vn-r.pop { animation: vnPop .35s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes vnPop { from { transform: translateY(30px) scale(.8); } }
+.vn-l svg, .vn-r svg { width: min(36vw, 260px); height: auto; display: block; }
+.vn-r svg { transform: scale(var(--ms, 1)); transform-origin: 50% 88%; }
+.vn-box { position: relative; margin: 0 auto max(16px, env(safe-area-inset-bottom)); width: min(920px, calc(100% - 24px)); min-height: 130px; padding: 26px 26px 20px; background: rgba(12, 0, 28, .93); box-shadow: inset 0 0 0 2px var(--sc, #00F0FF), 6px 6px 0 rgba(255, 46, 136, .55); }
+.vn-box.narr { box-shadow: inset 0 0 0 1px rgba(195, 155, 211, .5); text-align: center; }
+.vn-box.narr p { font-style: italic; color: #E8D8F0; }
+.vn-name { position: absolute; top: -18px; left: 18px; padding: 3px 14px; font-family: var(--f-display); font-size: 22px; text-transform: uppercase; color: #12001F; background: var(--sc, #00F0FF); transform: skewX(-10deg); }
+.vn-box p { margin: 0; font-size: clamp(16px, 2.2vw, 20px); line-height: 1.5; color: #fff; min-height: 2.6em; }
+.vn-more { position: absolute; right: 18px; bottom: 10px; color: var(--sc, #00F0FF); animation: vnBlink .8s steps(2) infinite; }
+.vn-box.idle .vn-more { display: none; }
+@keyframes vnBlink { 50% { opacity: 0; } }
+.vn-choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.vn-choices:empty { display: none; }
+.vn-opt { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 0; background: rgba(255, 255, 255, .06); color: #fff; font-family: var(--f-display); font-size: 18px; text-transform: uppercase; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgba(0, 240, 255, .55); transform: skewX(-8deg); }
+.vn-opt:hover { background: rgba(0, 240, 255, .16); }
+.vn-opt.primary { background: #FF2E88; box-shadow: 4px 4px 0 #00F0FF; }
+.vn-opt.starter { flex-direction: column; flex: 1; min-width: 150px; text-transform: none; font-family: inherit; font-size: 15px; transform: none; padding: 12px; }
+.vn-opt.starter span { font-family: var(--f-display); font-size: 20px; text-transform: uppercase; }
+.vn-opt.starter small { color: var(--muted); font-size: 12px; }
+.vn-skip { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(0, 0, 0, .45); color: #fff; font-family: var(--f-mono); font-size: 18px; letter-spacing: .1em; padding: 3px 12px; }
+.vn-chap { position: absolute; left: 0; right: 0; top: 30%; display: grid; justify-items: center; pointer-events: none; opacity: 0; }
+.vn-chap.go { animation: vnChap 1.6s ease-out forwards; }
+.vn-chap small { font-family: var(--f-mono); color: var(--cyan); font-size: 22px; letter-spacing: .3em; text-transform: uppercase; }
+.vn-chap b { font-family: var(--f-display); font-weight: 400; font-size: clamp(38px, 8vw, 92px); text-transform: uppercase; color: #fff; transform: skewX(-10deg); text-shadow: 4px 4px 0 #FF2E88, -3px -2px 0 rgba(0, 240, 255, .8); text-align: center; line-height: 1; padding: 0 16px; }
+.vn.boss .vn-chap b { text-shadow: 4px 4px 0 #FF3B3B, -3px -2px 0 rgba(255, 228, 94, .8); }
+@keyframes vnChap { 0% { opacity: 0; transform: scale(1.6); } 15% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+@media (max-width: 640px) { .vn-l svg, .vn-r svg { width: 44vw; } .vn-box { padding: 22px 16px 16px; } .vn-l.dim, .vn-r.dim { opacity: .25; } }
 </style>
 
 <div class="app">
@@ -943,7 +1016,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <button type="button" class="t-acc" id="titleAcc" hidden></button>
     <span class="t-sub" id="titleSub">Carol of the Bells</span>
     <nav class="t-menu">
-      <button type="button" data-start="train" style="--d:0s">Jouer<small>Synthville t'attend, ton monstre aussi</small></button>
+      <button type="button" data-start="train" style="--d:0s">Jouer<small>le mode histoire, chapitre par chapitre</small></button>
       <button type="button" data-start="intro" style="--d:.3s">L'histoire<small>revoir la cinématique d'ouverture</small></button>
     </nav>
     <span class="t-foot">CASQUE RECOMMANDÉ · LES FAUSSES NOTES SERONT PUNIES</span>
@@ -962,6 +1035,13 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
   <div class="w-hud" id="wHud"></div>
   <button type="button" class="w-prompt" id="wPrompt" hidden></button>
   <div class="w-crew" id="wCrew" hidden></div>
+</div>
+<div class="story-map" id="storyMap" hidden></div>
+<div class="vn" id="vn" hidden>
+  <div class="vn-stage"><div class="vn-l" id="vnL"></div><div class="vn-r" id="vnR"></div></div>
+  <div class="vn-box" id="vnBox"><span class="vn-name" id="vnName"></span><p id="vnText"></p><span class="vn-more">▼</span><div class="vn-choices" id="vnChoices"></div></div>
+  <button type="button" class="vn-skip" id="vnSkip">Passer ▸▸</button>
+  <div class="vn-chap" id="vnChap"></div>
 </div>
 <div class="cine" id="cine" hidden><canvas id="ccv"></canvas><button type="button" class="cine-skip" id="cineSkip">Passer ▸▸</button></div>
 <div class="hatch" id="hatch" hidden></div>
@@ -2633,6 +2713,7 @@ $("train").addEventListener("change", e => {
 let ex = null;
 const exHud = $("exHud");
 function exBegin(o) {
+  if (storyRun) { o.story = storyRun; o.title = storyRun.title; storyRun = null; }
   ex = Object.assign({ xp: 0, score: 0, maxCombo: 0, combo: 0, okN: 0, rated: 0, newBadges: [], lvl0: levelOf(prof.xp), low: 0, high: 0 }, o);
   $("train").hidden = true; $("exEnd").hidden = true; exHud.hidden = false;
   state.results = []; state.trace = []; state.live = null;
@@ -2640,7 +2721,7 @@ function exBegin(o) {
   renderHud();
 }
 function exAbort() {
-  stopPlayback();
+  stopPlayback(); storyRun = null;
   ex = null; state.hidePiece = false; state.exBand = null; state.focusIdx = null; state.live = null; state.results = null; state.trace = [];
   exHud.hidden = true; $("exEnd").hidden = true; $("arena").hidden = true;
   if (state.mode === "train") { $("train").hidden = false; renderTrain(); }
@@ -2904,6 +2985,7 @@ function complete(pct, info) {
   info.tokens = tokensFor(pct) + (prof.today.n === 1 ? 2 : 0);
   prof.tokens = (prof.tokens || 0) + info.tokens;
   saveProf(); saveProg();
+  ex.storyPassed = !!info.passed;
   info.mon = monsterReward(pct) + (ex.loot ? `<div class="mon-reward">${ex.loot}</div>` : "");
   showEnd(pct, info, goalHit);
 }
@@ -2976,7 +3058,11 @@ function showEnd(pct, info, goalHit) {
       ${ex.music ? musicBlock(ex.music) : ""}
       ${!ex.music && ex.musicTip ? `<p class="tip">${ex.musicTip}</p>` : ""}
       ${tip ? `<p class="tip">${tip}</p>` : ""}
-      <div class="row center">
+      ${ex.story ? `<div class="row center">
+        ${ex.storyPassed ? `<button type="button" class="pill primary" data-end="story">Suite de l'histoire ▸</button><button type="button" class="pill" data-end="again">Rejouer</button>`
+          : `<button type="button" class="pill primary" data-end="again">Réessayer</button><button type="button" class="pill" data-end="story">Retour à l'histoire</button>`}
+      </div>` : ""}
+      <div class="row center"${ex.story ? " hidden" : ""}>
         <button type="button" class="pill" data-end="again">Rejouer</button>
         ${canNext ? `<button type="button" class="pill primary" data-end="next">Niveau ${ex.L + 1}</button>` : ""}
         ${nextPhrase ? `<button type="button" class="pill primary" data-end="nextph">Phrase ${ex.k + 2}</button>` : ""}
@@ -3001,17 +3087,22 @@ $("exEnd").addEventListener("click", e => {
   const b = e.target.closest("[data-end]"); if (!b || !ex) return;
   const done = ex, act = b.dataset.end;
   exAbort();
+  if (done.story) {
+    if (act === "story") { storyResult(done.story, done.storyPassed); return; }
+    if (act === "back") { openStory(); return; }
+    storyRun = done.story;
+  }
   if (act === "back") return;
   $("train").hidden = true;
   if (act === "again") {
     if (done.type === "phrase" && done.musical) startMelody(done.k); else if (done.type === "phrase") startPhrase(done.k, done.L);
     else if (done.type === "full") startFull(); else if (done.type === "hold") startHold(); else if (done.type === "drill") startDrill();
-    else if (done.type === "attack") startAttack(); else if (done.type === "battle") startBattle(done.ri); else startEcho();
+    else if (done.type === "attack") startAttack(); else if (done.type === "battle") startBattle(done.ri, !!done.story); else startEcho();
   }
   else if (act === "next") startPhrase(done.k, done.L + 1);
   else if (act === "nextph") startPhrase(done.k + 1, 1);
 });
-$("trainBack").onclick = () => exAbort();
+$("trainBack").onclick = () => { const st = ex?.story; exAbort(); if (st) openStory(); };
 
 /* ════════ Coach : musicalité de chaque note et mémoire des passages difficiles ════════ */
 
@@ -3522,11 +3613,11 @@ function pickFigureN(nn) {
   }
   return idx.slice(0, nn).map(i => tgtOf(ns[i]));
 }
-async function startBattle(ri) {
+async function startBattle(ri, free = false) {
   if (!(await needMic())) return;
   const me = activeMon(); if (!me) return;
-  if (bellyOf(me) < 15) { renderTrain(); return; }
-  feedBelly(me, -15); saveZoo();
+  if (!free && bellyOf(me) < 15) { renderTrain(); return; }
+  if (!free) { feedBelly(me, -15); saveZoo(); }
   const R = RIVALS[ri], foe = rivalMon(ri);
   const myMax = Math.round(60 + me.lvl * 7 + me.stats.souf * 0.8), foeMax = Math.round(45 + R.lvl * 11);
   exBegin({ type: "battle", title: `Arène · ${R.name}`, ri, R, me, foe, myHp: myMax, myMax, foeHp: foeMax, foeMax, round: 0, dealt: 0, blocked: 0, taken: 0 });
@@ -4454,6 +4545,7 @@ function worldHud() {
   loadProg(); buildPhrases();
   const belly = Math.round(bellyOf(m)), need = xpNeed(m.lvl);
   missionNow = recommendation();
+  const storyL = storyChapters(), storyNext = nextChapter(storyL), storyIdx = storyNext ? chapterIndex(storyL, storyNext.id) : 0;
   const mp = W_.places.find(p => p.id === MISSION_PLACE[missionNow.kind]);
   $("wHud").innerHTML = `<div class="w-card">
       <span class="w-face">${monsterSvg(m, 64, { mood: moodOf(m) === "sad" ? "sad" : "ok" })}</span>
@@ -4463,9 +4555,12 @@ function worldHud() {
     <div class="w-right"><span class="w-tok">${prof.tokens ?? 0}<small>jetons</small></span>
       <button type="button" class="w-btn" data-w="sheet">${esc(state.score.parts[state.voice]?.name || "Voix")}</button>
       <button type="button" class="w-btn" data-w="account">${cloud.user ? '<i class="dot on"></i>' : cloudReady() ? '<i class="dot"></i>' : ""}${esc(prof.player?.name || "Compte")}</button>
+      <button type="button" class="w-btn" data-w="storymap">Histoire</button>
       <button type="button" class="w-btn" data-w="title">Menu</button></div>
-    <div class="w-mission"><span class="k">Mission</span><b>${esc(missionNow.label)}</b><small>${esc(missionNow.why)}${mp ? ` · ${mp.name}` : ""}</small>
-      <button type="button" class="main-btn wide" data-w="mission">${ICON.play}Go</button></div>`;
+    ${storyNext ? `<div class="w-mission story"><span class="k">Histoire · chapitre ${storyIdx + 1}</span><b>${esc(storyNext.title)}</b><small>Doc Vinyle t'attend. La suite de l'histoire est par ici.</small>
+      <button type="button" class="main-btn wide" data-w="story">${ICON.play}Go</button></div>`
+    : `<div class="w-mission"><span class="k">Mission</span><b>${esc(missionNow.label)}</b><small>${esc(missionNow.why)}${mp ? ` · ${mp.name}` : ""}</small>
+      <button type="button" class="main-btn wide" data-w="mission">${ICON.play}Go</button></div>`}`;
 }
 $("wHud").addEventListener("click", e => {
   const b = e.target.closest("[data-w]"); if (!b) return;
@@ -4473,6 +4568,8 @@ $("wHud").addEventListener("click", e => {
   if (w === "sheet") openSheet();
   else if (w === "account") openAccount();
   else if (w === "title") openTitle();
+  else if (w === "storymap") openStory();
+  else if (w === "story") { const nx = nextChapter(); if (nx) playChapter(nx); else openStory(); }
   else if (w === "mission" && missionNow) {
     const mp = W_.places.find(p => p.id === MISSION_PLACE[missionNow.kind]);
     closeWorld(); if (mp) { state.lairView = mp.id; placeBar(mp); }
@@ -4493,7 +4590,7 @@ function swapTo(cr) {
 
 /* Commandes : flèches ou Q/D pour marcher, Entrée ou ↑ pour entrer ; au doigt, on touche où aller */
 document.addEventListener("keydown", e => {
-  if (!W_.open || !$("accountBack").hidden || !$("sheetBack").hidden || !$("hatch").hidden || !$("wCrew").hidden || cine.on) return;
+  if (!W_.open || !$("accountBack").hidden || !$("sheetBack").hidden || !$("hatch").hidden || !$("wCrew").hidden || cine.on || vn.on || $("world").classList.contains("in-story")) return;
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
   const k = e.key.toLowerCase();
   if (["arrowleft", "arrowright", "q", "a", "d"].includes(k)) { W_.keys[k] = true; e.preventDefault(); if (W_.me) W_.me.auto = null, W_.me.tx = null; }
@@ -4883,7 +4980,355 @@ function cineFrame(now) {
 }
 window.addEventListener("resize", () => { if (cine.on) cineSize(); });
 
-$("toWorld").onclick = goWorld;
+/* ════════ Le mode histoire : trois actes, un mentor, six Monstres Muets, et chaque exercice amené par le récit ════════ */
+
+/* ── Doc Vinyle, ancien ingé son du Néon Club ── */
+function docSvg(mood = "talk", size = 260) {
+  const mouth = mood === "smile" ? `<path d="M84 141 q16 14 32 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`
+    : mood === "worried" ? `<path d="M86 146 q14 -9 28 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`
+    : mood === "shout" ? `<ellipse cx="100" cy="143" rx="12" ry="10" fill="#12001F" stroke="#fff" stroke-width="3"/>`
+    : `<ellipse cx="100" cy="143" rx="10" ry="5" fill="#12001F" stroke="#fff" stroke-width="3"/>`;
+  return `<svg class="doc" width="${size}" height="${size * 1.1}" viewBox="0 0 200 220" aria-hidden="true">
+    <defs><linearGradient id="docSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A3E2A"/><stop offset="1" stop-color="#4A2418"/></linearGradient>
+      <linearGradient id="docJacket" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A0F5C"/><stop offset="1" stop-color="#12001F"/></linearGradient></defs>
+    <path d="M30 220 q4 -50 46 -60 l48 0 q42 10 46 60 Z" fill="url(#docJacket)" stroke="#00F0FF" stroke-width="3"/>
+    <path d="M76 160 l24 30 l24 -30" fill="none" stroke="#FF2E88" stroke-width="3"/>
+    <circle cx="140" cy="196" r="10" fill="#12001F" stroke="#FFE45E" stroke-width="2.5"/><circle cx="140" cy="196" r="3" fill="#FFE45E"/>
+    <rect x="88" y="148" width="24" height="18" fill="#4A2418"/>
+    <path d="M58 168 q42 26 84 0" fill="none" stroke="#FFE45E" stroke-width="5"/>
+    <rect x="48" y="156" width="18" height="24" rx="6" fill="#FFE45E"/><rect x="134" y="156" width="18" height="24" rx="6" fill="#FFE45E"/>
+    <ellipse cx="100" cy="112" rx="40" ry="46" fill="url(#docSkin)" stroke="#FF2E88" stroke-width="3"/>
+    <path d="M58 98 q-6 -52 44 -60 q48 -6 56 36 q4 22 -16 22 q-10 -26 -44 -24 q-24 2 -32 26 Z" fill="#1A0630" stroke="#FF2E88" stroke-width="3"/>
+    <path d="M70 66 q30 -22 70 -6" fill="none" stroke="#C04BFF" stroke-width="3" opacity=".8"/>
+    <rect x="66" y="100" width="30" height="18" rx="6" fill="#00F0FF"/><rect x="104" y="100" width="30" height="18" rx="6" fill="#00F0FF"/>
+    <path d="M96 106 h8" stroke="#00F0FF" stroke-width="4"/><path d="M70 104 l8 0" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M108 104 l8 0" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    ${mood === "worried" ? `<path d="M66 94 l26 4 M134 94 l-26 4" stroke="#fff" stroke-width="3" stroke-linecap="round"/>` : ""}
+    <path d="M80 132 q20 -10 40 0 q-6 6 -20 4 q-14 2 -20 -4 Z" fill="#F2F2F2"/>
+    ${mouth}</svg>`;
+}
+
+/* ── La progression de l'histoire : des identifiants stables, quelle que soit la voix chantée ── */
+const story = Object.assign({ done: [], fails: {}, finished: false }, readJSON("drm.story"));
+const saveStory = () => store.set("drm.story", JSON.stringify(story));
+let storyRun = null;
+
+const ACTS = ["Acte I · Synthville se tait", "Acte II · Les salles du Studio 86", "Acte III · La Reine du Fausset"];
+const PH_PRE = [
+  ["Salle {n}. Mesures {a} à {b}. Tu écoutes une fois au ralenti, ensuite c'est à toi.", "Repère où la mélodie monte et où elle redescend. C'est là que les Muets ont caché leurs pièges."],
+  ["Salle {n}. Celle-là, les Muets l'ont bien abîmée. Écoute avant de foncer.", "Respire avant la phrase, pas au milieu. Le souffle, c'est le carburant de {m}."],
+  ["Salle {n}, mesures {a} à {b}. Même recette : on écoute, on chante.", "Si tu rates, c'est pas grave. Si tu rates en criant, c'est grave."],
+  ["Salle {n}. On approche du cœur du morceau.", "Garde les notes droites. Pas de toboggan, pas de sirène."],
+];
+const PH_WIN = ["Phrase {n} libérée. Encore un néon de rallumé dans le Studio.", "Ça sonne. Pas parfait, mais ça sonne. La ville récupère un bout de sa chanson.", "Libérée ! {m} a les yeux qui brillent. Ou c'est la lumière. Bref, bravo.", "Une phrase de plus. Les Muets doivent commencer à transpirer."];
+const PH_FAIL = ["Il faut 70 % de notes justes pour libérer la salle. Réécoute bien le début.", "Presque. Regarde où ta ligne passe en rouge : c'est là qu'il faut viser.", "Les Muets tiennent encore la salle. On y retourne, plus calme."];
+const PH_ME = ["Ding ! Dong !", "Encore une !", "J'ai faim de cette phrase.", "Grrr, je la sens bien celle-là."];
+
+function chPhrase(k) {
+  const ph = phrases[k], v = k % PH_PRE.length;
+  const snippet = (ph.words || "").split(" ").slice(0, 3).join(" ");
+  const fill = s => s.replace("{n}", k + 1).replace("{a}", ph.bars[0]).replace("{b}", ph.bars[1]);
+  return { id: "ph" + k, act: k === 0 ? 0 : 1, place: "train", kind: "phrase", k, title: `Salle ${k + 1}${snippet ? ` · « ${snippet} »` : ""}`,
+    pre: [["doc", fill(PH_PRE[v][0])], ["me", PH_ME[k % PH_ME.length], "joy"], ["doc", fill(PH_PRE[v][1])]],
+    win: [["doc", fill(PH_WIN[k % PH_WIN.length]), "smile"]], fail: [["doc", fill(PH_FAIL[k % PH_FAIL.length]), "worried"]] };
+}
+function chBoss(r, pre, win, fail, extra = {}) {
+  return Object.assign({ id: "boss" + r, act: r === 5 ? 2 : r === 0 ? 0 : 1, place: "fight", kind: "battle", r, title: RIVALS[r].name, boss: true, pre, win, fail }, extra);
+}
+function storyChapters() {
+  buildPhrases();
+  const P = phrases.length, L = [];
+  // Acte I
+  L.push({ id: "reveil", act: 0, place: "home", kind: "starter", title: "Le réveil",
+    pre: [["narr", "Synthville, 1986. Depuis que les Monstres Muets ont volé les notes justes, toute la ville chante faux."],
+      ["doc", "Hé, toi. Oui, toi, avec ta cassette encore fumante. Moi c'est Doc Vinyle, ancien ingé son du Néon Club."],
+      ["doc", "Ce qui vient d'éclore dans ta cassette, c'est un monstre musical. Il ne mange qu'une chose : les notes justes."],
+      ["doc", "Ta voix, en gros. Tu chantes faux, il dépérit. Tu chantes juste, il grandit. Aucune pression."],
+      { choice: [["Je chante comme une casserole.", [["doc", "Parfait, les casseroles c'est mon rayon. On va te récurer.", "smile"]]],
+        ["C'est parti, je suis prêt·e.", [["doc", "Tout le monde dit ça. Puis arrive le premier contre-ut.", "smile"]]]] }],
+    win: [["me", "…", "joy"], ["doc", "Il te regarde comme si tu étais sa mère. Félicitations, tu es responsable d'un monstre.", "smile"]] });
+  L.push({ id: "repas", act: 0, place: "feed", kind: "hold", title: "Premier repas",
+    pre: [["me", "Grrrooouuu…", "sad"], ["doc", "Il a faim. Un monstre, ça se nourrit de notes tenues : une note, bien droite, longtemps."],
+      ["doc", "Tiens chaque note jusqu'au bout de la jauge. Respire par le ventre, pas par les épaules."],
+      ["doc", "Et mets un casque si tu peux. Sinon le micro t'entend, plus la musique, et {m} mange de la bouillie."]],
+    win: [["me", "Miam.", "joy"], ["doc", "Assiette vide. Je pleure un peu, mais c'est l'émotion.", "smile"]],
+    fail: [["me", "Encore faim…", "sad"], ["doc", "Trois miettes. Tiens la note plus longtemps, sans bouger : une ligne droite, pas un toboggan.", "worried"]] });
+  L.push({ id: "oreille", act: 0, place: "feed", kind: "echo", title: "L'oreille",
+    pre: [["doc", "Deuxième leçon : l'oreille. Je joue trois notes, tu me les rends. Comme un perroquet, en plus doué."],
+      ["doc", "Écoute d'abord. Fredonne dans ta tête. Seulement ensuite, tu chantes."]],
+    win: [["doc", "Tu as de l'oreille. Ou de la chance. On verra au prochain coup.", "smile"]],
+    fail: [["doc", "Ton perroquet a besoin de lunettes. Ferme les yeux, écoute, recommence.", "worried"]] });
+  const first = chPhrase(0);
+  first.title = "Ding Dong"; first.act = 0;
+  first.pre = [["doc", "Bienvenue au Studio 86. Ici, on récupère le morceau que les Muets ont volé : Carol of the Bells."],
+    ["doc", "Il est découpé en salles. Chaque salle libérée rend un bout de la chanson à la ville."],
+    ["doc", "On commence doucement, tempo ralenti. Tu écoutes une fois, puis c'est à toi. Il faut 70 % de notes justes."],
+    ["me", "Ding ! Dong !", "joy"]];
+  first.win = [["doc", "Première salle libérée ! Tu entends ? Le néon du Studio vient de se rallumer.", "smile"],
+    ["doc", "Tiens, une cassette que je gardais pour une bonne occasion. Ouvre-la."]];
+  first.gift = { rar: "commune" };
+  L.push(first);
+  L.push(chBoss(0,
+    [["narr", "Un bruit de ventouse. Un monstre tout mou barre la rue."], ["r0", "Wub wub. Personne passe. C'est moi le chef de la rue."],
+      ["doc", "Wubby. Le plus nul des Monstres Muets. Il va quand même te chambrer."],
+      ["doc", "En combat, il chante une figure de notes. Tu la répètes juste, {m} frappe. Tu te plantes, c'est toi qui prends."],
+      ["r0", "Wub. Prépare-toi à pleurer en fa dièse."]],
+    [["r0", "Wub… c'était pas juste… enfin si, c'était juste. C'est bien ça le problème."], ["doc", "Premier Muet au tapis ! Sa cassette est à toi, et la rue respire.", "smile"]],
+    [["r0", "Wub wub wub ! Même moi je chante mieux !"], ["doc", "Ça, c'est vexant. Retente : il a gagné une bataille, pas la guerre.", "worried"]]));
+  // Acte II
+  const n = Math.max(0, P - 1), at = f => Math.max(1, Math.ceil(n * f));
+  const bosses = {
+    1: chBoss(1, [["r1", "Crrrr. J'ai senti une fausse note. Je l'ai mangée. Délicieux."], ["doc", "Croc-Synthé. Il mord dans chaque note ratée. Sois propre, attaque net."], ["r1", "Crrr. J'ai les crocs."]],
+      [["r1", "Crrr… plus rien à mordre… tu chantes trop juste…"], ["doc", "Il repart la queue entre les pattes. Et sa cassette reste ici.", "smile"]],
+      [["r1", "Crrr ! Un festin de fausses notes !"], ["doc", "Il s'est régalé. Vise pile la note dès le début, sans glisser.", "worried"]]),
+    2: chBoss(2, [["r2", "Mes chééériiis ! Moi je trémole depuis 1983, c'est un styyyle."], ["doc", "Madame Vibrato. Elle tremble tellement qu'on ne sait jamais quelle note elle chante."], ["doc", "Toi, garde tes notes droites. C'est ça qui la rend folle."]],
+      [["r2", "Quelle horreur… une note… immobile…"], ["doc", "Elle s'est évanouie de jalousie. Joli travail.", "smile"]],
+      [["r2", "Ahahaaaa ! Tu as tremblé, mon chéééri !"], ["doc", "Elle t'a contaminé. Tiens chaque note comme à la Cantine, bien droite.", "worried"]]),
+    3: chBoss(3, [["narr", "Les vitres du Studio se mettent à vibrer."], ["r3", "BONJOUR. JE SUIS GRAVE."], ["doc", "Basso Profundo. Il tire tout vers le bas. Vise le haut de tes notes, ne te laisse pas couler."]],
+      [["r3", "JE… SUIS… VEXÉ."], ["doc", "Même les vitres applaudissent. Bravo.", "smile"]],
+      [["r3", "TU ES DESCENDU·E AVEC MOI. MERCI."], ["doc", "Il t'a fait couler. Soutiens le souffle, vise haut.", "worried"]]),
+    4: chBoss(4, [["r4", "ANALYSE EN COURS. VOIX HUMAINE DÉTECTÉE. NIVEAU : CASSEROLE."], ["doc", "Vocodor. Moitié robot, moitié chanteur, totalement insupportable."], ["doc", "Prouve-lui que ses capteurs sont pétés."]],
+      [["r4", "ERREUR. ERREUR. JUSTESSE IMPRÉVUE. REDÉMARRAGE…"], ["doc", "Tu as fait planter un robot avec ta voix. Je l'écris dans mes mémoires.", "smile"]],
+      [["r4", "CONFIRMÉ : CASSEROLE. FIN DE TRANSMISSION."], ["doc", "Ses capteurs marchent encore, apparemment. On retente.", "worried"]]),
+  };
+  const placed = new Set();
+  const attack = { id: "attaques", act: 1, place: "feed", kind: "attack", title: "Attaques nettes",
+    pre: [["doc", "Je t'ai observé. Tu glisses sur tes notes : tu pars d'en dessous et tu remontes, comme une sirène d'ambulance."],
+      ["doc", "Six notes à attaquer pile dessus. Pense la note avant d'ouvrir la bouche."]],
+    win: [["doc", "Net, précis. Les Muets détestent ça.", "smile"]], fail: [["doc", "Encore des sirènes. Imagine la note dans ta tête, puis pose-la d'un coup.", "worried"]] };
+  const style = { id: "style", act: 1, place: "train", kind: "melody", k: 0, title: "Le style",
+    pre: [["doc", "Chanter juste, c'est bien. Chanter beau, c'est mieux. Pour battre Madame Vibrato, il te faut une ligne propre."],
+      ["doc", "Cette fois je note la musicalité de la première salle : l'attaque, la note droite, la tenue, le rythme."]],
+    win: [["doc", "Ça, c'était de la musique. Pas juste des notes.", "smile"]], fail: [["doc", "Juste, mais pas encore lié. Relis mes conseils à la fin, ils sont faits pour toi.", "worried"]] };
+  L.push(attack);
+  for (let k = 1; k < P; k++) {
+    L.push(chPhrase(k));
+    const i = k;
+    if (i === at(1 / 3) && !placed.has(1)) { L.push(bosses[1]); placed.add(1); }
+    if (i === at(1 / 2) && !placed.has(2)) { L.push(style, bosses[2]); placed.add(2); }
+    if (i === at(2 / 3) && !placed.has(3)) { L.push(bosses[3]); placed.add(3); }
+  }
+  for (const r of [1, 2, 3]) if (!placed.has(r)) { if (r === 2) L.push(style); L.push(bosses[r]); }
+  L.push({ id: "atelier", act: 1, place: "train", kind: "drill", title: "L'atelier de Doc",
+    pre: [["doc", "J'ai noté tous les passages où tu coinces. Ce soir, atelier : on les répare un par un."],
+      ["doc", "Si tout tient déjà, on fera un petit écho pour garder l'oreille chaude."]],
+    win: [["doc", "Les passages tiennent. Tu es prêt·e pour la suite.", "smile"]], fail: [["doc", "Ils résistent encore. C'est normal, on les reprendra.", "worried"]] });
+  L.push(bosses[4]);
+  // Acte III
+  L.push({ id: "filage", act: 2, place: "train", kind: "full", title: "Le grand filage",
+    pre: [["doc", "Toutes les salles sont libérées. Maintenant, on recolle tout : le morceau entier, au vrai tempo, sans la mélodie."],
+      ["doc", "Il faut 60 %. Garde du souffle pour la fin, ça grimpe."], ["me", "On va tout casser.", "joy"]],
+    win: [["doc", "Le morceau entier ! Toute la ville l'a entendu. Y compris quelqu'un qui n'aime pas ça du tout…", "worried"]],
+    fail: [["doc", "Le filage, c'est un marathon. Refais les salles qui coincent, puis reviens.", "worried"]] });
+  L.push(chBoss(5,
+    [["narr", "Le Néon Club s'éteint d'un coup. Une silhouette immense descend du plafond."],
+      ["r5", "Alors c'est toi, la petite voix qui rallume MA ville ? Mignon."],
+      ["r5", "Personne ne m'a jamais entendue chanter faux. Personne n'a jamais survécu pour le raconter."],
+      ["doc", "C'est le moment. Tout ce que tu as appris : l'oreille, la tenue, les attaques. Et respire.", "shout"], ["me", "GRAOUUU !", "sing"]],
+    [["r5", "Impossible… une note juste… dans MA ville…"], ["narr", "La Reine se dissout en confettis dorés. Tous les néons de Synthville se rallument d'un coup."]],
+    [["r5", "Hahaha ! Retourne à la chorale, petite voix."], ["doc", "Elle est coriace. Nourris {m}, refais un tour au Studio, et on y retourne.", "worried"]], { title: "La Reine du Fausset" }));
+  L.push({ id: "epilogue", act: 2, place: "home", kind: "none", title: "Épilogue",
+    pre: [["doc", "Tu sais quoi ? Le premier jour, je ne t'aurais pas confié un kazoo.", "smile"],
+      ["doc", "Aujourd'hui, Synthville chante juste. Et c'est grâce à toi."],
+      ["me", "Et à moi !", "joy"], ["doc", "Et à {m}, oui. Surtout à {m}, d'après {m}.", "smile"],
+      ["doc", "Le quartier est à toi. Continue de nourrir ta bande, ouvre des cassettes, repasse le filage pour le plaisir."],
+      ["doc", "Et à la chorale ? Ils ne vont pas en revenir."]],
+    win: [] });
+  return L;
+}
+const chapterIndex = (L, id) => L.findIndex(c => c.id === id);
+function nextChapter(L = storyChapters()) { return L.find(c => !story.done.includes(c.id)) || null; }
+
+/* ════════ Le roman visuel : portraits, bulle, texte tapé à la machine ════════ */
+const vn = { on: false, q: [], cur: null, shown: 0, timer: 0, done: null, wait: false };
+const SPEAKERS = { doc: { name: "Doc Vinyle", col: "#00F0FF", pitch: 180 }, narr: { name: "", col: "#C39BD3", pitch: 0 } };
+function speakerOf(who) {
+  if (who === "me") { const m = activeMon(); return { name: m ? m.name : "???", col: "#FF2E88", pitch: 520, mon: m }; }
+  if (/^r\d$/.test(who)) { const i = +who[1]; return { name: RIVALS[i].name, col: "#FF3B3B", pitch: [140, 300, 420, 70, 240, 380][i], mon: rivalMon(i) }; }
+  return SPEAKERS[who] || SPEAKERS.narr;
+}
+const fillVars = s => s.replace(/\{m\}/g, activeMon()?.name || "ton monstre").replace(/\{p\}/g, prof.player?.name || "toi");
+function vnPlay(lines, done, opts = {}) {
+  vn.q = lines.slice(); vn.done = done; vn.on = true; vn.left = null; vn.right = null;
+  $("vn").hidden = false; $("vn").classList.toggle("boss", !!opts.boss);
+  $("vnL").innerHTML = ""; $("vnR").innerHTML = ""; $("vnChoices").innerHTML = "";
+  if (opts.chapter) { const c = $("vnChap"); c.innerHTML = `<small>${esc(opts.chapter.k)}</small><b>${esc(opts.chapter.t)}</b>`; c.classList.remove("go"); void c.offsetWidth; c.classList.add("go");
+    if (ctx) { const t = ctx.currentTime; blip(220, t, 0.12, 0.06, "sawtooth"); blip(330, t + 0.12, 0.12, 0.06, "sawtooth"); blip(440, t + 0.24, 0.3, 0.06, "sawtooth"); }
+    vn.wait = true; setTimeout(() => { vn.wait = false; vnNext(); }, 1500);
+  } else vnNext();
+}
+function vnNext() {
+  clearInterval(vn.timer); $("vnChoices").innerHTML = "";
+  const line = vn.q.shift();
+  if (!line) { vnEnd(); return; }
+  if (line.run) { $("vnBox").classList.add("idle"); line.run(() => vnNext()); return; }
+  if (line.choice) { vnChoice(line.choice); return; }
+  const [who, text, mood] = line, sp = speakerOf(who);
+  vn.cur = { who, text: fillVars(text), sp };
+  const box = $("vnBox"); box.classList.remove("idle"); box.classList.toggle("narr", who === "narr"); box.style.setProperty("--sc", sp.col);
+  $("vnName").textContent = sp.name; $("vnName").hidden = !sp.name;
+  // portraits : Doc à gauche, les monstres à droite
+  if (who === "doc") { $("vnL").innerHTML = docSvg(mood || "talk"); vn.left = "doc"; }
+  else if (sp.mon) { $("vnR").innerHTML = monsterSvg(sp.mon, 250, { mood: mood || (who === "me" ? "ok" : "angry"), cls: "idle" }); $("vnR").style.setProperty("--ms", [1, 1.6, 1.3, 1.1][sp.mon.stage || 1]); vn.right = who; }
+  $("vnL").classList.toggle("speaking", who === "doc"); $("vnR").classList.toggle("speaking", who !== "doc" && who !== "narr");
+  $("vnL").classList.toggle("dim", who !== "doc" && who !== "narr" && !!vn.left); $("vnR").classList.toggle("dim", who === "doc" && !!vn.right);
+  if (who !== "doc" && sp.mon) { const r = $("vnR"); r.classList.remove("pop"); void r.offsetWidth; r.classList.add("pop"); }
+  vn.shown = 0; $("vnText").textContent = "";
+  vn.timer = setInterval(() => {
+    vn.shown += 1;
+    $("vnText").textContent = vn.cur.text.slice(0, vn.shown);
+    if (sp.pitch && ctx && vn.shown % 3 === 0 && /\S/.test(vn.cur.text[vn.shown - 1] || "")) blip(sp.pitch * (0.9 + Math.random() * 0.25), ctx.currentTime, 0.035, 0.018, who === "doc" ? "triangle" : "square");
+    if (vn.shown >= vn.cur.text.length) clearInterval(vn.timer);
+  }, 24);
+}
+function vnChoice(opts) {
+  $("vnBox").classList.add("idle");
+  $("vnChoices").innerHTML = opts.map((o, i) => `<button type="button" class="vn-opt${o[2] ? " " + o[2] : ""}" data-opt="${i}">${o[3] || ""}<span>${esc(o[0])}</span></button>`).join("");
+  $("vnChoices").onclick = e => {
+    const b = e.target.closest("[data-opt]"); if (!b) return;
+    e.stopPropagation();
+    const o = opts[+b.dataset.opt]; $("vnChoices").innerHTML = "";
+    if (ctx) blip(880, ctx.currentTime, 0.06, 0.04);
+    if (typeof o[1] === "function") { o[1](); return; }
+    vn.q = (o[1] || []).concat(vn.q); vnNext();
+  };
+}
+function vnAdvance() {
+  if (!vn.on || vn.wait || $("vnBox").classList.contains("idle")) return;
+  if (vn.cur && vn.shown < vn.cur.text.length) { clearInterval(vn.timer); vn.shown = vn.cur.text.length; $("vnText").textContent = vn.cur.text; return; }
+  vnNext();
+}
+function vnEnd() { vn.on = false; $("vn").hidden = true; const d = vn.done; vn.done = null; if (d) d(); }
+function vnSkip() {
+  if (!vn.on || vn.wait) return;
+  clearInterval(vn.timer);
+  while (vn.q.length && !vn.q[0].run && !vn.q[0].choice) vn.q.shift();
+  vnNext();
+}
+$("vn").addEventListener("click", e => { if (e.target.closest(".vn-opt, #vnSkip")) return; vnAdvance(); });
+$("vnSkip").onclick = e => { e.stopPropagation(); vnSkip(); };
+document.addEventListener("keydown", e => {
+  if (!vn.on || cine.on) return;
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); e.stopPropagation(); vnAdvance(); }
+  if (e.key === "Escape") vnSkip();
+}, true);
+
+/* ════════ La carte de l'histoire ════════ */
+function storyBackdrop(place) {
+  state.lairView = "home";
+  if (state.mode !== "train") setMode("train"); else renderTrain();
+  if (!W_.open) openWorld();
+  const p = W_.places.find(q => q.id === place) || W_.places.find(q => q.id === "home");
+  if (p && W_.me) { W_.me.x = p.door; W_.me.tx = null; W_.me.auto = null; W_.cam = Math.max(0, Math.min(W_.worldW - W_.W, p.door - W_.W * 0.5)); }
+  $("world").classList.add("in-story");
+}
+function openStory(focusId) {
+  if (ex) exAbort();
+  stopPlayback(); storyRun = null;
+  storyBackdrop("home");
+  const L = storyChapters(), nx = nextChapter(L), cur = nx ? chapterIndex(L, nx.id) : L.length;
+  const icon = c => c.boss ? "⚔" : c.kind === "phrase" || c.kind === "full" || c.kind === "melody" ? "♪" : c.kind === "none" || c.kind === "starter" ? "★" : "◎";
+  let html = `<div class="st-top"><div><span class="k">Mode histoire</span><h2>${story.finished ? "Synthville chante juste" : esc(ACTS[nx ? nx.act : 2])}</h2>
+      <span class="st-prog"><i style="width:${Math.round(story.done.filter(id => L.some(c => c.id === id)).length / L.length * 100)}%"></i></span>
+      <small>${story.done.filter(id => L.some(c => c.id === id)).length} chapitres sur ${L.length}</small></div>
+    <div class="st-btns"><button type="button" class="w-btn" data-st="world">Quartier libre</button><button type="button" class="w-btn" data-st="account">${cloud.user ? '<i class="dot on"></i>' : ""}${esc(prof.player?.name || "Compte")}</button><button type="button" class="w-btn" data-st="title">Menu</button></div></div>`;
+  if (nx) {
+    const isBoss = nx.boss, who = isBoss ? rivalMon(nx.r) : null;
+    html += `<button type="button" class="st-next${isBoss ? " boss" : ""}" data-play="${nx.id}">
+      <span class="st-art">${isBoss ? monsterSvg(who, 120, { mood: "angry", cls: "idle" }) : activeMon() ? monsterSvg(activeMon(), 120, { mood: "joy", cls: "idle" }) : docSvg("smile", 110)}</span>
+      <span class="st-txt"><small>${story.done.length ? "Continuer · " : ""}Chapitre ${cur + 1}</small><b>${esc(nx.title)}</b><em>${isBoss ? "Combat de boss" : { starter: "Le début de l'histoire", hold: "La note tenue", echo: "L'écho", attack: "Attaques nettes", phrase: "Une salle du morceau", melody: "La musicalité", drill: "L'atelier", full: "Tout le morceau", none: "La fin" }[nx.kind]}</em></span>
+      <span class="st-go">▶</span></button>`;
+  }
+  let act = -1;
+  html += `<div class="st-path">`;
+  L.forEach((c, i) => {
+    if (c.act !== act) { act = c.act; html += `<h3 class="st-act">${esc(ACTS[act])}</h3>`; }
+    const done = story.done.includes(c.id), now = nx && c.id === nx.id, locked = !done && !now;
+    html += `<button type="button" class="st-node${done ? " done" : ""}${now ? " now" : ""}${locked ? " locked" : ""}${c.boss ? " boss" : ""}" ${locked ? "disabled" : `data-play="${c.id}"`} style="--x:${[0, 1, 2, 1][i % 4]}">
+      <i>${done ? "✓" : locked ? "🔒" : icon(c)}</i><span><small>Chapitre ${i + 1}</small><b>${esc(c.title)}</b></span></button>`;
+  });
+  html += `</div>`;
+  $("storyMap").innerHTML = html; $("storyMap").hidden = false; $("storyMap").scrollTop = 0;
+  const focus = $("storyMap").querySelector(".st-node.now");
+  if (focus) setTimeout(() => focus.scrollIntoView({ block: "center", behavior: "smooth" }), 400);
+}
+function closeStoryMap() { $("storyMap").hidden = true; }
+$("storyMap").addEventListener("click", e => {
+  const b = e.target.closest("[data-st]");
+  if (b) {
+    const w = b.dataset.st;
+    if (w === "world") { closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }
+    else if (w === "account") openAccount(); else if (w === "title") openTitle();
+    return;
+  }
+  const p = e.target.closest("[data-play]"); if (!p) return;
+  const L = storyChapters(), c = L.find(x => x.id === p.dataset.play); if (!c) return;
+  playChapter(c, story.done.includes(c.id));
+});
+
+/* ════════ Un chapitre : dialogue, épreuve, dénouement ════════ */
+function playChapter(c, replay = false) {
+  const L = storyChapters(), i = chapterIndex(L, c.id);
+  closeStoryMap(); storyBackdrop(c.place);
+  const lines = c.pre.slice();
+  if (c.kind === "starter") {
+    if (zoo.list.length) lines.push(["doc", "Ah, mais tu as déjà un monstre. {m}, c'est ça ? Joli nom. Un peu ridicule.", "smile"]);
+    else lines.push(["doc", "Trois cassettes ont survécu. Choisis ton monstre : il grandira avec ta voix."], { run: next => pickStarter(next) });
+  }
+  vnPlay(lines, () => launchChapter(c, replay), { chapter: { k: `Chapitre ${i + 1} · ${ACTS[c.act].split(" · ")[0]}`, t: c.title }, boss: c.boss });
+}
+function pickStarter(next) {
+  const seeds = ["neon", "chrome", "basse"].map((t, i) => ({ t, seed: (zoo.starterSeed + i * 7919) >>> 0 }));
+  vnChoice(seeds.map(s => {
+    const preview = { id: "pv" + s.seed, name: nameOf(s.seed), type: s.t, stage: 1, dna: dnaOf(s.seed, s.t) };
+    return [`${preview.name} · ${TYPES[s.t].name}`, () => {
+      const m = birth(s.seed, s.t);
+      hatchShow(m, "Ton premier monstre !");
+      $("hatch").querySelector("button").onclick = () => { $("hatch").hidden = true; next(); };
+    }, "starter", monsterSvg(preview, 110, { mood: "joy", cls: "idle" }) + `<small>${esc(TYPES[s.t].desc)}</small>`];
+  }));
+}
+async function launchChapter(c, replay) {
+  if (c.kind === "starter" || c.kind === "none") { storyResult({ id: c.id, replay }, true); return; }
+  const m = await ensureMic();
+  if (!m) { vnPlay([["doc", "Je ne t'entends pas ! Le micro est bloqué. Autorise-le dans le navigateur, ou ouvre le jeu sur deftunk.github.io/pupitre.", "worried"]], () => openStory()); return; }
+  storyRun = { id: c.id, replay, title: c.title };
+  closeWorld(); $("world").classList.remove("in-story");
+  const p = W_.places.find(q => q.id === c.place); if (p) placeBar(p);
+  state.lairView = c.place === "home" ? "train" : c.place;
+  if (state.mode !== "train") setMode("train");
+  $("train").hidden = true;
+  const k = c.kind;
+  if (k === "hold") startHold(); else if (k === "echo") startEcho(); else if (k === "attack") startAttack();
+  else if (k === "phrase") startPhrase(c.k, 1); else if (k === "melody") startMelody(c.k);
+  else if (k === "full") startFull(); else if (k === "battle") startBattle(c.r, true);
+  else if (k === "drill") { loadProg(); if (weakSpots(4).length) startDrill(); else startEcho(); }
+}
+function storyResult(run, passed) {
+  const L = storyChapters(), c = L.find(x => x.id === run.id); storyRun = null;
+  if (!c) { openStory(); return; }
+  const i = chapterIndex(L, c.id), first = passed && !story.done.includes(c.id);
+  if (passed) { if (first) { story.done.push(c.id); delete story.fails[c.id]; prof.tokens = (prof.tokens || 0) + 3; saveProf(); } }
+  else { story.fails[c.id] = (story.fails[c.id] || 0) + 1; }
+  if (c.id === "epilogue" && passed) story.finished = true;
+  saveStory();
+  closeStoryMap(); storyBackdrop(c.place);
+  const lines = (passed ? c.win : c.fail || []).slice();
+  if (first && c.gift) lines.push({ run: next => { zoo.tapes.push({ seed: (Date.now() ^ 0x5eed) >>> 0, type: pick(["neon", "chrome", "basse"]), rar: c.gift.rar, from: "Doc Vinyle" }); saveZoo(); hatchTape(zoo.tapes.length - 1); $("hatch").querySelector("button").onclick = () => { $("hatch").hidden = true; next(); }; } });
+  if (first && c.id !== "epilogue") lines.push(["narr", "+3 jetons pour le juke-box. Chapitre terminé."]);
+  const nx = nextChapter(L);
+  if (passed) {
+    if (nx) lines.push({ choice: [[`Chapitre suivant : ${nx.title}`, () => { vnEnd(); playChapter(nx); }, "primary", "▶ "], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
+    else lines.push({ choice: [["Explorer le quartier", () => { vn.done = null; vnEnd(); closeStoryMap(); $("world").classList.remove("in-story"); worldHud(); }, "primary"], ["Voir la carte", () => { vn.done = null; vnEnd(); openStory(); }]] });
+  } else {
+    const opts = [["Réessayer", () => { vnEnd(); launchChapter(c, run.replay); }, "primary", "↻ "], ["Revoir le chapitre", () => { vnEnd(); playChapter(c, run.replay); }], ["La carte", () => { vn.done = null; vnEnd(); openStory(); }]];
+    if ((story.fails[c.id] || 0) >= 3 && !story.done.includes(c.id)) opts.push(["Passer ce chapitre", () => { vnEnd(); story.done.push(c.id); saveStory(); openStory(); }]);
+    lines.push({ choice: opts });
+  }
+  vnPlay(lines, () => openStory(), { boss: c.boss && !passed });
+  if (passed && c.boss) { celebrate(120); flash("#FFE45E", 0.4); if (ctx) fanfare(); }
+}
+
+$("toWorld").onclick = () => { const st = ex?.story; if (st) { exAbort(); openStory(); } else goWorld(); };
 
 /* ══ Écran titre ══ */
 function openTitle() {
@@ -4900,8 +5345,9 @@ $("titleScreen").addEventListener("click", e => {
   $("titleScreen").classList.add("gone");
   flash("#FF2E88", 0.35); shake(10);
   const m = b.dataset.start;
-  if (m === "intro" || !store.get("drm.intro")) playIntro(goWorld);
-  else goWorld();
+  const begin = () => { const nx = nextChapter(); if (!story.done.length && nx) playChapter(nx); else openStory(); };
+  if (m === "intro" || !store.get("drm.intro")) playIntro(begin);
+  else begin();
 });
 document.addEventListener("keydown", e => { if (!$("titleScreen").classList.contains("gone") && (e.key === "Enter" || (e.key === " " && document.activeElement?.tagName !== "INPUT"))) { e.preventDefault(); $("titleScreen").querySelector("[data-start]").click(); } });
 $("openTitle").onclick = () => { stopPlayback(); openTitle(); };
