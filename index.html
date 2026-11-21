@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#06070D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>html,body{margin:0}</style>
+</head>
+<body>
+<title>Pupitre</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Une scène de nuit : la partition défile en lumière vers la ligne du présent, la voix laisse une traînée. Un seul univers, sombre, par choix. */
+:root {
+  --night: #06070D;
+  --stage: #090B17;
+  --glass: rgba(18, 21, 40, .66);
+  --glass-2: rgba(255, 255, 255, .05);
+  --line: rgba(255, 255, 255, .09);
+  --text: #EEF0F8;
+  --muted: #8C92B0;
+  --gold: #F3C870;
+  --gold-deep: #C8913A;
+  --ok: #6EF0C2;
+  --high: #FF8A66;
+  --low: #7DBEFF;
+  --silver: #AEB6D9;
+  --f-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --f-ui: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; background: var(--night); color: var(--text); }
+body { font-family: var(--f-ui); font-size: 14.5px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.app {
+  height: 100%; min-height: 600px; max-width: 1320px; margin: 0 auto;
+  display: grid; grid-template-rows: auto minmax(320px, 1fr) auto; gap: 12px;
+  padding-block: 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* En-tête */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px 20px; flex-wrap: wrap; }
+.titles { min-width: 0; display: grid; gap: 2px; }
+.brand { font-size: 11px; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+.brand svg { width: 14px; height: 14px; }
+h1 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 600; font-size: clamp(30px, 5vw, 46px); line-height: 1; letter-spacing: -.01em; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.top-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--glass-2); border: 1px solid var(--line); }
+.seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; color: var(--muted); font-weight: 600; font-size: 13px; transition: background .2s, color .2s; }
+.seg button[aria-pressed="true"] { background: var(--gold); color: #1A1306; box-shadow: 0 0 18px rgba(243, 200, 112, .35); }
+.seg.small button { padding: 5px 10px; font-size: 12px; }
+.ghost { border: 1px solid var(--line); background: var(--glass-2); border-radius: 999px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+.ghost:hover { border-color: rgba(243, 200, 112, .5); }
+.ghost svg { width: 15px; height: 15px; }
+
+/* Scène */
+.stage { position: relative; border-radius: 26px; overflow: hidden; background: var(--stage); box-shadow: 0 0 0 1px var(--line), 0 40px 90px rgba(0, 0, 0, .55); min-height: 320px; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+#cv.dragging { cursor: grabbing; }
+.where { position: absolute; top: 14px; left: 16px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); pointer-events: none; }
+.zoom { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; }
+.zoom button { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 17px; line-height: 1; color: var(--muted); }
+.hint-drag { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); font-size: 12px; color: var(--muted); pointer-events: none; transition: opacity .6s; white-space: nowrap; }
+
+.countdown { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.countdown span { font-family: var(--f-display); font-style: italic; font-size: clamp(90px, 18vw, 170px); color: var(--gold); text-shadow: 0 0 40px rgba(243, 200, 112, .6); animation: beat .5s ease-out; }
+@keyframes beat { from { transform: scale(1.35); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.step-hud { position: absolute; top: 52px; right: 16px; padding: 16px 20px; border-radius: 20px; background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); display: grid; justify-items: center; gap: 2px; min-width: 150px; text-align: center; pointer-events: none; }
+.step-hud .syl { font-family: var(--f-display); font-style: italic; font-size: 20px; color: var(--silver); min-height: 1.2em; }
+.step-hud .name { font-family: var(--f-display); font-weight: 600; font-size: 64px; line-height: .9; color: var(--gold); text-shadow: 0 0 30px rgba(243, 200, 112, .45); }
+.step-hud .oct { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.step-hud .hint { margin-top: 8px; font-weight: 700; font-size: 15px; min-height: 1.4em; transition: color .15s; }
+.hint.ok { color: var(--ok); } .hint.high { color: var(--high); } .hint.low { color: var(--low); }
+.step-hud .count { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); width: min(560px, calc(100% - 32px)); padding: 14px 16px; border-radius: 18px; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(243, 200, 112, .3); display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
+.toast b { color: var(--gold); }
+.toast p { margin: 0; color: var(--muted); font-size: 13px; grid-column: 1; }
+.toast .x { grid-row: 1 / span 2; grid-column: 2; align-self: start; border: 0; background: transparent; color: var(--muted); font-size: 18px; }
+
+/* Résultats */
+.results { position: absolute; left: 12px; right: 12px; bottom: 12px; max-height: calc(100% - 24px); overflow: auto; padding: 18px 20px; border-radius: 22px; background: rgba(12, 14, 28, .86); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid var(--line); display: grid; gap: 14px; animation: rise .45s cubic-bezier(.2, .8, .2, 1); }
+@keyframes rise { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.res-head { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; }
+.ring { width: 86px; height: 86px; position: relative; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-size: 26px; font-weight: 600; }
+.res-head h3 { margin: 0; font-family: var(--f-display); font-style: italic; font-weight: 600; font-size: 26px; line-height: 1.1; }
+.res-head p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; font-size: 13.5px; }
+.closeBtn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass-2); color: var(--muted); align-self: start; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--glass-2); border-radius: 12px; padding: 5px 10px; display: grid; text-align: left; min-width: 52px; }
+.chip i { font-style: italic; font-family: var(--f-display); font-size: 16px; line-height: 1.1; }
+.chip small { font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); }
+.chip.ok { border-color: rgba(110, 240, 194, .35); } .chip.ok small { color: var(--ok); }
+.chip.high { border-color: rgba(255, 138, 102, .45); background: rgba(255, 138, 102, .08); } .chip.high small { color: var(--high); }
+.chip.low { border-color: rgba(125, 190, 255, .45); background: rgba(125, 190, 255, .08); } .chip.low small { color: var(--low); }
+.chip.miss { opacity: .5; }
+
+/* Pupitre de commande */
+.dock { display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; align-items: center; padding: 12px 14px; border-radius: 24px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.modes { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 4px; border-radius: 18px; background: var(--glass-2); border: 1px solid var(--line); }
+.modes button { border: 0; background: transparent; border-radius: 14px; padding: 9px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; font-size: 13.5px; transition: background .2s, color .2s; }
+.modes button svg { width: 17px; height: 17px; }
+.modes button[aria-selected="true"] { background: rgba(243, 200, 112, .14); color: var(--gold); box-shadow: inset 0 0 0 1px rgba(243, 200, 112, .35); }
+.ctrls { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; min-width: 0; }
+.ctrls[hidden] { display: none !important; }
+.cluster { display: flex; align-items: center; gap: 10px; }
+.main-btn {
+  width: 62px; height: 62px; border-radius: 50%; border: 0; flex: none; display: grid; place-items: center; color: #1A1306;
+  background: radial-gradient(circle at 35% 30%, #FFE3A6, var(--gold) 45%, var(--gold-deep));
+  box-shadow: 0 0 0 6px rgba(243, 200, 112, .1), 0 0 34px rgba(243, 200, 112, .45);
+  transition: transform .15s;
+}
+.main-btn:active { transform: scale(.95); }
+.main-btn svg { width: 26px; height: 26px; }
+.main-btn.rec { background: radial-gradient(circle at 35% 30%, #FFC2AE, #FF7A57 50%, #C9452A); color: #2A0A02; box-shadow: 0 0 0 6px rgba(255, 122, 87, .12), 0 0 34px rgba(255, 122, 87, .45); }
+.main-btn.wide { width: auto; padding: 0 20px; border-radius: 999px; gap: 8px; display: inline-flex; align-items: center; font-weight: 700; height: 52px; }
+.main-btn.wide svg { width: 20px; height: 20px; }
+.round { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass-2); display: grid; place-items: center; flex: none; color: var(--text); }
+.round svg { width: 18px; height: 18px; }
+.round[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: rgba(243, 200, 112, .1); }
+.field { display: grid; gap: 4px; }
+.field > span { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button { width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: var(--glass-2); font-size: 16px; line-height: 1; }
+.stepper output { min-width: 76px; text-align: center; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.pill { border: 1px solid var(--line); background: var(--glass-2); border-radius: 999px; padding: 8px 13px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 7px; }
+.pill svg { width: 15px; height: 15px; }
+.pill[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: rgba(243, 200, 112, .1); }
+.filebtn { position: relative; overflow: hidden; }
+.filebtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.status { font-size: 12.5px; color: var(--muted); }
+
+/* Tiroir partition */
+.sheet-back { position: fixed; inset: 0; z-index: 30; background: rgba(3, 4, 9, .6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: grid; justify-items: end; }
+.sheet { width: min(560px, 100%); height: 100%; overflow-y: auto; background: #0E1022; border-left: 1px solid var(--line); display: grid; gap: 18px; align-content: start;
+  padding-block: calc(22px + env(safe-area-inset-top, 0px)) calc(28px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.sheet h2 { margin: 0; font-family: var(--f-display); font-style: italic; font-size: 32px; font-weight: 600; }
+.sheet h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.sheet section { display: grid; gap: 10px; }
+.sheet hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.spread { justify-content: space-between; }
+textarea { width: 100%; min-height: 260px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); padding: 12px; font-family: var(--f-mono); font-size: 12px; line-height: 1.65; resize: vertical; }
+select { border-radius: 999px; border: 1px solid var(--line); background: #15182C; padding: 8px 12px; }
+.help { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+.help code { font-family: var(--f-mono); font-size: 11.5px; background: rgba(255, 255, 255, .06); border-radius: 5px; padding: 1px 5px; color: var(--text); }
+.err { color: var(--high); font-size: 12.5px; }
+.primary { background: var(--gold); color: #1A1306; border-color: var(--gold); }
+
+@media (max-width: 760px) {
+  .app { padding-block: 10px; gap: 10px; grid-template-rows: auto minmax(340px, 1fr) auto; }
+  .dock { grid-template-columns: 1fr; padding: 10px; border-radius: 20px; }
+  .modes { grid-template-columns: repeat(3, 1fr); }
+  .modes button { justify-content: center; padding: 9px 6px; }
+  .ctrls { justify-content: center; gap: 10px 14px; }
+  .step-hud { top: auto; bottom: 100px; right: 12px; min-width: 120px; padding: 12px 14px; }
+  .step-hud .name { font-size: 48px; }
+  .res-head { grid-template-columns: auto 1fr; }
+  .res-head .closeBtn { grid-column: 2; grid-row: 1; justify-self: end; }
+  .ring { width: 70px; height: 70px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="titles">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a5 5 0 0 0-5 5v4l-2 4h14l-2-4V8a5 5 0 0 0-5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+        Pupitre
+      </div>
+      <h1 id="title">Carol of the Bells</h1>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div class="top-right">
+      <div class="seg" id="voices" role="group" aria-label="Ma voix"></div>
+      <button class="ghost" id="openSheet" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        Partition
+      </button>
+    </div>
+  </header>
+
+  <section class="stage" id="stage" aria-label="Partition animée">
+    <canvas id="cv"></canvas>
+    <div class="where" id="where"></div>
+    <div class="hint-drag" id="hintDrag">Faites glisser la partition pour choisir où commencer</div>
+    <div class="zoom">
+      <button type="button" id="zoomOut" aria-label="Voir plus de mesures">−</button>
+      <button type="button" id="zoomIn" aria-label="Voir moins de mesures">+</button>
+    </div>
+    <div class="step-hud" id="stepHud" hidden>
+      <span class="syl" id="stepSyl"></span>
+      <span class="name" id="stepName">sol</span>
+      <span class="oct" id="stepOct">sol3</span>
+      <span class="hint" id="stepHint">Écoutez, puis chantez</span>
+      <span class="count" id="stepCount"></span>
+    </div>
+    <div class="countdown" id="countdown" hidden><span id="countNum">3</span></div>
+    <div class="toast" id="micToast" hidden>
+      <b>Le micro n'est pas accessible sur cette page</b>
+      <p id="micToastText"></p>
+      <button class="x" type="button" id="micToastClose" aria-label="Fermer">×</button>
+    </div>
+    <div class="results" id="results" hidden></div>
+  </section>
+
+  <nav class="dock" aria-label="Commandes">
+    <div class="modes" role="tablist">
+      <button role="tab" id="tab-listen" data-mode="listen" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Écouter</button>
+      <button role="tab" id="tab-step" data-mode="step" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Note par note</button>
+      <button role="tab" id="tab-sing" data-mode="sing" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Chanter</button>
+    </div>
+
+    <div class="ctrls" id="ctrl-listen">
+      <div class="cluster">
+        <button class="round" id="restartBtn" type="button" aria-label="Revenir au début"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+        <button class="main-btn" id="playBtn" type="button" aria-label="Lecture"></button>
+        <button class="round" id="loopBtn" type="button" aria-pressed="false" aria-label="Lire en boucle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></button>
+      </div>
+      <label class="field"><span>Tempo</span>
+        <div class="stepper"><button type="button" data-tempo="-10" aria-label="Plus lent">−</button><output class="tempoOut">140 / min</output><button type="button" data-tempo="10" aria-label="Plus rapide">+</button></div>
+      </label>
+      <label class="field"><span>Hauteur</span>
+        <div class="stepper"><button type="button" data-tr="-1" aria-label="Un demi-ton plus bas">−</button><output class="trOut">écrite</output><button type="button" data-tr="1" aria-label="Un demi-ton plus haut">+</button></div>
+      </label>
+      <div class="field othersField"><span>Autres voix</span>
+        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.3" aria-pressed="false">Douces</button><button type="button" data-others="0.7" aria-pressed="false">Fortes</button></div>
+      </div>
+    </div>
+
+    <div class="ctrls" id="ctrl-step" hidden>
+      <div class="cluster">
+        <button class="round" id="stepPrev" type="button" aria-label="Note précédente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="main-btn wide" id="stepListen" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Entendre la note</button>
+        <button class="round" id="stepNext" type="button" aria-label="Note suivante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+      <div class="field"><span>Exigence</span>
+        <div class="seg small" id="tolSeg"><button type="button" data-tol="40" aria-pressed="false">Souple</button><button type="button" data-tol="25" aria-pressed="true">Normale</button><button type="button" data-tol="15" aria-pressed="false">Stricte</button></div>
+      </div>
+      <button type="button" class="pill" id="autoBtn" aria-pressed="true">Enchaîner seule</button>
+      <button type="button" class="pill" id="micBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Activer le micro</button>
+    </div>
+
+    <div class="ctrls" id="ctrl-sing" hidden>
+      <button class="main-btn rec" id="singBtn" type="button" aria-label="Chanter"></button>
+      <div class="field"><span>Mélodie guide</span>
+        <div class="seg small" id="guideSeg"><button type="button" data-guide="0" aria-pressed="false">Muette</button><button type="button" data-guide="0.35" aria-pressed="true">Douce</button><button type="button" data-guide="1" aria-pressed="false">Forte</button></div>
+      </div>
+      <div class="field othersField"><span>Autres voix</span>
+        <div class="seg small othersSeg"><button type="button" data-others="0" aria-pressed="true">Muettes</button><button type="button" data-others="0.3" aria-pressed="false">Douces</button><button type="button" data-others="0.7" aria-pressed="false">Fortes</button></div>
+      </div>
+      <span class="pill filebtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
+        Analyser un enregistrement
+        <input type="file" id="audioFile" accept="audio/*,video/*" aria-label="Importer un enregistrement">
+      </span>
+      <span class="status" id="fileStatus" hidden></span>
+    </div>
+  </nav>
+</div>
+
+<div class="sheet-back" id="sheetBack" hidden>
+  <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="row spread">
+      <h2 id="sheetTitle">La partition</h2>
+      <button class="round" id="closeSheet" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <section id="photoSection">
+      <h3>Depuis une photo</h3>
+      <p class="status" style="margin:0">Photographiez la partition bien à plat. Claude recopie la ligne de la voix choisie, à vérifier ensuite à l'oreille.</p>
+      <div class="row">
+        <select id="voiceSel" aria-label="Voix à recopier"><option>Soprano</option><option selected>Alto</option><option>Ténor</option><option>Basse</option><option>Mélodie principale</option></select>
+        <span class="pill primary filebtn">Choisir les photos<input type="file" id="photoFile" accept="image/*" multiple aria-label="Photos de la partition"></span>
+      </div>
+      <div class="status" id="photoStatus" hidden></div>
+    </section>
+    <hr id="photoSep">
+    <section>
+      <h3>Le texte de la partition</h3>
+      <textarea id="scoreText" spellcheck="false" aria-label="Texte de la partition"></textarea>
+      <div class="err" id="parseErr" hidden></div>
+      <div class="row">
+        <button type="button" class="pill primary" id="applyScore">Utiliser ce texte</button>
+        <button type="button" class="pill" id="resetScore">Revenir à la partition d'origine</button>
+      </div>
+      <div class="help">
+        <span>Une note : <code>sol3</code>, <code>sol3:2</code> pour deux temps, <code>sol3:2:joie</code> avec sa syllabe. <code>_</code> prolonge la syllabe d'avant.</span>
+        <span>Durées en temps : <code>1</code> noire, <code>2</code> blanche, <code>0.5</code> croche, <code>3</code> blanche pointée. Sans durée, la note reprend celle d'avant.</span>
+        <span>Silence <code>-:3</code>. Altérations <code>fa#3</code>, <code>sib3</code>. Le do du milieu du piano est <code>do3</code>.</span>
+        <span>En tête : <code>titre:</code>, <code>tempo:</code>, <code>mesure:</code>. Chaque voix commence par <code>voix: Alto</code>.</span>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const EXAMPLE = `titre: Carol of the Bells
+tempo: 140
+mesure: 3
+// Reprise déroulée : mesures 1-4, 5-32, 1re fin, 5-32, 2e fin.
+
+voix: Soprano
+sib3:1:Hark la3:0.5:How sib3:the sol3:1:bells | sib3:sweet la3:0.5:sil sib3:ver sol3:1:bells | sib3:all la3:0.5:seem sib3:to sol3:1:say | sib3:Throw la3:0.5:cares sib3:a sol3:1:way |
+sib3:Christ la3:0.5:mas sib3:is sol3:1:here | sib3:bring la3:0.5:ing sib3:good sol3:1:cheer | sib3:to la3:0.5:young sib3:and sol3:1:old | sib3:meek la3:0.5:and sib3:the sol3:1:bold |
+sib3:Ding la3:0.5:dong sib3:ding sol3:1:dong | sib3:that la3:0.5:is sib3:their sol3:1:song | sib3:with la3:0.5:joy sib3:ful sol3:1:ring | sib3:all la3:0.5:car sib3:ol sol3:1:ing |
+sib3:One la3:0.5:seems sib3:to sol3:1:hear | sib3:words la3:0.5:of sib3:good sol3:1:cheer | sib3:from la3:0.5:ev' sib3:ry sol3:1:where | sib3:fill la3:0.5:ing sib3:the sol3:1:air |
+ré4:O do4:0.5:how ré4:they sib3:1:pound | ré4:rais do4:0.5:ing ré4:their sib3:1:sound | ré4:o'er do4:0.5:hill ré4:and sib3:1:dale | ré4:tell do4:0.5:ing ré4:their sib3:1:tale |
+sol4:Gai sol4:0.5:ly sol4:they fa4:ring mib4:_ | ré4:1:while ré4:0.5:peo ré4:ple do4:sing sib3:_ | do4:1:songs do4:0.5:of do4:good ré4:cheer do4:_ | sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here |
+ré3:0.5:Mer mi3:ry fa#3:mer sol3:ry la3:mer sib3:ry | do4:mer ré4:ry do4:1:Christ sib3:mas | ré3:0.5:Mer mi3:ry fa#3:mer sol3:ry la3:mer sib3:ry | do4:mer ré4:ry do4:1:Christ sib3:mas |
+sib3:On la3:0.5:on sib3:they sol3:1:send | sib3:on la3:0.5:with sib3:out sol3:1:end | sib3:their la3:0.5:joy sib3:ful sol3:1:tone | sib3:to la3:0.5:ev' sib3:ry sol3:1:home |
+sib3:Hark la3:0.5:How sib3:the sol3:1:bells | sib3:sweet la3:0.5:sil sib3:ver sol3:1:bells | sib3:all la3:0.5:seem sib3:to sol3:1:say | sib3:Throw la3:0.5:cares sib3:a sol3:1:way |
+sib3:Christ la3:0.5:mas sib3:is sol3:1:here | sib3:bring la3:0.5:ing sib3:good sol3:1:cheer | sib3:to la3:0.5:young sib3:and sol3:1:old | sib3:meek la3:0.5:and sib3:the sol3:1:bold |
+sib3:Ding la3:0.5:dong sib3:ding sol3:1:dong | sib3:that la3:0.5:is sib3:their sol3:1:song | sib3:with la3:0.5:joy sib3:ful sol3:1:ring | sib3:all la3:0.5:car sib3:ol sol3:1:ing |
+sib3:One la3:0.5:seems sib3:to sol3:1:hear | sib3:words la3:0.5:of sib3:good sol3:1:cheer | sib3:from la3:0.5:ev' sib3:ry sol3:1:where | sib3:fill la3:0.5:ing sib3:the sol3:1:air |
+ré4:O do4:0.5:how ré4:they sib3:1:pound | ré4:rais do4:0.5:ing ré4:their sib3:1:sound | ré4:o'er do4:0.5:hill ré4:and sib3:1:dale | ré4:tell do4:0.5:ing ré4:their sib3:1:tale |
+sol4:Gai sol4:0.5:ly sol4:they fa4:ring mib4:_ | ré4:1:while ré4:0.5:peo ré4:ple do4:sing sib3:_ | do4:1:songs do4:0.5:of do4:good ré4:cheer do4:_ | sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here |
+ré3:0.5:Mer mi3:ry fa#3:mer sol3:ry la3:mer sib3:ry | do4:mer ré4:ry do4:1:Christ sib3:mas | ré3:0.5:Mer mi3:ry fa#3:mer sol3:ry la3:mer sib3:ry | do4:mer ré4:ry do4:1:Christ sib3:mas |
+sib3:On la3:0.5:on sib3:they sol3:1:send | sib3:on la3:0.5:with sib3:out sol3:1:end | sib3:their la3:0.5:joy sib3:ful sol3:1:tone | sib3:to la3:0.5:ev' sib3:ry sol3:1:home |
+sol3:12:dong | ré4:1 do4:0.5:_ ré4:_ sol3:4:_ |
+
+voix: Alto
+-:12 | sol3:3:Ding | fa3:dong | mib3:ding |
+ré3:dong | sol3:Ding | fa3:dong | mib3:ding |
+ré3:dong | sol3:1:One sol3:0.5:seems sol3:to sol3:1:hear | sol3:words sol3:0.5:of sol3:good sol3:1:cheer | sol3:from sol3:0.5:ev' sol3:ry sol3:1:where |
+sol3:fill sol3:0.5:ing sol3:the sol3:1:air | sib3:O la3:0.5:how sib3:they sol3:1:pound | sib3:rais la3:0.5:ing sib3:their sol3:1:sound | sib3:o'er la3:0.5:hill sib3:and sol3:1:dale |
+sib3:tell la3:0.5:ing sib3:their sol3:1:tale | sol3:Gai sol3:0.5:ly sol3:they sol3:ring sol3:_ | sol3:1:while sol3:0.5:peo sol3:ple sol3:1:sing | sol3:songs sol3:0.5:of sol3:good sol3:cheer sol3:_ |
+sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here | ré3:3:Ding | mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding |
+mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | do3:dong | ré3:ding |
+ré3:ding | ré3:9:dong | -:3 | sol3:Ding |
+fa3:dong | mib3:ding | ré3:dong | sol3:Ding |
+fa3:dong | mib3:ding | ré3:dong | sol3:1:One sol3:0.5:seems sol3:to sol3:1:hear |
+sol3:words sol3:0.5:of sol3:good sol3:1:cheer | sol3:from sol3:0.5:ev' sol3:ry sol3:1:where | sol3:fill sol3:0.5:ing sol3:the sol3:1:air | sib3:O la3:0.5:how sib3:they sol3:1:pound |
+sib3:rais la3:0.5:ing sib3:their sol3:1:sound | sib3:o'er la3:0.5:hill sib3:and sol3:1:dale | sib3:tell la3:0.5:ing sib3:their sol3:1:tale | sol3:Gai sol3:0.5:ly sol3:they sol3:ring sol3:_ |
+sol3:1:while sol3:0.5:peo sol3:ple sol3:1:sing | sol3:songs sol3:0.5:of sol3:good sol3:cheer sol3:_ | sol3:1:Christ sol3:0.5:mas sol3:is sol3:1:here | ré3:3:Ding |
+mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding | mi3:1:ding fa#3:_ sol3:dong | ré3:3:Ding |
+do3:dong | ré3:ding | ré3:ding | ré3:12:dong |
+sib3:1 la3:0.5:_ sib3:_ sol3:4:_ |`;
+
+/* ════════ Partition ════════ */
+
+const SOLF = ["do","do♯","ré","mi♭","mi","fa","fa♯","sol","sol♯","la","si♭","si"];
+const SOLF_TXT = ["do","do#","ré","mib","mi","fa","fa#","sol","sol#","la","sib","si"];
+const PC = { do:0, ut:0, ré:2, re:2, mi:4, fa:5, sol:7, la:9, si:11, c:0, d:2, e:4, f:5, g:7, a:9, b:11 };
+const pcOf = m => ((Math.round(m) % 12) + 12) % 12;
+const noteName = m => SOLF[pcOf(m)];
+const noteOct = m => Math.floor(Math.round(m) / 12) - 2;
+const fullName = m => noteName(m) + noteOct(m);
+const BLACK = new Set([1, 3, 6, 8, 10]);
+
+function parseDur(s) {
+  if (!s) return null;
+  s = s.trim().replace(",", ".");
+  if (/^\d+\/\d+$/.test(s)) { const [a, b] = s.split("/").map(Number); return b ? a / b : null; }
+  if (/^\d*\.?\d+$/.test(s)) return parseFloat(s);
+  return null;
+}
+
+function parseScore(text) {
+  const out = { title: "Sans titre", tempo: 90, beatsPerBar: 4, parts: [] };
+  let prevMidi = 60, prevDur = 1, part = null;
+  const target = () => { if (!part) { part = { name: "Ma voix", notes: [] }; out.parts.push(part); } return part.notes; };
+  const errors = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("//")) continue;
+    const head = line.match(/^(titre|title|tempo|mesure|voix|voice)\s*:\s*(.+)$/i);
+    if (head) {
+      const k = head[1].toLowerCase(), v = head[2].trim();
+      if (k === "voix" || k === "voice") { part = { name: v, notes: [] }; out.parts.push(part); prevMidi = 60; prevDur = 1; }
+      else if (k === "titre" || k === "title") out.title = v;
+      else if (k === "tempo") out.tempo = Math.max(20, Math.min(240, parseFloat(v) || 90));
+      else out.beatsPerBar = Math.max(1, Math.min(12, parseInt(v, 10) || 4));
+      continue;
+    }
+    for (const tok of line.split(/\s+/)) {
+      if (!tok || /^\|+$/.test(tok)) continue;
+      const bits = tok.replace(/\|/g, "").split(":");
+      const p = bits[0].toLowerCase();
+      let dur = null, syl = "";
+      if (bits.length > 1) {
+        const d = parseDur(bits[1]);
+        if (d !== null) { dur = d; syl = bits.slice(2).join(":"); } else syl = bits.slice(1).join(":");
+      }
+      if (dur === null) dur = prevDur;
+      if (!(dur > 0)) { errors.push(tok); continue; }
+      prevDur = dur;
+      if (syl === "_") syl = "";
+      if (p === "-" || p === "r" || p === "silence") { target().push({ midi: null, beats: dur, syl: "" }); continue; }
+      const m = p.match(/^(do|ut|ré|re|mi|fa|sol|la|si|[a-g])([#♯b♭]*)(-?\d)?$/);
+      if (!m) { errors.push(tok); continue; }
+      const solfege = m[1].length > 1;
+      let pc = PC[m[1]];
+      for (const ch of m[2]) pc += (ch === "#" || ch === "♯") ? 1 : -1;
+      let midi;
+      if (m[3] !== undefined) { const oct = parseInt(m[3], 10); midi = solfege ? 12 * (oct + 2) + pc : 12 * (oct + 1) + pc; }
+      else midi = pc + 12 * Math.round((prevMidi - pc) / 12);
+      prevMidi = midi;
+      target().push({ midi, beats: dur, syl });
+    }
+  }
+  out.parts = out.parts.filter(p => p.notes.some(n => n.midi != null));
+  for (const p of out.parts) { let t = 0; for (const n of p.notes) { n.start = t; t += n.beats; } p.total = t; }
+  return { score: out, errors };
+}
+
+function scoreToText(title, tempo, bpb, voice, notes) {
+  let s = `titre: ${title}\ntempo: ${tempo}\nmesure: ${bpb}\n\nvoix: ${voice}\n`;
+  let beat = 0, prevDur = null, bars = 0, line = [];
+  for (const n of notes) {
+    let tok = n.midi == null ? "-" : SOLF_TXT[pcOf(n.midi)] + noteOct(n.midi);
+    const syl = (n.syl || "").replace(/[\s:|]/g, "");
+    if (n.beats !== prevDur) tok += ":" + (+n.beats.toFixed(3));
+    if (syl) tok += ":" + syl;
+    prevDur = n.beats; line.push(tok); beat += n.beats;
+    if (Math.abs(beat / bpb - Math.round(beat / bpb)) < 1e-6) { line.push("|"); bars++; if (bars % 4 === 0) { s += line.join(" ") + "\n"; line = []; } }
+  }
+  if (line.length) s += line.join(" ") + "\n";
+  return s;
+}
+
+/* ════════ État ════════ */
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const state = {
+  text: store.get("pupitre.score.v3") || EXAMPLE,
+  score: null, voice: 0, others: 0, bpm: 140,
+  transpose: parseInt(store.get("pupitre.transpose") || "0", 10) || 0,
+  loop: false, mode: "listen", playing: null,
+  trace: [], results: null, stepIdx: 0, tol: 25, auto: true, guide: 0.35, zoom: 1,
+  live: null,
+};
+const view = { beat: 0, target: 0 };
+
+function loadScore(text) {
+  const { score, errors } = parseScore(text);
+  if (!score.parts.length) return { ok: false, errors };
+  state.text = text; state.score = score; state.bpm = score.tempo;
+  const saved = store.get("pupitre.voice") || "Alto";
+  selectVoice(Math.max(0, score.parts.findIndex(p => p.name === saved)));
+  return { ok: true, errors };
+}
+function selectVoice(i) {
+  const sc = state.score;
+  state.voice = i;
+  sc.notes = sc.parts[i].notes;
+  sc.total = Math.max(...sc.parts.map(p => p.total));
+  state.trace = []; state.results = null;
+  state.stepIdx = firstSungIndex(0, 1);
+  view.target = view.beat = 0;
+}
+const notes = () => state.score.notes;
+const tgtOf = n => n.midi == null ? null : n.midi + state.transpose;
+function firstSungIndex(i, dir) {
+  const ns = notes();
+  while (i >= 0 && i < ns.length && ns[i].midi == null) i += dir;
+  return Math.max(0, Math.min(ns.length - 1, i));
+}
+function noteIndexAt(beat) {
+  const ns = notes();
+  for (let i = 0; i < ns.length; i++) if (beat < ns[i].start + ns[i].beats) return i;
+  return ns.length - 1;
+}
+const barOf = beat => Math.floor(beat / state.score.beatsPerBar + 1e-6) + 1;
+
+/* ════════ Son (avec réverbération de salle) ════════ */
+
+let ctx = null, OUT = null;
+function ac() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    OUT = ctx.createGain(); OUT.gain.value = 0.9;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 3;
+    const conv = ctx.createConvolver(); conv.buffer = impulse(2.6, 2.6);
+    const wet = ctx.createGain(); wet.gain.value = 0.3;
+    OUT.connect(comp); OUT.connect(conv); conv.connect(wet).connect(comp); comp.connect(ctx.destination);
+  }
+  if (ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+function impulse(sec, decay) {
+  const len = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+  return b;
+}
+const freq = m => 440 * Math.pow(2, (m - 69) / 12);
+
+function tone(midi, t, dur, out, vel = 1) {
+  const c = ctx, f = freq(midi);
+  const g = c.createGain(), lp = c.createBiquadFilter();
+  lp.type = "lowpass"; lp.frequency.value = Math.min(3800, f * 5); lp.Q.value = 0.3;
+  const o1 = c.createOscillator(); o1.type = "triangle"; o1.frequency.value = f;
+  const o2 = c.createOscillator(); o2.type = "sine"; o2.frequency.value = f * 2;
+  const o3 = c.createOscillator(); o3.type = "sine"; o3.frequency.value = f * 1.003;
+  const g2 = c.createGain(); g2.gain.value = 0.16;
+  const g3 = c.createGain(); g3.gain.value = 0.35;
+  o1.connect(g); o2.connect(g2).connect(g); o3.connect(g3).connect(g); g.connect(lp).connect(out);
+  const a = 0.03, rel = 0.12, end = t + Math.max(0.12, dur * 0.94);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.26 * vel, t + a);
+  g.gain.exponentialRampToValueAtTime(0.17 * vel, t + Math.min(0.4, dur * 0.5) + a);
+  g.gain.setValueAtTime(0.17 * vel, end);
+  g.gain.exponentialRampToValueAtTime(0.0001, end + rel);
+  for (const o of [o1, o2, o3]) { o.start(t); o.stop(end + rel + 0.02); }
+}
+function bell(t, strong, out) {
+  const base = strong ? 1318.5 : 1046.5;
+  for (const [r, a] of [[1, 0.16], [2.76, 0.05], [5.4, 0.02]]) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = base * r;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(a, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7 / r + 0.15);
+    o.connect(g).connect(out); o.start(t); o.stop(t + 1);
+  }
+}
+function chime(out) { const t = ctx.currentTime; [0, 0.09, 0.18].forEach((d, i) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = "sine"; o.frequency.value = [1568, 1976, 2349][i]; g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(0.06, t + d + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.6); o.connect(g).connect(out); o.start(t + d); o.stop(t + d + 0.7); }); }
+
+let refBus = null, refUntil = 0;
+function playRef(midi, seconds = 1.1) {
+  const c = ac();
+  if (refBus) { const old = refBus; old.gain.setTargetAtTime(0, c.currentTime, 0.02); setTimeout(() => old.disconnect(), 300); }
+  refBus = c.createGain(); refBus.connect(OUT);
+  tone(midi, c.currentTime + 0.02, seconds, refBus);
+  refUntil = c.currentTime + 0.02 + seconds + 0.18;
+  fx.ripple(nowX(), yOf(midi), "gold");
+}
+
+function startPlayback({ from, guide = 1, countIn = false, mode = "listen" }) {
+  stopPlayback();
+  const c = ac(), ns = notes(), spb = 60 / state.bpm;
+  const startBeat = ns[from].start;
+  const lead = countIn ? state.score.beatsPerBar * spb : 0;
+  const t0 = c.currentTime + 0.15 + lead;
+  const bus = c.createGain(); bus.connect(OUT);
+  const gBus = c.createGain(); gBus.gain.value = guide; gBus.connect(bus);
+  if (countIn) for (let k = 0; k < state.score.beatsPerBar; k++) bell(t0 - lead + k * spb, k === 0, bus);
+  if (guide > 0) for (let i = from; i < ns.length; i++) { const n = ns[i]; if (n.midi != null) tone(tgtOf(n), t0 + (n.start - startBeat) * spb, n.beats * spb, gBus); }
+  if (state.others > 0) {
+    const oBus = c.createGain(); oBus.gain.value = state.others; oBus.connect(bus);
+    state.score.parts.forEach((p, k) => {
+      if (k === state.voice) return;
+      for (const n of p.notes) if (n.midi != null && n.start >= startBeat - 1e-6) tone(n.midi + state.transpose, t0 + (n.start - startBeat) * spb, n.beats * spb, oBus, 0.6);
+    });
+  }
+  state.playing = { t0, startBeat, endBeat: state.score.total, bus, mode, from, countIn, lastIdx: -1 };
+  updateButtons();
+}
+function stopPlayback() {
+  const p = state.playing; if (!p) return;
+  p.bus.gain.setTargetAtTime(0, ctx.currentTime, 0.02);
+  setTimeout(() => p.bus.disconnect(), 300);
+  state.playing = null;
+  $("countdown").hidden = true;
+  updateButtons();
+}
+function currentBeat() { const p = state.playing; return p && ctx ? p.startBeat + (ctx.currentTime - p.t0) * state.bpm / 60 : null; }
+
+/* ════════ Hauteur de la voix (YIN) ════════ */
+
+function detectPitch(buf, sr) {
+  const n = buf.length; let rms = 0;
+  for (let i = 0; i < n; i++) rms += buf[i] * buf[i];
+  if (Math.sqrt(rms / n) < 0.01) return null;
+  const W = Math.floor(n / 2), minT = Math.max(2, Math.floor(sr / 1100)), maxT = Math.min(W - 1, Math.floor(sr / 65));
+  const d = new Float32Array(maxT + 2);
+  for (let t = 1; t <= maxT + 1; t++) { let s = 0; for (let i = 0; i < W; i++) { const v = buf[i] - buf[i + t]; s += v * v; } d[t] = s; }
+  d[0] = 1; let run = 0;
+  for (let t = 1; t <= maxT + 1; t++) { run += d[t]; d[t] = run ? d[t] * t / run : 1; }
+  let tau = -1;
+  for (let t = minT; t <= maxT; t++) if (d[t] < 0.15) { while (t + 1 <= maxT && d[t + 1] < d[t]) t++; tau = t; break; }
+  if (tau < 0) return null;
+  const a = d[tau - 1], b = d[tau], c = d[tau + 1], den = a + c - 2 * b;
+  const f = sr / (tau + (den ? Math.max(-1, Math.min(1, (a - c) / (2 * den))) : 0));
+  return f < 65 || f > 1100 ? null : 69 + 12 * Math.log2(f / 440);
+}
+function decimate(src, k) {
+  if (k <= 1) return src;
+  const out = new Float32Array(Math.floor(src.length / k));
+  for (let i = 0, j = 0; i < out.length; i++, j += k) { let s = 0; for (let q = 0; q < k; q++) s += src[j + q]; out[i] = s / k; }
+  return out;
+}
+const fold = c => ((((c + 600) % 1200) + 1200) % 1200) - 600;
+const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+
+let mic = null, micState = "idle";
+async function ensureMic() {
+  if (mic) return mic;
+  if (micState === "denied") { showMicToast(); return null; }
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw 0;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+    const c = ac(), src = c.createMediaStreamSource(stream), an = c.createAnalyser();
+    an.fftSize = 2048; src.connect(an);
+    const k = Math.max(1, Math.round(c.sampleRate / 16000));
+    mic = { an, buf: new Float32Array(2048), k, sr: c.sampleRate / k };
+    micState = "on";
+  } catch { micState = "denied"; showMicToast(); }
+  updateButtons();
+  return mic;
+}
+function readMic() { if (!mic) return null; mic.an.getFloatTimeDomainData(mic.buf); return detectPitch(decimate(mic.buf, mic.k), mic.sr); }
+let smooth = null;
+function smoothed(p) {
+  if (p == null) return (smooth = null);
+  smooth = smooth == null || Math.abs(p - smooth) > 0.8 ? p : smooth * 0.6 + p * 0.4;
+  return smooth;
+}
+function showMicToast() {
+  $("micToastText").textContent = state.mode === "step"
+    ? "Ce mode marche aussi à l'oreille : écoutez la note, chantez-la, puis passez à la suivante. Pour être guidée en direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur."
+    : "Enregistrez-vous avec le dictaphone du téléphone, puis utilisez « Analyser un enregistrement » : chaque note sera vérifiée. Pour le direct, ouvrez le fichier Pupitre dans Chrome sur un ordinateur.";
+  $("micToast").hidden = false;
+}
+
+/* ════════ Scène ════════ */
+
+const $ = id => document.getElementById(id);
+const stage = $("stage"), cv = $("cv"), g = cv.getContext("2d");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COL = { gold: "#F3C870", ok: "#6EF0C2", high: "#FF8A66", low: "#7DBEFF", silver: "#AEB6D9", text: "#EEF0F8", muted: "#8C92B0", miss: "#6A6F8A" };
+const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+let W = 0, H = 0, backdrop = null;
+const TOP = 44, LEFT = 54;
+const BOTTOM = () => Math.max(78, Math.min(108, H * 0.2));
+const lanes = { lo: 55, hi: 72, h: 14 };
+
+function resize() {
+  const r = stage.getBoundingClientRect();
+  W = r.width; H = r.height;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  backdrop = makeBackdrop(dpr);
+  layout();
+}
+function layout() {
+  if (!state.score) return;
+  const ms = notes().filter(n => n.midi != null).map(tgtOf);
+  lanes.lo = Math.min(...ms) - 2; lanes.hi = Math.max(...ms) + 2;
+  lanes.h = (H - TOP - BOTTOM()) / (lanes.hi - lanes.lo + 1);
+}
+function makeBackdrop(dpr) {
+  const c = document.createElement("canvas"); c.width = Math.max(1, W * dpr); c.height = Math.max(1, H * dpr);
+  const b = c.getContext("2d"); b.scale(dpr, dpr);
+  const lg = b.createLinearGradient(0, 0, 0, H); lg.addColorStop(0, "#0D1026"); lg.addColorStop(1, "#05060C");
+  b.fillStyle = lg; b.fillRect(0, 0, W, H);
+  const blob = (x, y, r, col) => { const rg = b.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, col); rg.addColorStop(1, "rgba(0,0,0,0)"); b.fillStyle = rg; b.fillRect(0, 0, W, H); };
+  blob(W * 0.18, H * 0.05, W * 0.55, "rgba(70,78,170,.22)");
+  blob(W * 0.92, H * 0.95, W * 0.5, "rgba(120,60,140,.18)");
+  blob(W * 0.3, H * 0.55, W * 0.35, "rgba(243,200,112,.05)");
+  const vg = b.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.5)");
+  b.fillStyle = vg; b.fillRect(0, 0, W, H);
+  return c;
+}
+new ResizeObserver(resize).observe(stage);
+
+const nowX = () => Math.max(LEFT + 70, W * 0.3);
+const ppb = () => Math.max(26, Math.min(170, W / (state.score.beatsPerBar * 4.6) * state.zoom));
+const xOf = b => nowX() + (b - view.beat) * ppb();
+const yOf = m => TOP + (lanes.hi - m + 0.5) * lanes.h;
+
+/* Particules : neige, ondes, étincelles */
+const snow = Array.from({ length: reduced ? 0 : 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.5 + Math.random() * 1.6, v: 0.004 + Math.random() * 0.012, ph: Math.random() * 6.28, a: 0.15 + Math.random() * 0.45 }));
+const fx = {
+  items: [],
+  ripple(x, y, col) { if (!reduced) this.items.push({ k: "r", x, y, col, t: 0, life: 900 }); },
+  burst(x, y, col, n = 18) {
+    if (reduced) return;
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 0.04 + Math.random() * 0.16; this.items.push({ k: "s", x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 0.05, col, t: 0, life: 600 + Math.random() * 500, r: 1 + Math.random() * 2 }); }
+  },
+};
+
+function capsule(x, y, w, h) {
+  const r = Math.min(h / 2, w / 2);
+  g.beginPath();
+  g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+  g.lineTo(x + r, y + h); g.arc(x + r, y + r, r, Math.PI / 2, Math.PI * 1.5); g.closePath();
+}
+const statusCol = s => s === "ok" ? COL.ok : s === "high" ? COL.high : s === "low" ? COL.low : s === "miss" ? COL.miss : COL.gold;
+
+function draw(now, dt) {
+  if (!W || !H || !state.score) return;
+  const ns = notes(), P = ppb(), NX = nowX(), bpb = state.score.beatsPerBar, bot = H - BOTTOM();
+  g.clearRect(0, 0, W, H);
+  if (backdrop) g.drawImage(backdrop, 0, 0, W, H);
+
+  // neige
+  for (const s of snow) {
+    s.y += s.v * dt / 16 * 0.06; s.x += Math.sin(now / 2400 + s.ph) * 0.00012 * dt;
+    if (s.y > 1.02) { s.y = -0.02; s.x = Math.random(); }
+    g.fillStyle = `rgba(230,236,255,${s.a})`; g.beginPath(); g.arc(s.x * W, s.y * H, s.r, 0, 6.283); g.fill();
+  }
+
+  // pistes
+  for (let m = lanes.lo; m <= lanes.hi; m++) {
+    const y = yOf(m) - lanes.h / 2;
+    if (BLACK.has(pcOf(m))) { g.fillStyle = "rgba(255,255,255,.022)"; g.fillRect(LEFT, y, W - LEFT, lanes.h); }
+    if (pcOf(m) === 0) { g.fillStyle = "rgba(255,255,255,.07)"; g.fillRect(LEFT, y + lanes.h - 0.5, W - LEFT, 1); }
+  }
+  // mesures
+  const firstBar = Math.max(0, Math.floor((view.beat - (NX - LEFT) / P) / bpb));
+  g.font = "500 10px 'JetBrains Mono', monospace"; g.textAlign = "left"; g.textBaseline = "top";
+  for (let k = firstBar; k * bpb <= state.score.total; k++) {
+    const x = xOf(k * bpb); if (x > W) break; if (x < LEFT) continue;
+    g.fillStyle = "rgba(255,255,255,.05)"; g.fillRect(Math.round(x), TOP - 6, 1, bot - TOP + 6);
+    if (k * bpb < state.score.total) { g.fillStyle = "rgba(140,146,176,.6)"; g.fillText(String(k + 1), x + 4, TOP - 18); }
+  }
+
+  g.save(); g.beginPath(); g.rect(LEFT, 0, W - LEFT, bot); g.clip();
+
+  // autres voix : de fines lignes argentées
+  state.score.parts.forEach((p, k) => {
+    if (k === state.voice) return;
+    for (const n of p.notes) {
+      if (n.midi == null) continue;
+      const x = xOf(n.start), w = n.beats * P; if (x > W || x + w < LEFT) continue;
+      const m = n.midi + state.transpose; if (m < lanes.lo - 0.5 || m > lanes.hi + 0.5) continue;
+      capsule(x + 2, yOf(m) - lanes.h * 0.14, Math.max(4, w - 4), lanes.h * 0.28);
+      g.fillStyle = "rgba(174,182,217,.13)"; g.fill();
+    }
+  });
+
+  // mes notes
+  const vb = view.beat, live = state.live;
+  const curIdx = noteIndexAt(vb);
+  for (let i = 0; i < ns.length; i++) {
+    const n = ns[i]; if (n.midi == null) continue;
+    const x = xOf(n.start), w = n.beats * P; if (x > W + 10) break; if (x + w < LEFT - 10) continue;
+    const m = tgtOf(n), hh = Math.max(6, lanes.h * 0.74), y = yOf(m) - hh / 2;
+    const res = state.results?.[i];
+    const col = res ? statusCol(res.status) : COL.gold;
+    const active = vb >= n.start && vb < n.start + n.beats && (state.playing || state.mode === "step");
+    const isStep = state.mode === "step" && i === state.stepIdx;
+    const past = n.start + n.beats <= vb && !res;
+    const alpha = past ? 0.3 : 1;
+    const glowing = active || isStep;
+    g.save();
+    if (glowing) { g.shadowColor = rgba(col, 0.9); g.shadowBlur = 26; }
+    const gr = g.createLinearGradient(0, y, 0, y + hh);
+    gr.addColorStop(0, rgba(col, (glowing ? 1 : 0.82) * alpha)); gr.addColorStop(1, rgba(col, (glowing ? 0.75 : 0.5) * alpha));
+    capsule(x + 1.5, y, Math.max(6, w - 3), hh); g.fillStyle = gr; g.fill();
+    g.restore();
+    if (glowing && state.playing) {
+      const fillW = Math.max(0, Math.min(w - 3, NX - x - 1.5));
+      g.save(); capsule(x + 1.5, y, Math.max(6, w - 3), hh); g.clip();
+      g.fillStyle = "rgba(255,255,255,.28)"; g.fillRect(x, y, fillW, hh); g.restore();
+    }
+    if (w > 26 && hh >= 10) {
+      g.fillStyle = `rgba(20,14,4,${past ? 0.5 : 0.78})`; g.font = `700 ${Math.min(11, hh - 3)}px Manrope, sans-serif`;
+      g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(noteName(m), x + 8, y + hh / 2 + 0.5);
+    }
+  }
+
+  // traînée de la voix
+  if (state.trace.length > 1) {
+    g.lineWidth = 3; g.lineCap = "round"; g.lineJoin = "round";
+    let prev = null;
+    for (const p of state.trace) {
+      const x = xOf(p.beat);
+      if (p.midi == null || x < LEFT - 20 || x > W + 20) { prev = null; continue; }
+      const t = tgtOf(ns[noteIndexAt(p.beat)]);
+      const m = t == null ? p.midi : t + fold((p.midi - t) * 100) / 100;
+      const y = yOf(m);
+      if (prev && Math.abs(prev.y - y) < lanes.h * 3 && x - prev.x < P) {
+        const c = t == null ? COL.silver : Math.abs((m - t) * 100) <= state.tol ? COL.ok : m > t ? COL.high : COL.low;
+        g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 10;
+        g.beginPath(); g.moveTo(prev.x, prev.y); g.lineTo(x, y); g.stroke();
+      }
+      prev = { x, y };
+    }
+    g.shadowBlur = 0;
+  }
+  g.restore();
+
+  // ligne du présent
+  const beam = g.createLinearGradient(0, TOP - 10, 0, bot);
+  beam.addColorStop(0, "rgba(243,200,112,0)"); beam.addColorStop(0.5, "rgba(243,200,112,.75)"); beam.addColorStop(1, "rgba(243,200,112,0)");
+  g.fillStyle = "rgba(243,200,112,.05)"; g.fillRect(NX - 16, TOP - 10, 32, bot - TOP + 10);
+  g.fillStyle = beam; g.fillRect(NX - 1, TOP - 10, 2, bot - TOP + 10);
+
+  // la voix en direct : une perle de lumière sur la ligne du présent
+  if (live && live.midi != null) {
+    const y = yOf(Math.max(lanes.lo - 0.4, Math.min(lanes.hi + 0.4, live.shown)));
+    const c = live.cls === "ok" ? COL.ok : live.cls === "high" ? COL.high : live.cls === "low" ? COL.low : COL.silver;
+    const halo = g.createRadialGradient(NX, y, 0, NX, y, 30); halo.addColorStop(0, rgba(c, 0.55)); halo.addColorStop(1, rgba(c, 0));
+    g.fillStyle = halo; g.beginPath(); g.arc(NX, y, 30, 0, 6.283); g.fill();
+    g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 18; g.beginPath(); g.arc(NX, y, 7, 0, 6.283); g.fill(); g.shadowBlur = 0;
+    if (state.mode === "step" && hold > 0) {
+      g.strokeStyle = COL.ok; g.lineWidth = 3; g.lineCap = "round";
+      g.beginPath(); g.arc(NX, y, 17, -Math.PI / 2, -Math.PI / 2 + 6.283 * Math.min(1, hold / HOLD_MS)); g.stroke();
+    }
+  }
+
+  // ondes et étincelles
+  fx.items = fx.items.filter(it => (it.t += dt) < it.life);
+  for (const it of fx.items) {
+    const p = it.t / it.life;
+    if (it.k === "r") { g.strokeStyle = rgba(COL[it.col] || it.col, (1 - p) * 0.8); g.lineWidth = 2; g.beginPath(); g.arc(it.x, it.y, 8 + p * 54, 0, 6.283); g.stroke(); }
+    else { it.x += it.vx * dt; it.y += it.vy * dt; it.vy += 0.00025 * dt; g.fillStyle = rgba(COL[it.col] || it.col, 1 - p); g.beginPath(); g.arc(it.x, it.y, it.r, 0, 6.283); g.fill(); }
+  }
+
+  // noms des notes, sur un fondu
+  const lg = g.createLinearGradient(0, 0, LEFT + 30, 0);
+  lg.addColorStop(0, "rgba(7,8,16,.95)"); lg.addColorStop(0.7, "rgba(7,8,16,.85)"); lg.addColorStop(1, "rgba(7,8,16,0)");
+  g.fillStyle = lg; g.fillRect(0, TOP - 24, LEFT + 30, bot - TOP + 24);
+  g.textAlign = "right"; g.textBaseline = "middle";
+  for (let m = lanes.lo; m <= lanes.hi; m++) {
+    const pc = pcOf(m); if (BLACK.has(pc)) continue;
+    if (lanes.h < 12 && ![0, 4, 7].includes(pc)) continue;
+    const hot = live && live.midi != null && Math.round(live.shown) === m;
+    g.fillStyle = hot ? COL.gold : pc === 0 ? "rgba(238,240,248,.85)" : "rgba(140,146,176,.75)";
+    g.font = `${pc === 0 || hot ? 700 : 500} 11px Manrope, sans-serif`;
+    g.fillText(fullName(m), LEFT - 6, yOf(m));
+  }
+
+  drawLyrics(curIdx, bot);
+}
+
+function drawLyrics(curIdx, bot) {
+  const ns = notes(), bpb = state.score.beatsPerBar;
+  const phrase = Math.floor((barOf(Math.max(0, view.beat)) - 1) / 4);
+  const a = phrase * 4 * bpb, b = a + 4 * bpb;
+  const words = [];
+  for (let i = 0; i < ns.length; i++) { const n = ns[i]; if (n.start >= b) break; if (n.start >= a && n.syl) words.push({ i, s: n.syl }); }
+  const size = Math.max(18, Math.min(32, W / 30));
+  const y = bot + (H - bot) / 2 + 4;
+  g.textBaseline = "middle"; g.textAlign = "left";
+  g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(LEFT, bot, W - LEFT * 2, 1);
+  if (!words.length) { g.font = `italic 500 ${size}px 'Cormorant Garamond', Georgia, serif`; g.fillStyle = "rgba(140,146,176,.5)"; g.textAlign = "center"; g.fillText("· · ·", W / 2, y); return; }
+  g.font = `italic 600 ${size}px 'Cormorant Garamond', Georgia, serif`;
+  const gap = size * 0.42;
+  const widths = words.map(w => g.measureText(w.s).width);
+  let total = widths.reduce((s, w) => s + w, 0) + gap * (words.length - 1);
+  let scale = Math.min(1, (W - 40) / total);
+  if (scale < 1) { g.font = `italic 600 ${size * scale}px 'Cormorant Garamond', Georgia, serif`; total *= scale; }
+  let x = (W - total) / 2;
+  const active = state.mode === "step" ? state.stepIdx : curIdx;
+  words.forEach((w, k) => {
+    const ww = widths[k] * scale;
+    if (w.i === active) { g.fillStyle = COL.gold; g.shadowColor = "rgba(243,200,112,.8)"; g.shadowBlur = 18; }
+    else if (w.i < active) { g.fillStyle = "rgba(238,240,248,.92)"; g.shadowBlur = 0; }
+    else { g.fillStyle = "rgba(140,146,176,.55)"; g.shadowBlur = 0; }
+    g.fillText(w.s, x, y); g.shadowBlur = 0;
+    x += ww + gap * scale;
+  });
+}
+
+/* ════════ Boucle ════════ */
+
+let last = performance.now(), hold = 0, advancing = false;
+const HOLD_MS = 650;
+function frame(now) {
+  const dt = Math.min(64, now - last); last = now;
+  const p = state.playing;
+  if (p) {
+    const b = currentBeat();
+    view.beat = view.target = b;
+    const cd = $("countdown");
+    if (p.countIn && b < p.startBeat) { cd.hidden = false; const n = String(Math.min(state.score.beatsPerBar, Math.ceil(p.startBeat - b))); if ($("countNum").textContent !== n) { $("countNum").textContent = n; $("countNum").style.animation = "none"; void $("countNum").offsetWidth; $("countNum").style.animation = ""; } }
+    else cd.hidden = true;
+    const idx = noteIndexAt(b), n = notes()[idx];
+    if (b >= n.start && idx !== p.lastIdx && n.midi != null) { p.lastIdx = idx; fx.ripple(nowX(), yOf(tgtOf(n)), "gold"); }
+    if (p.mode === "sing" && b >= p.startBeat - 0.25) {
+      const m = readMic();
+      state.trace.push({ beat: b, midi: m });
+      setLive(smoothed(m), tgtOf(n));
+    }
+    if (b >= p.endBeat + (p.mode === "sing" ? 0.5 : 0)) finishPlayback();
+  } else {
+    view.beat += (view.target - view.beat) * Math.min(1, dt * 0.012);
+    if (state.mode === "sing" && mic) setLive(smoothed(readMic()), tgtOf(notes()[noteIndexAt(view.beat)]));
+  }
+  if (state.mode === "step") stepTick(dt);
+  $("where").textContent = `MESURE ${Math.min(barOf(Math.max(0, view.beat)), Math.ceil(state.score.total / state.score.beatsPerBar))} / ${Math.ceil(state.score.total / state.score.beatsPerBar - 1e-6)}`;
+  draw(now, dt);
+  requestAnimationFrame(frame);
+}
+
+function setLive(m, tgt) {
+  if (m == null) { state.live = null; return; }
+  if (tgt == null) { state.live = { midi: m, shown: m, cls: "" }; return; }
+  const c = fold((m - tgt) * 100);
+  const cls = Math.abs(c) <= state.tol ? "ok" : c > 0 ? "high" : "low";
+  state.live = { midi: m, cents: c, shown: tgt + c / 100, cls };
+}
+
+function finishPlayback() {
+  const p = state.playing;
+  stopPlayback();
+  state.live = null;
+  view.target = p ? p.startBeat : 0;
+  if (p?.mode === "listen" && state.loop) { startPlayback({ from: p.from, mode: "listen" }); return; }
+  if (p?.mode === "sing") { state.results = evaluateTrace(state.trace, p.from); renderResults("live"); }
+}
+
+/* ════════ Écouter ════════ */
+
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.5" height="14" rx="1.2"/><rect x="13.5" y="5" width="4.5" height="14" rx="1.2"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>',
+};
+function updateButtons() {
+  const m = state.playing?.mode;
+  $("playBtn").innerHTML = m === "listen" ? ICON.pause : ICON.play;
+  $("playBtn").setAttribute("aria-label", m === "listen" ? "Pause" : "Lecture");
+  $("singBtn").innerHTML = m === "sing" ? ICON.stop : ICON.mic;
+  $("singBtn").setAttribute("aria-label", m === "sing" ? "Arrêter" : "Chanter depuis la ligne dorée");
+  $("micBtn").hidden = !!mic;
+}
+const startIndexAtView = () => { const i = noteIndexAt(Math.max(0, view.beat + 0.01)); return i; };
+
+$("playBtn").onclick = () => {
+  if (state.playing?.mode === "listen") { const b = currentBeat(); stopPlayback(); view.target = notes()[noteIndexAt(b)].start; return; }
+  hideHint();
+  const i = startIndexAtView();
+  startPlayback({ from: i, mode: "listen" });
+};
+$("restartBtn").onclick = () => { const was = state.playing?.mode === "listen"; stopPlayback(); view.target = 0; if (was) startPlayback({ from: 0, mode: "listen" }); };
+$("loopBtn").onclick = e => { state.loop = !state.loop; e.currentTarget.setAttribute("aria-pressed", state.loop); };
+
+function setTempo(v) {
+  const p = state.playing;
+  state.bpm = Math.max(30, Math.min(220, Math.round(v)));
+  document.querySelectorAll(".tempoOut").forEach(o => o.textContent = state.bpm + " / min");
+  renderMeta();
+  if (p && p.mode === "listen") { const b = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(b), mode: "listen" }); }
+}
+document.querySelectorAll("[data-tempo]").forEach(b => b.onclick = e => { e.preventDefault(); setTempo(state.bpm + +b.dataset.tempo); });
+function setTranspose(v) {
+  state.transpose = Math.max(-12, Math.min(12, v));
+  store.set("pupitre.transpose", String(state.transpose));
+  const t = state.transpose;
+  document.querySelectorAll(".trOut").forEach(o => o.textContent = t === 0 ? "écrite" : (t > 0 ? "+" : "−") + Math.abs(t) + " demi-ton" + (Math.abs(t) > 1 ? "s" : ""));
+  stopPlayback(); state.results = null; state.trace = []; $("results").hidden = true;
+  layout(); renderMeta(); if (state.mode === "step") renderStep();
+}
+document.querySelectorAll("[data-tr]").forEach(b => b.onclick = e => { e.preventDefault(); setTranspose(state.transpose + +b.dataset.tr); });
+document.querySelectorAll(".othersSeg button").forEach(b => b.onclick = () => {
+  state.others = +b.dataset.others;
+  document.querySelectorAll(".othersSeg button").forEach(x => x.setAttribute("aria-pressed", +x.dataset.others === state.others));
+  if (state.playing?.mode === "listen") { const bt = currentBeat(); stopPlayback(); startPlayback({ from: noteIndexAt(bt), mode: "listen" }); }
+});
+
+/* ════════ Note par note ════════ */
+
+function renderStep() {
+  const ns = notes(), i = state.stepIdx = firstSungIndex(state.stepIdx, 1), m = tgtOf(ns[i]);
+  $("stepName").textContent = noteName(m);
+  $("stepOct").textContent = fullName(m);
+  $("stepSyl").textContent = ns[i].syl || " ";
+  const sung = ns.filter(n => n.midi != null).length, pos = ns.slice(0, i + 1).filter(n => n.midi != null).length;
+  $("stepCount").textContent = `Note ${pos} sur ${sung} · mesure ${barOf(ns[i].start)}`;
+  setHint(mic ? "Chantez la note" : "Écoutez, puis chantez", "");
+  hold = 0;
+  view.target = ns[i].start + Math.min(ns[i].beats * 0.5, 0.6);
+}
+function setHint(t, cls) { const h = $("stepHint"); if (h.textContent !== t) h.textContent = t; h.className = "hint " + (cls || ""); }
+function stepGo(i, play = true) {
+  state.stepIdx = i; renderStep();
+  if (play) playRef(tgtOf(notes()[state.stepIdx]), 1.1);
+}
+function stepTick(dt) {
+  if (!mic || !ctx) return;
+  const tgt = tgtOf(notes()[state.stepIdx]);
+  if (ctx.currentTime < refUntil || advancing) { state.live = null; return; }
+  const m = smoothed(readMic());
+  setLive(m, tgt);
+  if (m == null) { hold = Math.max(0, hold - dt * 0.5); return; }
+  const c = state.live.cents, a = Math.abs(c);
+  if (state.live.cls === "ok") setHint("Juste !", "ok");
+  else if (c < 0) setHint(a < 60 ? "Montez un peu ↑" : "Plus haut ↑↑", "low");
+  else setHint(a < 60 ? "Descendez un peu ↓" : "Plus bas ↓↓", "high");
+  hold = state.live.cls === "ok" ? hold + dt : Math.max(0, hold - dt);
+  if (hold >= HOLD_MS) {
+    advancing = true;
+    setHint("Bravo !", "ok");
+    fx.burst(nowX(), yOf(tgt), "ok", 26); fx.ripple(nowX(), yOf(tgt), "ok"); chime(OUT);
+    state.results = state.results || [];
+    state.results[state.stepIdx] = { status: "ok", cents: c };
+    setTimeout(() => {
+      advancing = false; hold = 0;
+      const nxt = firstSungIndex(state.stepIdx + 1, 1);
+      if (!state.auto || nxt === state.stepIdx) return;
+      stepGo(nxt);
+    }, 650);
+  }
+}
+$("stepListen").onclick = () => { playRef(tgtOf(notes()[state.stepIdx]), 1.4); };
+$("stepNext").onclick = () => stepGo(firstSungIndex(state.stepIdx + 1, 1));
+$("stepPrev").onclick = () => stepGo(firstSungIndex(state.stepIdx - 1, -1));
+$("autoBtn").onclick = e => { state.auto = !state.auto; e.currentTarget.setAttribute("aria-pressed", state.auto); };
+$("micBtn").onclick = () => ensureMic();
+document.querySelectorAll("#tolSeg button").forEach(b => b.onclick = () => {
+  state.tol = +b.dataset.tol;
+  document.querySelectorAll("#tolSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+
+/* ════════ Chanter ════════ */
+
+$("singBtn").onclick = async () => {
+  if (state.playing?.mode === "sing") { finishPlayback(); return; }
+  hideHint();
+  const m = await ensureMic(); if (!m) return;
+  state.trace = []; state.results = null; $("results").hidden = true;
+  startPlayback({ from: startIndexAtView(), guide: state.guide, countIn: true, mode: "sing" });
+};
+document.querySelectorAll("#guideSeg button").forEach(b => b.onclick = () => {
+  state.guide = +b.dataset.guide;
+  document.querySelectorAll("#guideSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+});
+
+function rate(samples, target) {
+  const v = samples.filter(x => x != null);
+  if (v.length < 3) return { status: "miss", cents: null };
+  const cents = median(v.map(x => fold((x - target) * 100)));
+  return { status: Math.abs(cents) <= state.tol ? "ok" : cents > 0 ? "high" : "low", cents };
+}
+function evaluateTrace(trace, from = 0) {
+  return notes().map((n, i) => {
+    if (n.midi == null || i < from) return null;
+    const a = n.start + Math.min(0.25, n.beats * 0.3), b = n.start + n.beats * 0.92;
+    return rate(trace.filter(p => p.beat >= a && p.beat < b).map(p => p.midi), tgtOf(n));
+  });
+}
+
+function renderResults(source) {
+  const res = state.results || [], ns = notes();
+  const rated = res.map((r, i) => r && { ...r, i }).filter(Boolean);
+  const sung = rated.filter(r => r.status !== "miss");
+  const ok = sung.filter(r => r.status === "ok").length, high = sung.filter(r => r.status === "high").length, low = sung.filter(r => r.status === "low").length;
+  const box = $("results");
+  if (!rated.length) { box.hidden = true; return; }
+  const pct = ok / rated.length;
+  let verdict, advice;
+  if (!sung.length) { verdict = "Rien entendu"; advice = "Le micro n'a pas capté de voix. Rapprochez-vous du micro."; }
+  else if (pct >= 0.85) { verdict = "Très juste"; advice = "Presque tout est en place. Essayez avec la mélodie guide muette, ou en exigence Stricte."; }
+  else if (pct >= 0.6) { verdict = "Bien parti"; advice = "La plupart des notes sont justes. Reprenez celles en couleur en mode Note par note."; }
+  else { verdict = "À travailler"; advice = "Baissez le tempo et passez par le mode Note par note sur les passages en couleur."; }
+  if (sung.length >= 4 && high + low >= 3) {
+    if (low >= 2 * high) advice += " Tendance : un peu en dessous de la note. Visez au-dessus.";
+    else if (high >= 2 * low) advice += " Tendance : un peu au-dessus de la note.";
+  }
+  const C = 2 * Math.PI * 42;
+  box.innerHTML = `
+    <div class="res-head">
+      <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/><circle cx="50" cy="50" r="42" fill="none" stroke="${COL.ok}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}" style="filter:drop-shadow(0 0 6px ${rgba(COL.ok, .6)})"/></svg><b>${Math.round(pct * 100)}%</b></div>
+      <div><h3>${verdict}, ${ok} note${ok > 1 ? "s" : ""} juste${ok > 1 ? "s" : ""} sur ${rated.length}</h3><p>${advice}</p></div>
+      <button class="closeBtn" type="button" id="closeRes" aria-label="Fermer">×</button>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--ok)"></span>juste</span>
+      <span><span class="dot" style="background:var(--high)"></span>trop haut</span>
+      <span><span class="dot" style="background:var(--low)"></span>trop bas</span>
+      <span>¢ = centième de demi-ton</span>
+      ${source === "file" ? "<span>Enregistrement calé automatiquement sur la partition</span>" : ""}
+    </div>
+    <div class="chips">${rated.map(r => {
+      const n = ns[r.i], m = tgtOf(n);
+      const lab = r.status === "miss" ? "pas entendu" : r.status === "ok" ? "juste" : (r.cents > 0 ? "+" : "−") + Math.round(Math.abs(r.cents)) + " ¢";
+      return `<button type="button" class="chip ${r.status}" data-i="${r.i}" title="${fullName(m)}, mesure ${barOf(n.start)}"><i>${n.syl ? esc(n.syl) : noteName(m)}</i><small>${lab}</small></button>`;
+    }).join("")}</div>
+    <div class="status">Touchez une note pour la retravailler en mode Note par note.</div>`;
+  box.hidden = false;
+  $("closeRes").onclick = () => { box.hidden = true; };
+  box.querySelectorAll(".chip").forEach(c => c.onclick = () => { box.hidden = true; setMode("step"); stepGo(+c.dataset.i); });
+}
+
+$("audioFile").onchange = async e => {
+  const file = e.target.files[0]; e.target.value = "";
+  if (!file) return;
+  const st = $("fileStatus"); st.hidden = false; st.textContent = "Lecture de l'enregistrement…";
+  $("results").hidden = true;
+  try {
+    const audio = await ac().decodeAudioData(await file.arrayBuffer());
+    const len = audio.length, mono = new Float32Array(len);
+    for (let c = 0; c < audio.numberOfChannels; c++) { const d = audio.getChannelData(c); for (let i = 0; i < len; i++) mono[i] += d[i] / audio.numberOfChannels; }
+    const k = Math.max(1, Math.round(audio.sampleRate / 16000)), x = decimate(mono, k), sr = audio.sampleRate / k, dur = x.length / sr;
+    if (dur > 600) throw { long: true };
+    const scoreSec = state.score.total * 60 / state.bpm;
+    const fps = Math.max(6, Math.min(20, Math.sqrt(7e6 / Math.max(1, dur * scoreSec))));
+    const hop = sr / fps, win = 1024, M = Math.floor((x.length - win) / hop), sungF = new Array(M);
+    for (let j = 0; j < M; j++) {
+      const s = Math.floor(j * hop); sungF[j] = detectPitch(x.subarray(s, s + win), sr);
+      if (j % 200 === 0) { st.textContent = `Écoute de la voix… ${Math.round(j / M * 100)} %`; await new Promise(r => setTimeout(r)); }
+    }
+    st.textContent = "Calage sur la partition…"; await new Promise(r => setTimeout(r, 20));
+    const assign = align(sungF, fps), ns = notes(), per = ns.map(() => []);
+    assign.forEach((ni, j) => { if (ni >= 0) per[ni].push(j); });
+    const trace = [];
+    state.results = ns.map((n, i) => {
+      const js = per[i];
+      js.forEach((j, q) => trace.push({ beat: n.start + (q / Math.max(1, js.length)) * n.beats, midi: sungF[j] }));
+      if (n.midi == null) return null;
+      return rate(js.slice(Math.floor(js.length * 0.2), Math.ceil(js.length * 0.92)).map(j => sungF[j]), tgtOf(n));
+    });
+    state.trace = trace.sort((p, q) => p.beat - q.beat);
+    st.hidden = true; view.target = 0;
+    renderResults("file");
+  } catch (err) {
+    st.textContent = err?.long ? "L'enregistrement dépasse 10 minutes. Coupez-le au morceau travaillé." : "Ce fichier n'a pas pu être lu. Essayez un enregistrement du dictaphone (m4a, mp3 ou wav).";
+  }
+};
+function align(X, fps) {
+  const S = [];
+  notes().forEach((n, i) => { const k = Math.max(1, Math.round(n.beats * 60 / state.bpm * fps)); for (let q = 0; q < k; q++) S.push({ i, m: tgtOf(n) }); });
+  const N = S.length, M = X.length;
+  const cost = (s, x) => s.m == null ? (x == null ? 0 : 0.8) : x == null ? 0.5 : Math.min(Math.abs(fold((x - s.m) * 100)) / 100, 4) / 2;
+  const D = new Float32Array(N * M), P = new Uint8Array(N * M);
+  for (let j = 0; j < M; j++) D[j] = cost(S[0], X[j]);
+  for (let i = 1; i < N; i++) {
+    const r = i * M, pr = (i - 1) * M, si = S[i];
+    D[r] = D[pr] + cost(si, X[0]); P[r] = 1;
+    for (let j = 1; j < M; j++) {
+      const c = cost(si, X[j]), dg = D[pr + j - 1], up = D[pr + j], lf = D[r + j - 1];
+      if (dg <= up && dg <= lf) { D[r + j] = dg + c; P[r + j] = 3; } else if (up <= lf) { D[r + j] = up + c * 1.2; P[r + j] = 1; } else { D[r + j] = lf + c; P[r + j] = 2; }
+    }
+  }
+  let jEnd = 0, best = Infinity; const last = (N - 1) * M;
+  for (let j = 0; j < M; j++) if (D[last + j] < best) { best = D[last + j]; jEnd = j; }
+  const assign = new Array(M).fill(-1);
+  let i = N - 1, j = jEnd;
+  while (i >= 0 && j >= 0) {
+    if (assign[j] < 0) assign[j] = S[i].i;
+    const pp = P[i * M + j]; if (pp === 0) break;
+    if (pp === 3) { i--; j--; } else if (pp === 1) i--; else j--;
+  }
+  return assign;
+}
+
+/* ════════ Modes, gestes, clavier ════════ */
+
+function setMode(mode) {
+  if (state.mode === mode) return;
+  stopPlayback(); state.live = null;
+  state.mode = mode;
+  for (const m of ["listen", "step", "sing"]) { $("ctrl-" + m).hidden = m !== mode; $("tab-" + m).setAttribute("aria-selected", m === mode); }
+  $("stepHud").hidden = mode !== "step";
+  $("micToast").hidden = true;
+  if (mode === "step") { renderStep(); if (micState === "idle") ensureMic(); }
+  if (mode === "sing" && micState === "idle") ensureMic();
+}
+document.querySelectorAll(".modes button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+let drag = null;
+cv.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, beat: view.target, moved: false }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  if (!drag.moved && Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(e.clientY - drag.y)) { drag.moved = true; cv.classList.add("dragging"); hideHint(); }
+  if (drag.moved && !state.playing) { view.target = view.beat = Math.max(-2, Math.min(state.score.total, drag.beat - dx / ppb())); }
+});
+cv.addEventListener("pointerup", e => {
+  const d = drag; drag = null; cv.classList.remove("dragging");
+  if (!d || d.moved) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left;
+  if (x < LEFT) return;
+  const beat = view.beat + (x - nowX()) / ppb();
+  if (beat < 0 || beat > state.score.total) return;
+  let i = noteIndexAt(beat);
+  if (notes()[i].midi == null) i = firstSungIndex(i, 1);
+  if (state.mode === "step") { stepGo(i); return; }
+  if (state.playing) return;
+  view.target = notes()[i].start;
+  playRef(tgtOf(notes()[i]), Math.min(1.6, notes()[i].beats * 60 / state.bpm + 0.2));
+});
+cv.addEventListener("pointercancel", () => { drag = null; cv.classList.remove("dragging"); });
+cv.addEventListener("wheel", e => {
+  if (state.playing) return;
+  const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if (!d) return;
+  e.preventDefault(); hideHint();
+  view.target = Math.max(-2, Math.min(state.score.total, view.target + d / ppb()));
+}, { passive: false });
+$("zoomIn").onclick = () => { state.zoom = Math.min(3, state.zoom * 1.25); };
+$("zoomOut").onclick = () => { state.zoom = Math.max(0.35, state.zoom / 1.25); };
+function hideHint() { $("hintDrag").style.opacity = "0"; }
+
+document.addEventListener("keydown", e => {
+  if (!$("sheetBack").hidden) { if (e.key === "Escape") closeSheet(); return; }
+  if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+  if (e.code === "Space") { e.preventDefault(); (state.mode === "sing" ? $("singBtn") : state.mode === "step" ? $("stepListen") : $("playBtn")).click(); }
+  if (e.key === "ArrowRight") { e.preventDefault(); if (state.mode === "step") $("stepNext").click(); else if (!state.playing) view.target = Math.min(state.score.total, view.target + state.score.beatsPerBar); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); if (state.mode === "step") $("stepPrev").click(); else if (!state.playing) view.target = Math.max(0, view.target - state.score.beatsPerBar); }
+});
+$("micToastClose").onclick = () => { $("micToast").hidden = true; };
+
+/* ════════ Partition : tiroir, voix, photo ════════ */
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function renderMeta() {
+  const sc = state.score, ms = notes().filter(n => n.midi != null).map(tgtOf);
+  $("title").textContent = sc.title;
+  $("meta").textContent = `${Math.ceil(sc.total / sc.beatsPerBar - 1e-6)} mesures · de ${fullName(Math.min(...ms))} à ${fullName(Math.max(...ms))} · ${state.bpm} temps par minute`;
+}
+function renderVoices() {
+  const parts = state.score.parts, box = $("voices"), multi = parts.length > 1;
+  box.hidden = !multi;
+  document.querySelectorAll(".othersField").forEach(el => el.hidden = !multi);
+  if (!multi) return;
+  box.innerHTML = parts.map((p, i) => `<button type="button" data-voice="${i}" aria-pressed="${i === state.voice}">${esc(p.name)}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    const i = +b.dataset.voice; if (i === state.voice) return;
+    stopPlayback(); selectVoice(i); store.set("pupitre.voice", state.score.parts[i].name); refreshAll();
+  });
+}
+function refreshAll() {
+  renderVoices(); setTempo(state.bpm); layout(); renderMeta();
+  $("results").hidden = true;
+  if (state.mode === "step") renderStep();
+}
+function openSheet() { $("scoreText").value = state.text; $("parseErr").hidden = true; $("sheetBack").hidden = false; }
+function closeSheet() { $("sheetBack").hidden = true; }
+$("openSheet").onclick = openSheet;
+$("closeSheet").onclick = closeSheet;
+$("sheetBack").addEventListener("click", e => { if (e.target === e.currentTarget) closeSheet(); });
+function applyText(text) {
+  stopPlayback();
+  const r = loadScore(text), err = $("parseErr");
+  if (!r.ok) { err.hidden = false; err.textContent = "Aucune note reconnue. Vérifiez l'écriture, par exemple sol3:1:joie."; return false; }
+  store.set("pupitre.score.v3", text);
+  if (r.errors.length) { err.hidden = false; err.textContent = `Ignoré, non reconnu : ${r.errors.slice(0, 12).join("  ")}${r.errors.length > 12 ? " …" : ""}`; } else err.hidden = true;
+  refreshAll();
+  return true;
+}
+$("applyScore").onclick = () => { if (applyText($("scoreText").value) && $("parseErr").hidden) closeSheet(); };
+$("resetScore").onclick = () => { $("scoreText").value = EXAMPLE; applyText(EXAMPLE); };
+
+let sampleFn = null;
+function hidePhoto() { $("photoSection").hidden = true; $("photoSep").hidden = true; }
+if (!window.claude) hidePhoto();
+else (async () => {
+  try { sampleFn = await window.claude.use("sample"); const lim = sampleFn ? await sampleFn.limits().catch(() => null) : null; if (!lim?.images) hidePhoto(); else $("photoFile").accept = lim.images.mediaTypes.join(","); }
+  catch { hidePhoto(); }
+})();
+$("photoFile").onchange = async e => {
+  const files = [...e.target.files]; e.target.value = "";
+  if (!files.length || !sampleFn) return;
+  const st = $("photoStatus"); st.hidden = false; st.className = "status"; st.textContent = "Claude lit la partition… (cela peut prendre une minute)";
+  const voice = $("voiceSel").value;
+  const prompt = `Ces images sont les pages d'une partition de chœur, dans l'ordre. Recopie uniquement la ligne de la voix « ${voice} », du début à la fin, avec les paroles de cette voix.
+Règles : applique l'armure et les altérations ; hauteurs en notation anglaise avec octave scientifique (C4 = do du milieu du piano) ; une clé de sol avec un 8 en dessous sonne une octave plus bas ; durées en temps de noire (noire 1, blanche 2, croche 0.5, noire pointée 1.5) ; additionne les notes liées ; silences "n": "-" ; déroule les reprises dans l'ordre chanté ; une syllabe par note, "" sur les notes tenues d'un mélisme ; propose un tempo réaliste s'il manque.
+Réponds uniquement avec ce JSON : {"title": "…", "tempo": 80, "beatsPerBar": 4, "notes": [{"n": "E4", "d": 1, "s": "Gloi"}]}`;
+  try {
+    const data = await sampleFn.json(prompt, { images: files, modelTier: "complex" });
+    if (!Array.isArray(data?.notes) || !data.notes.length) throw { code: "invalid_json" };
+    const ns = [];
+    for (const n of data.notes) {
+      const beats = +n.d > 0 ? +n.d : 1, raw = String(n.n || "-").trim();
+      if (raw === "-" || /^r/i.test(raw)) { ns.push({ midi: null, beats, syl: "" }); continue; }
+      const m = raw.match(/^([A-Ga-g])([#b♯♭]*)(-?\d)$/); if (!m) continue;
+      let pc = PC[m[1].toLowerCase()]; for (const ch of m[2]) pc += (ch === "#" || ch === "♯") ? 1 : -1;
+      ns.push({ midi: 12 * (+m[3] + 1) + pc, beats, syl: String(n.s || "") });
+    }
+    if (!ns.length) throw { code: "invalid_json" };
+    const text = scoreToText(String(data.title || "Partition").replace(/\n/g, " "), Math.round(+data.tempo || 80), Math.round(+data.beatsPerBar || 4), voice, ns);
+    $("scoreText").value = text;
+    if (applyText(text)) st.textContent = `C'est fait : ${ns.length} notes recopiées pour la voix ${voice}. Écoutez-la une fois avec la partition sous les yeux.`;
+  } catch (err) {
+    st.className = "err";
+    st.textContent = err?.code === "not_granted" || err?.code === "sampling_disabled" ? "La lecture de photo n'est pas autorisée sur cette page. Le texte se modifie à la main ci-dessous."
+      : err?.code === "rate_limited" ? "Trop de demandes pour le moment. Réessayez dans quelques minutes."
+      : "La partition n'a pas pu être lue. Essayez une photo plus nette, prise bien à plat.";
+  }
+};
+
+/* ════════ Démarrage ════════ */
+
+if (!loadScore(state.text).ok) loadScore(EXAMPLE);
+setTranspose(state.transpose);
+refreshAll();
+updateButtons();
+resize();
+document.fonts?.ready.then(() => {});
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
