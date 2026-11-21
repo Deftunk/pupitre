@@ -758,6 +758,24 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
 .to-world:hover { background: rgba(255, 46, 136, .3); }
 .place-name { font-family: var(--f-display); font-size: 24px; color: #fff; text-transform: uppercase; transform: skewX(-8deg); text-shadow: 0 0 14px var(--pc, #FF2E88), 2px 2px 0 var(--pc, #FF2E88); white-space: nowrap; }
 @media (max-width: 560px) { .place-name { font-size: 18px; } .to-world { font-size: 15px; padding: 6px 10px; } }
+
+/* ══ Le compte en ligne ══ */
+#accountBack { z-index: 68; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #6E5A80; margin-right: 7px; vertical-align: middle; }
+.dot.on { background: #00F5D4; box-shadow: 0 0 8px #00F5D4; }
+.t-acc { margin-top: 2px; border: 1px solid rgba(0, 245, 212, .45); background: rgba(0, 245, 212, .07); color: #DFFFF8; font-family: var(--f-mono); font-size: 17px; letter-spacing: .06em; padding: 3px 14px; transform: skewX(-8deg); }
+.t-acc:hover { background: rgba(0, 245, 212, .16); }
+.acc-login { flex-wrap: wrap; }
+.acc-login input { flex: 1; min-width: 200px; font: inherit; font-size: 16px; color: #fff; background: rgba(255, 255, 255, .06); border: 1px solid rgba(0, 240, 255, .5); padding: 9px 12px; }
+.acc-login input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0, 240, 255, .15); }
+.acc-online { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: rgba(0, 245, 212, .06); box-shadow: inset 0 0 0 1px rgba(0, 245, 212, .35); }
+.acc-online > div { display: grid; flex: 1; min-width: 160px; }
+.acc-online span { color: var(--muted); font-size: 13px; }
+.acc-picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.acc-pick { display: grid; gap: 4px; padding: 12px; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 46, 136, .4); }
+.acc-pick span, .acc-pick small { color: var(--muted); font-size: 13px; }
+.acc-pick .pill { justify-self: start; margin-top: 6px; }
+#wHud .dot { width: 7px; height: 7px; margin-right: 5px; }
 </style>
 
 <div class="app">
@@ -922,6 +940,7 @@ button.ex-card:hover, .ex-card.ph:not(.locked):hover { border-color: var(--cyan)
     <span class="t-pre">// CHANTE JUSTE · ÉLÈVE TES MONSTRES · 1986</span>
     <h2 class="t-logo">Do Ré<br>Monstres</h2>
     <label class="t-player"><span>Pseudo</span><input id="titleName" maxlength="18" placeholder="Ton pseudo" autocomplete="nickname"></label>
+    <button type="button" class="t-acc" id="titleAcc" hidden></button>
     <span class="t-sub" id="titleSub">Carol of the Bells</span>
     <nav class="t-menu">
       <button type="button" data-start="train" style="--d:0s">Jouer<small>Synthville t'attend, ton monstre aussi</small></button>
@@ -1114,9 +1133,13 @@ function scoreToText(title, tempo, bpb, voice, notes) {
 
 /* ════════ État ════════ */
 
+let cloudHook = null;
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  set(k, v) {
+    try { localStorage.setItem(k, v); } catch {}
+    if (cloudHook && k.startsWith("drm.") && !k.startsWith("drm.cloud.")) cloudHook();
+  },
 };
 const state = {
   text: store.get("drm.score.v5") || EXAMPLE,
@@ -3769,25 +3792,20 @@ function ensurePlayer(name) {
   return prof.player;
 }
 function saveCode() {
-  const data = {};
-  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("drm.")) data[k] = localStorage.getItem(k); } } catch {}
-  return "DRM2:" + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  return "DRM2:" + btoa(unescape(encodeURIComponent(JSON.stringify(localSave()))));
 }
 function loadCode(code) {
   const raw = String(code || "").trim();
   if (!raw.startsWith("DRM2:")) throw new Error("format");
   const data = JSON.parse(decodeURIComponent(escape(atob(raw.slice(5)))));
   if (!data || typeof data !== "object") throw new Error("format");
-  try {
-    const old = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("drm.")) old.push(k); }
-    old.forEach(k => localStorage.removeItem(k));
-    for (const [k, v] of Object.entries(data)) if (k.startsWith("drm.")) localStorage.setItem(k, v);
-  } catch { throw new Error("stockage"); }
+  try { applySave(data); localStorage.setItem("drm.cloud.dirty", "1"); } catch { throw new Error("stockage"); }
 }
 function renderAccount() {
   const p = ensurePlayer(), L = levelOf(prof.xp);
   const wins = zoo.list.reduce((s, m) => s + (m.wins || 0), 0), act = activeMon();
   $("accountBody").innerHTML = `
+    <section id="accCloud">${cloudSectionHtml()}</section>
     <div class="acc-card">
       <div class="acc-ava">${act ? monsterSvg(act, 96, { cls: "idle" }) : ""}</div>
       <div class="acc-id"><span class="k">Joueur</span><input id="accName" value="${esc(p.name)}" maxlength="18" aria-label="Pseudo">
@@ -3800,17 +3818,21 @@ function renderAccount() {
     </div>
     <section><h3>Ta courbe</h3>${sparkHtml()}</section>
     <section><h3>Trophées · ${prof.badges.length}/${BADGES.length}</h3>${badgesHtml()}</section>
-    <section><h3>Transférer ma partie</h3>
-      <p class="sub">Ta partie vit dans ce navigateur. Pour la passer du téléphone au Mac, copie ton code ici, envoie-le-toi, et colle-le sur l'autre appareil.</p>
+    <section><h3>Transférer ma partie à la main</h3>
+      <p class="sub">${cloud.user ? "Connecté, tu n'en as pas besoin : la partie te suit partout. Ce code reste une copie de secours." : "Sans compte, ta partie vit dans ce navigateur. Copie ce code, envoie-le-toi, et colle-le sur l'autre appareil."}</p>
       <div class="row"><button type="button" class="pill primary" id="accCopy">Copier mon code</button><span class="status" id="accCopied"></span></div>
       <textarea id="accCode" rows="4" placeholder="Colle ici un code de sauvegarde (il commence par DRM2:)" spellcheck="false"></textarea>
       <div class="row"><button type="button" class="pill" id="accLoad">Charger ce code</button><span class="err" id="accErr" hidden></span></div>
     </section>
-    <section><h3>En ligne</h3>
-      <p class="sub">Les combats entre joueurs et la sauvegarde automatique dans le nuage demandent un serveur de jeu. Ton pseudo et ton identifiant de joueur sont déjà prêts pour ça.</p>
-      <div class="row"><button type="button" class="pill" disabled>Combat entre joueurs · bientôt</button><span class="k">ID ${p.id.toUpperCase()}</span></div>
+    <section><h3>Combats entre joueurs</h3>
+      <p class="sub">Ton pseudo est unique et réservé${cloud.user ? "" : " dès que tu te connectes"}. Il servira aux classements et aux duels en ligne.</p>
+      <div class="row"><button type="button" class="pill" disabled>Combat entre joueurs · bientôt</button></div>
     </section>`;
-  $("accName").onchange = e => { ensurePlayer(e.target.value); renderAccount(); };
+  $("accName").onchange = async e => {
+    const msg = await setPseudo(e.target.value);
+    if (msg) { e.target.value = prof.player?.name || ""; $("accErr").hidden = false; $("accErr").textContent = msg; $("accErr").scrollIntoView({ block: "nearest" }); }
+    else renderAccount();
+  };
   $("accCopy").onclick = async () => {
     const code = saveCode(), out = $("accCopied");
     try { await navigator.clipboard.writeText(code); out.textContent = "Copié. Envoie-le-toi."; }
@@ -3821,11 +3843,200 @@ function renderAccount() {
     const err = $("accErr");
     if (!armed) { armed = true; $("accLoad").textContent = "Sûr ? Ça remplace la partie de cet appareil"; return; }
     try { loadCode($("accCode").value); location.reload(); }
-    catch (e) { err.hidden = false; err.textContent = e.message === "stockage" ? "Ce navigateur refuse l'enregistrement." : "Ce code n'est pas valide. Il doit commencer par DRM1:."; armed = false; $("accLoad").textContent = "Charger ce code"; }
+    catch (e) { err.hidden = false; err.textContent = e.message === "stockage" ? "Ce navigateur refuse l'enregistrement." : "Ce code n'est pas valide. Il doit commencer par DRM2:."; armed = false; $("accLoad").textContent = "Charger ce code"; }
   };
 }
+/* ════════ Le compte en ligne : connexion par lien e-mail, partie sauvegardée dans le nuage (Supabase) ════════
+   La partie reste dans le navigateur, et chaque changement part dans le nuage quelques secondes après.
+   Sur un autre appareil, la connexion ramène la partie. Si deux appareils ont avancé chacun de leur côté, le joueur choisit. */
+
+const CLOUD = { url: "https://kmkqmadaperwdhavevdm.supabase.co", key: "sb_publishable_HWrmV9Mf8Uz1P6jtOo_xxg_IGtK3Efb" };   // clé publiable : faite pour vivre dans le navigateur, la sécurité vient des règles par ligne
+const CLOUD_SITE = "https://deftunk.github.io/pupitre/";
+const SB_LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js";
+const cloud = { sb: null, user: null, status: "off", last: 0, timer: 0, conflict: null, sent: "", err: "" };
+const cloudReady = () => !!(CLOUD.url && CLOUD.key);
+const onCloudSite = () => location.href.startsWith(CLOUD_SITE) || /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+const isLocalOnly = k => k.startsWith("drm.cloud.");
+
+function localSave() {
+  const data = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("drm.") && !isLocalOnly(k)) data[k] = localStorage.getItem(k); } } catch {}
+  return data;
+}
+function applySave(data) {
+  const old = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("drm.") && !isLocalOnly(k)) old.push(k); }
+  old.forEach(k => localStorage.removeItem(k));
+  for (const [k, v] of Object.entries(data || {})) if (k.startsWith("drm.") && !isLocalOnly(k) && typeof v === "string") localStorage.setItem(k, v);
+}
+function saveSummary(data) {
+  let mons = [], p = {};
+  try { mons = JSON.parse(data["drm.monsters"] || "{}").list || []; } catch {}
+  try { p = JSON.parse(data["drm.profile"] || "{}"); } catch {}
+  return { mons: mons.length, best: mons.reduce((s, m) => Math.max(s, m.lvl || 0), 0), xp: p.xp || 0, tokens: p.tokens || 0, name: p.player?.name || "" };
+}
+const hasProgress = data => { const s = saveSummary(data); return s.mons > 0 || s.xp > 0; };
+
+/* Chaque écriture dans la partie la marque « à envoyer » ; l'envoi part 4 secondes après la dernière */
+function cloudDirty() {
+  try { localStorage.setItem("drm.cloud.dirty", "1"); } catch {}
+  if (!cloud.user || cloud.conflict) return;
+  clearTimeout(cloud.timer); cloud.timer = setTimeout(cloudPush, 4000);
+}
+cloudHook = cloudDirty;
+
+function loadSbLib() {
+  return new Promise((res, rej) => {
+    if (window.supabase?.createClient) return res();
+    const s = document.createElement("script"); s.src = SB_LIB; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+}
+async function cloudInit() {
+  if (!cloudReady() || !onCloudSite()) return;
+  try { await loadSbLib(); } catch { cloud.status = "offline"; cloudUi(); return; }
+  cloud.sb = window.supabase.createClient(CLOUD.url, CLOUD.key, { auth: { flowType: "implicit", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "drm.cloud.auth" } });
+  cloud.sb.auth.onAuthStateChange((ev, session) => setTimeout(() => onSession(session, ev), 0));
+  document.addEventListener("visibilitychange", () => {
+    if (!cloud.user) return;
+    if (document.hidden) { if (store.get("drm.cloud.dirty") === "1") cloudPush(); }
+    else cloudPull();
+  });
+}
+async function onSession(session, ev) {
+  const u = session?.user || null;
+  if ((u?.id || null) === (cloud.user?.id || null)) return;
+  cloud.user = u; cloud.conflict = null;
+  if (/access_token|error_description/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+  if (!u) { cloud.status = "off"; cloudUi(); return; }
+  if (ev === "SIGNED_IN" && !$("titleScreen").classList.contains("gone")) { flash("#00F5D4", 0.3); }
+  await cloudPull();
+}
+
+/* Récupérer la partie : le nuage, l'appareil, ou le choix du joueur */
+async function cloudPull() {
+  if (!cloud.user) return;
+  cloud.status = "sync"; cloudUi();
+  const uid = cloud.user.id;
+  const { data: row, error } = await cloud.sb.from("saves").select("data, updated_at").eq("user_id", uid).maybeSingle();
+  if (error) { cloud.status = "error"; cloud.err = error.message; cloudUi(); return; }
+  await cloudProfile();
+  const linked = store.get("drm.cloud.uid") === uid, dirty = store.get("drm.cloud.dirty") === "1";
+  const seen = +(store.get("drm.cloud.at") || 0), local = localSave();
+  if (!row) { await cloudPush(); return; }
+  const at = Date.parse(row.updated_at);
+  const take = () => { applySave(row.data); store.set("drm.cloud.uid", uid); store.set("drm.cloud.at", String(at)); localStorage.setItem("drm.cloud.dirty", "0"); location.reload(); };
+  const busy = () => typeof ex !== "undefined" && (ex || state.playing);
+  if (linked && !dirty) { if (at > seen) { if (busy()) { cloud.status = "ok"; cloudUi(); return; } take(); return; } cloud.status = "ok"; cloud.last = at; cloudUi(); return; }
+  if (linked && dirty && at <= seen) { await cloudPush(); return; }
+  if (!hasProgress(local)) { take(); return; }
+  if (JSON.stringify(row.data) === JSON.stringify(local)) { store.set("drm.cloud.uid", uid); store.set("drm.cloud.at", String(at)); localStorage.setItem("drm.cloud.dirty", "0"); cloud.status = "ok"; cloudUi(); return; }
+  cloud.conflict = { row, at }; cloud.status = "conflict"; openAccount();
+}
+async function cloudPush() {
+  if (!cloud.user || cloud.conflict) return;
+  clearTimeout(cloud.timer);
+  cloud.status = "sync"; cloudUi();
+  const { data, error } = await cloud.sb.from("saves").upsert({ user_id: cloud.user.id, data: localSave() }).select("updated_at").single();
+  if (error) { cloud.status = "error"; cloud.err = error.message; cloudUi(); cloud.timer = setTimeout(cloudPush, 30000); return; }
+  const at = Date.parse(data.updated_at);
+  store.set("drm.cloud.uid", cloud.user.id); store.set("drm.cloud.at", String(at)); localStorage.setItem("drm.cloud.dirty", "0");
+  cloud.status = "ok"; cloud.last = at; cloudUi();
+}
+async function resolveConflict(keep) {
+  const c = cloud.conflict; if (!c) return;
+  cloud.conflict = null;
+  if (keep === "cloud") { applySave(c.row.data); store.set("drm.cloud.uid", cloud.user.id); store.set("drm.cloud.at", String(c.at)); localStorage.setItem("drm.cloud.dirty", "0"); location.reload(); }
+  else await cloudPush();
+}
+
+/* Le pseudo est unique et public : il servira aux classements et aux combats entre joueurs */
+async function cloudProfile() {
+  const { data } = await cloud.sb.from("profiles").select("pseudo").eq("id", cloud.user.id).maybeSingle();
+  if (data?.pseudo) { if (prof.player?.name !== data.pseudo) { ensurePlayer(data.pseudo); updateHdr(); } return; }
+  const base = (ensurePlayer().name || "Recrue").slice(0, 14);
+  for (let i = 0; i < 4; i++) {
+    const name = i ? `${base}${Math.floor(Math.random() * 900 + 100)}` : base;
+    const { error } = await cloud.sb.from("profiles").upsert({ id: cloud.user.id, pseudo: name });
+    if (!error) { ensurePlayer(name); updateHdr(); return; }
+    if (error.code !== "23505") return;
+  }
+}
+async function setPseudo(name) {
+  name = name.trim().slice(0, 18);
+  if (name.length < 2) return "Deux caractères minimum.";
+  if (!cloud.user) { ensurePlayer(name); return ""; }
+  const { error } = await cloud.sb.from("profiles").upsert({ id: cloud.user.id, pseudo: name });
+  if (error) return error.code === "23505" ? "Ce pseudo est déjà pris." : "Pas de réseau, réessaie.";
+  ensurePlayer(name); updateHdr(); return "";
+}
+async function sendLink(email) {
+  const { error } = await cloud.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: CLOUD_SITE, shouldCreateUser: true } });
+  if (error) return /rate|seconds/i.test(error.message) ? "Trop de liens demandés. Attends une minute et réessaie." : "L'envoi a échoué. Vérifie l'adresse.";
+  cloud.sent = email; return "";
+}
+async function signOut() {
+  if (store.get("drm.cloud.dirty") === "1") await cloudPush();
+  await cloud.sb.auth.signOut();
+  ["drm.cloud.uid", "drm.cloud.at", "drm.cloud.dirty"].forEach(k => { try { localStorage.removeItem(k); } catch {} });
+}
+
+/* L'état du compte, partout où il se voit */
+const timeStr = t => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+function cloudLabel() {
+  if (!cloudReady()) return "";
+  if (!cloud.user) return "Non connecté";
+  return { sync: "Sauvegarde…", ok: cloud.last ? `Sauvegardé à ${timeStr(cloud.last)}` : "Connecté", error: "Hors ligne · nouvel essai bientôt", conflict: "Deux parties à départager", offline: "Hors ligne" }[cloud.status] || "Connecté";
+}
+function cloudUi() {
+  const chip = $("titleAcc");
+  if (chip) {
+    chip.hidden = !cloudReady();
+    chip.innerHTML = cloud.user ? `<i class="dot on"></i>${esc(prof.player?.name || "Connecté")} · ${esc(cloudLabel())}` : `<i class="dot"></i>Se connecter pour sauvegarder sa partie`;
+  }
+  const hud = document.querySelector('#wHud [data-w="account"]');
+  if (hud) hud.innerHTML = `${cloud.user ? '<i class="dot on"></i>' : cloudReady() ? '<i class="dot"></i>' : ""}${esc(prof.player?.name || "Compte")}`;
+  if (!$("accountBack").hidden && $("accCloud")) $("accCloud").innerHTML = cloudSectionHtml();
+}
+function cloudSectionHtml() {
+  if (!cloudReady()) return `<h3>En ligne</h3><p class="sub">Les comptes en ligne arrivent bientôt. En attendant, le code ci-dessous transfère ta partie.</p>`;
+  if (!onCloudSite()) return `<h3>Mon compte en ligne</h3><p class="sub">La connexion se fait sur le site du jeu : <a href="${CLOUD_SITE}" target="_blank" rel="noopener">${CLOUD_SITE.replace("https://", "")}</a></p>`;
+  if (!cloud.sb) return `<h3>Mon compte en ligne</h3><p class="sub">${cloud.status === "offline" ? "Pas de réseau pour l'instant." : "Connexion au serveur…"}</p>`;
+  if (cloud.conflict) {
+    const a = saveSummary(localSave()), b = saveSummary(cloud.conflict.row.data);
+    const card = (s, title, sub, keep) => `<div class="acc-pick"><span class="k">${title}</span><b>${s.mons} monstre${s.mons > 1 ? "s" : ""} · niveau ${s.best} max</b><span>${s.xp} XP · ${s.tokens} jetons${s.name ? ` · ${esc(s.name)}` : ""}</span><small>${sub}</small><button type="button" class="pill primary" data-keep="${keep}">Garder celle-ci</button></div>`;
+    return `<h3>Deux parties à départager</h3><p class="sub">Ce compte a déjà une partie en ligne, et cet appareil en a une autre. Choisis celle qui continue. L'autre sera remplacée.</p>
+      <div class="acc-picks">${card(a, "Cet appareil", "Ce navigateur", "local")}${card(b, "En ligne", `Sauvegardée le ${new Date(cloud.conflict.at).toLocaleDateString("fr-FR")} à ${timeStr(cloud.conflict.at)}`, "cloud")}</div>`;
+  }
+  if (!cloud.user) {
+    if (cloud.sent) return `<h3>Mon compte en ligne</h3><p class="sub"><b>Lien envoyé à ${esc(cloud.sent)}.</b> Ouvre l'e-mail sur cet appareil et touche le lien : tu reviendras ici, connecté. Pense à regarder les indésirables.</p>
+      <div class="row"><button type="button" class="pill" id="accResend">Changer d'adresse</button></div>`;
+    return `<h3>Mon compte en ligne</h3><p class="sub">Connecte-toi pour sauvegarder ta partie dans le nuage et la retrouver sur tous tes appareils. Pas de mot de passe : un lien arrive par e-mail.</p>
+      <form class="row acc-login" id="accLogin"><input type="email" id="accEmail" required placeholder="ton@email.fr" autocomplete="email" inputmode="email"><button type="submit" class="pill primary">Recevoir mon lien</button></form>
+      <span class="err" id="accLoginErr" hidden></span>`;
+  }
+  return `<h3>Mon compte en ligne</h3>
+    <div class="acc-online"><i class="dot on"></i><div><b>${esc(cloud.user.email || "")}</b><span>${esc(cloudLabel())}</span></div>
+      <button type="button" class="pill" id="accSync">Sauvegarder</button><button type="button" class="pill" id="accOut">Se déconnecter</button></div>
+    ${cloud.status === "error" ? `<span class="err">${esc(cloud.err || "Erreur réseau")}</span>` : ""}`;
+}
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "accLogin") return;
+  e.preventDefault();
+  const btn = e.target.querySelector("button"), err = $("accLoginErr"); btn.disabled = true; btn.textContent = "Envoi…";
+  const msg = await sendLink($("accEmail").value.trim());
+  if (msg) { err.hidden = false; err.textContent = msg; btn.disabled = false; btn.textContent = "Recevoir mon lien"; }
+  else cloudUi();
+});
+document.addEventListener("click", async e => {
+  const t = e.target.closest("#accResend, #accSync, #accOut, [data-keep]"); if (!t) return;
+  if (t.id === "accResend") { cloud.sent = ""; cloudUi(); }
+  else if (t.id === "accSync") cloudPush();
+  else if (t.id === "accOut") { t.disabled = true; await signOut(); cloudUi(); }
+  else resolveConflict(t.dataset.keep);
+});
+
 function openAccount() { stopPlayback(); renderAccount(); $("accountBack").hidden = false; }
 $("openAccount").onclick = openAccount;
+$("titleAcc").onclick = openAccount;
 $("closeAccount").onclick = () => { $("accountBack").hidden = true; if (state.mode === "train" && !ex) renderTrain(); };
 $("accountBack").addEventListener("click", e => { if (e.target === e.currentTarget) $("closeAccount").click(); });
 
@@ -4251,7 +4462,7 @@ function worldHud() {
         <span class="w-bar xp"><i style="width:${Math.round(m.xp / need * 100)}%"></i><small>XP ${m.xp}/${need}</small></span></div></div>
     <div class="w-right"><span class="w-tok">${prof.tokens ?? 0}<small>jetons</small></span>
       <button type="button" class="w-btn" data-w="sheet">${esc(state.score.parts[state.voice]?.name || "Voix")}</button>
-      <button type="button" class="w-btn" data-w="account">${esc(prof.player?.name || "Compte")}</button>
+      <button type="button" class="w-btn" data-w="account">${cloud.user ? '<i class="dot on"></i>' : cloudReady() ? '<i class="dot"></i>' : ""}${esc(prof.player?.name || "Compte")}</button>
       <button type="button" class="w-btn" data-w="title">Menu</button></div>
     <div class="w-mission"><span class="k">Mission</span><b>${esc(missionNow.label)}</b><small>${esc(missionNow.why)}${mp ? ` · ${mp.name}` : ""}</small>
       <button type="button" class="main-btn wide" data-w="mission">${ICON.play}Go</button></div>`;
@@ -4704,6 +4915,7 @@ updateButtons();
 resize();
 document.fonts?.ready.then(() => {});
 openTitle();
+cloudUi(); cloudInit();
 requestAnimationFrame(frame);
 })();
 </script>
